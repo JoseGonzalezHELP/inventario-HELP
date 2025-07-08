@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario Biomédico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistema de Inventario Biomédico</h1>
+            <p>Control de sub-almacén de insumos biomédicos</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'inventory')"><i class="fas fa-boxes"></i> Inventario</div>
+            <div class="tab" onclick="openTab(event, 'entries')"><i class="fas fa-sign-in-alt"></i> Entradas</div>
+            <div class="tab" onclick="openTab(event, 'outputs')"><i class="fas fa-sign-out-alt"></i> Salidas</div>
+            <div class="tab" onclick="openTab(event, 'reports')"><i class="fas fa-chart-bar"></i> Reportes</div>
+        </div>
+        
+        <!-- Inventario Tab -->
+        <div id="inventory" class="tab-content active">
+            <div class="search-container">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <input type="text" id="inventorySearch" class="search-input" placeholder="Buscar insumo..." onkeyup="searchInventory()">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <select id="typeFilter" onchange="filterByType()">
+                            <option value="all">Todos los tipos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="btn btn-primary" onclick="openAddItemModal()"><i class="fas fa-plus"></i> Agregar Nuevo Insumo</button>
+                <button class="btn btn-info" onclick="openQRScanner()"><i class="fas fa-camera"></i> Escanear QR</button>
+            </div>
+            
+            <div id="stockAlerts"></div>
+            
+            <div class="table-container">
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Tamaño</th>
+                            <th>Existencias</th>
+                            <th>Stock Mínimo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Entradas Tab -->
+        <div id="entries" class="tab-content">
+            <div class="tab-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Registro de Entradas</h2>
+                <button class="btn btn-primary" onclick="openAddEntryModal()"><i class="fas fa-plus"></i> Registrar Nueva Entrada</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="entriesTable">
+                    <thead>
+                        <tr>
+                            <th>Folio Vale</th>
+                            <th>Insumo</th>
+                            <th>Cantidad</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesTableBody">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Salidas Tab -->
+        <div id="outputs" class="tab-content">
+            <div class="tab-header">
+                <h2><i class="fas fa-sign-out-alt"></i> Registro de Salidas</h2>
+                <button class="btn btn-primary" onclick="openAddOutputModal()"><i class="fas fa-plus"></i> Registrar Nueva Salida</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="outputsTable">
+                    <thead>
+                        <tr>
+                            <th>Folio OS</th>
+                            <th>Insumo</th>
+                            <th>Cantidad</th>
+                            <th>Ingeniero</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outputsTableBody">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Reportes Tab -->
+        <div id="reports" class="tab-content">
+            <div class="tab-header">
+                <h2><i class="fas fa-chart-bar"></i> Reportes</h2>
+            </div>
+            
+            <div class="report-controls">
+                <div class="form-group">
+                    <label for="reportType"><i class="fas fa-chart-pie"></i> Tipo de Reporte:</label>
+                    <select id="reportType" onchange="updateReportForm()">
+                        <option value="stock">Niveles de Stock</option>
+                        <option value="movements">Movimientos</option>
+                        <option value="expiring">Caducidades Próximas</option>
+                    </select>
+                </div>
+                
+                <div id="reportFilters">
+                    <!-- Filtros dinámicos según tipo de reporte -->
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateReport()"><i class="fas fa-file-export"></i> Generar Reporte</button>
+            </div>
+            
+            <div id="reportResults" class="report-results">
+                <!-- Resultados del reporte -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para agregar/editar insumo -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('itemModal')">&times;</span>
+            <h2 id="itemModalTitle"><i class="fas fa-box-open"></i> Agregar Nuevo Insumo</h2>
+            
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemNumber"><i class="fas fa-barcode"></i> Número de Insumo:</label>
+                        <input type="text" id="itemNumber" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemName"><i class="fas fa-tag"></i> Nombre del Insumo:</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemType"><i class="fas fa-list"></i> Tipo de Insumo:</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="itemType" required onchange="toggleCustomType()" style="flex: 1;">
+                            <option value="">Seleccione un tipo</option>
+                            <option value="BRAZALETE REUSABLE">Brazalete Reusable</option>
+                            <option value="MANGO DE LARINGOSCOPIO">Mango de Laringoscopio</option>
+                            <option value="FOCO DE HALÓGENO">Foco de Halógeno</option>
+                            <option value="JUEGO DE CAMPANAS">Juego de Campanas</option>
+                            <option value="BATERÍA RECARGABLE">Batería Recargable</option>
+                            <option value="OTRO">Otro (especificar)</option>
+                        </select>
+                        <button type="button" class="btn btn-info" onclick="openAddTypeModal()" style="width: auto;">
+                            <i class="fas fa-plus"></i> Nuevo
+                        </button>
+                    </div>
+                    <input type="text" id="customType" style="display: none; margin-top: 0.5rem;" placeholder="Especificar tipo de insumo" class="form-input">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemVoucher"><i class="fas fa-file-invoice"></i> Folio del Vale:</label>
+                        <input type="text" id="itemVoucher">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemCharacteristic"><i class="fas fa-info-circle"></i> Característica:</label>
+                        <input type="text" id="itemCharacteristic">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemBrand"><i class="fas fa-copyright"></i> Marca Compatible:</label>
+                        <input type="text" id="itemBrand">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemModel"><i class="fas fa-cube"></i> Modelo Compatible:</label>
+                        <input type="text" id="itemModel">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemSize"><i class="fas fa-ruler-combined"></i> Tamaño:</label>
+                        <select id="itemSize">
+                            <option value="">N/A</option>
+                            <option value="ADULTO">Adulto</option>
+                            <option value="PEDIÁTRICO">Pedriático</option>
+                            <option value="NEONATAL">Neonatal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemInitialStock"><i class="fas fa-boxes"></i> Existencias Iniciales:</label>
+                        <input type="number" id="itemInitialStock" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemExpiration"><i class="fas fa-calendar-times"></i> Fecha de Caducidad:</label>
+                        <input type="date" id="itemExpiration">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="itemMinStock"><i class="fas fa-exclamation-triangle"></i> Stock Mínimo:</label>
+                        <input type="number" id="itemMinStock" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveItem()"><i class="fas fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para QR -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('qrModal')">&times;</span>
+            <h2 id="qrModalTitle"><i class="fas fa-qrcode"></i> Código QR del Insumo</h2>
+            
+            <div class="qr-container">
+                <div id="qrCode" class="qr-code"></div>
+            </div>
+            
+            <div id="qrItemInfo" class="qr-info"></div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="printQR()"><i class="fas fa-print"></i> Imprimir Código QR</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para escanear QR -->
+    <div id="scanQRModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('scanQRModal')">&times;</span>
+            <h2><i class="fas fa-camera"></i> Escanear Código QR</h2>
+            
+            <div id="qrScannerContainer" style="width: 100%; height: 300px; margin: 1rem 0;">
+                <video id="qrVideo" width="100%" height="100%" style="border-radius: var(--border-radius-sm);"></video>
+            </div>
+            
+            <div id="qrScanResult" style="margin: 1rem 0; padding: 1rem; background: #f8fafc; border-radius: var(--border-radius-sm);"></div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="startQRScanner()"><i class="fas fa-play"></i> Iniciar Escáner</button>
+                <button class="btn btn-danger" onclick="stopQRScanner()"><i class="fas fa-stop"></i> Detener Escáner</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para entrada -->
+    <div id="entryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('entryModal')">&times;</span>
+            <h2 id="entryModalTitle"><i class="fas fa-sign-in-alt"></i> Registrar Entrada</h2>
+            
+            <form id="entryForm">
+                <div class="form-group">
+                    <label for="entryItem"><i class="fas fa-box-open"></i> Insumo:</label>
+                    <select id="entryItem" required>
+                        <option value="">Seleccione un insumo</option>
+                        <!-- Opciones se llenarán dinámicamente -->
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="entryVoucher"><i class="fas fa-file-invoice"></i> Folio del Vale:</label>
+                        <input type="text" id="entryVoucher" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="entryQuantity"><i class="fas fa-boxes"></i> Cantidad:</label>
+                        <input type="number" id="entryQuantity" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="entryDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                    <input type="date" id="entryDate" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveEntry()"><i class="fas fa-save"></i> Guardar Entrada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para salida -->
+    <div id="outputModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('outputModal')">&times;</span>
+            <h2 id="outputModalTitle"><i class="fas fa-sign-out-alt"></i> Registrar Salida</h2>
+            
+            <form id="outputForm">
+                <div class="form-group">
+                    <label for="outputItem"><i class="fas fa-box-open"></i> Insumo:</label>
+                    <select id="outputItem" required onchange="updateAvailableStock()">
+                        <option value="">Seleccione un insumo</option>
+                        <!-- Opciones se llenarán dinámicamente -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="availableStock"><i class="fas fa-boxes"></i> Existencias disponibles:</label>
+                    <input type="text" id="availableStock" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="movementType"><i class="fas fa-exchange-alt"></i> Tipo de movimiento:</label>
+                    <select id="movementType" required>
+                        <option value="output">Salida</option>
+                        <option value="loan">Préstamo</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="outputOS"><i class="fas fa-file-alt"></i> Folio de Orden:</label>
+                        <input type="text" id="outputOS" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="outputEngineer"><i class="fas fa-user-tie"></i> Ingeniero:</label>
+                        <select id="outputEngineer" required>
+                            <option value="">Seleccione un ingeniero</option>
+                            <option value="Ing. Juan Pérez">Ing. Juan Pérez</option>
+                            <option value="Ing. María Gómez">Ing. María Gómez</option>
+                            <option value="Ing. Carlos Ruiz">Ing. Carlos Ruiz</option>
+                            <option value="Ing. Ana López">Ing. Ana López</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="outputQuantity"><i class="fas fa-boxes"></i> Cantidad:</label>
+                        <input type="number" id="outputQuantity" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="outputDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                        <input type="date" id="outputDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="saveOutput()"><i class="fas fa-save"></i> Guardar Salida</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para detalles -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('detailsModal')">&times;</span>
+            <h2 id="detailsModalTitle"><i class="fas fa-info-circle"></i> Detalles del Insumo</h2>
+            
+            <div id="itemDetails" class="item-details">
+                <!-- Los detalles se cargarán dinámicamente -->
+            </div>
+            
+            <h3><i class="fas fa-history"></i> Historial de Movimientos</h3>
+            
+            <div class="table-container">
+                <table id="movementsTable">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Cantidad</th>
+                            <th>Documento</th>
+                            <th>Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movementsTableBody">
+                        <!-- Los datos se cargarán dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar tipo -->
+    <div id="typeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('typeModal')">&times;</span>
+            <h2><i class="fas fa-tags"></i> Agregar Nuevo Tipo</h2>
+            
+            <div class="form-group">
+                <label for="newTypeName">Nombre del Tipo:</label>
+                <input type="text" id="newTypeName" class="form-input" placeholder="Ej: Equipo de diagnóstico">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="saveNewType()">
+                    <i class="fas fa-save"></i> Guardar Tipo
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Importaciones de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
