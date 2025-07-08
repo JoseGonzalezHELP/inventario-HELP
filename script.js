@@ -1,13 +1,13 @@
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDrXAUR40G8OgvRGz2H20gO6aisbITC7oY",
-  authDomain: "interfaz-inventario-biomedico.firebaseapp.com",
-  databaseURL: "https://interfaz-inventario-biomedico-default-rtdb.firebaseio.com",
-  projectId: "interfaz-inventario-biomedico",
-  storageBucket: "interfaz-inventario-biomedico.appspot.com",
-  messagingSenderId: "1093995303517",
-  appId: "1:1093995303517:web:40fbc5882f4299bcfa73b4",
-  measurementId: "G-YKK4PHB6DJ"
+  apiKey: "AIzaSyCNjNkWCGxcpQ9KglW7nLerNTpnsmGkkLw",
+  authDomain: "inventario-hepl-biomedica.firebaseapp.com",
+  databaseURL: "https://inventario-hepl-biomedica-default-rtdb.firebaseio.com",
+  projectId: "inventario-hepl-biomedica",
+  storageBucket: "inventario-hepl-biomedica.firebasestorage.app",
+  messagingSenderId: "843964981869",
+  appId: "1:843964981869:web:bed7e15ddc20c9a30e9564",
+  measurementId: "G-FFYZ2HL9S1"
 };
 
 // Inicializa Firebase
