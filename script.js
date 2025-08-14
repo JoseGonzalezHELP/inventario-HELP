@@ -37,52 +37,30 @@ let outputs = [];
 let qrScanner = null;
 let itemTypes = [];
 
-// Cargar datos iniciales al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-    // Configurar listeners para cambios en tiempo real
-    setupRealTimeListeners();
-    
-    // Cargar opciones de los selects
-    loadItemOptions();
-    loadItemTypeOptions();
-    loadTypeFilterOptions();
-    setDefaultDates();
-});
-
-// Configurar listeners para cambios en tiempo real
-function setupRealTimeListeners() {
-    // Listener para inventario
-    inventoryRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        inventory = data ? Object.values(data) : [];
-        loadInventory();
-        checkStockAlerts();
-        loadItemOptions();
-        loadItemTypeOptions();
-        loadTypeFilterOptions();
-    });
-    
-    // Listener para entradas
-    entriesRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        entries = data ? Object.values(data) : [];
-        loadEntries();
-    });
-    
-    // Listener para salidas
-    outputsRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        outputs = data ? Object.values(data) : [];
-        loadOutputs();
-    });
-
-    typesRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      itemTypes = data ? Object.values(data) : [];
-      loadItemTypeOptions();
-    });
+// Función para mostrar notificaciones toast
+function showToast(message) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '10px 20px';
+    toast.style.backgroundColor = '#4CAF50';
+    toast.style.color = 'white';
+    toast.style.borderRadius = '5px';
+    toast.style.zIndex = '1000';
+    document.body.appendChild(toast);
+  }
+  
+  toast.textContent = message;
+  toast.style.display = 'block';
+  
+  setTimeout(() => {
+    toast.style.display = 'none';
+  }, 3000);
 }
-
 
 // Función para formatear fecha en formato dd/mm/aaaa
 function formatDate(dateString) {
@@ -330,6 +308,7 @@ function loadItemTypeOptions() {
         typeSelect.value = currentValue;
     }
 }
+
 // Función para abrir el modal de nuevo tipo
 function openAddTypeModal() {
     document.getElementById('newTypeName').value = '';
@@ -365,6 +344,7 @@ function saveNewType() {
             alert('Error al guardar el tipo: ' + error.message);
         });
 }
+
 // Abrir modal para agregar insumo
 function openAddItemModal() {
     document.getElementById('itemModalTitle').textContent = 'Agregar Nuevo Insumo';
@@ -618,6 +598,7 @@ function openAddEntryModal() {
     document.getElementById('customResponsible').style.display = 'none';
     document.getElementById('entryModal').style.display = 'block';
 }
+
 // Guardar entrada
 function saveEntry() {
     // Obtener valores del formulario
@@ -688,9 +669,9 @@ function viewEntryDetails(id) {
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
     // Formatear fecha correctamente
-const formattedDate = entry.date 
-  ? new Date(entry.date).toLocaleDateString('es-ES') 
-  : 'N/A';
+    const formattedDate = entry.date 
+      ? new Date(entry.date).toLocaleDateString('es-ES') 
+      : 'N/A';
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -794,6 +775,7 @@ function openAddOutputModal() {
     document.getElementById('customEngineer').style.display = 'none';
     document.getElementById('outputModal').style.display = 'block';
 }
+
 // Actualizar stock disponible al seleccionar un insumo
 function updateAvailableStock() {
     let itemId = document.getElementById('outputItem').value;
@@ -869,7 +851,6 @@ function saveOutput() {
         .catch(error => alert('Error: ' + error.message));
 }
 
-
 // Ver detalles de salida
 function viewOutputDetails(id) {
     const output = outputs.find(o => o.id === id);
@@ -878,9 +859,9 @@ function viewOutputDetails(id) {
     const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
     // Formatear fecha correctamente
-const formattedDate = output.date 
-  ? new Date(output.date).toLocaleDateString('es-ES') 
-  : 'N/A';
+    const formattedDate = output.date 
+      ? new Date(output.date).toLocaleDateString('es-ES') 
+      : 'N/A';
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -1385,7 +1366,7 @@ function generateExpiringReport() {
     });
     
     html += `
-            </tbody>
+            </tbody
         </table>
         <button class="btn btn-primary" onclick="printReport()">Imprimir Reporte</button>
     `;
@@ -1432,3 +1413,49 @@ function setDefaultDates() {
     document.getElementById('movementDateFrom').value = firstDayOfMonth.toISOString().split('T')[0];
     document.getElementById('movementDateTo').value = today.toISOString().split('T')[0];
 }
+
+// Configurar listeners para cambios en tiempo real
+function setupRealTimeListeners() {
+    // Listener para inventario
+    inventoryRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        inventory = data ? Object.values(data) : [];
+        loadInventory();
+        checkStockAlerts();
+        loadItemOptions();
+        loadItemTypeOptions();
+        loadTypeFilterOptions();
+    });
+    
+    // Listener para entradas
+    entriesRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        entries = data ? Object.values(data) : [];
+        loadEntries();
+    });
+    
+    // Listener para salidas
+    outputsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        outputs = data ? Object.values(data) : [];
+        loadOutputs();
+    });
+
+    typesRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      itemTypes = data ? Object.values(data) : [];
+      loadItemTypeOptions();
+    });
+}
+
+// Cargar datos iniciales al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar listeners para cambios en tiempo real
+    setupRealTimeListeners();
+    
+    // Cargar opciones de los selects
+    loadItemOptions();
+    loadItemTypeOptions();
+    loadTypeFilterOptions();
+    setDefaultDates();
+});
