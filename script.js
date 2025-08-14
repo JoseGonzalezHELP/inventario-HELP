@@ -20,6 +20,20 @@ const entriesRef = database.ref('entries');
 const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
 
+// Función para mostrar/ocultar el campo de responsable manual
+function toggleCustomResponsible() {
+    const responsibleSelect = document.getElementById('entryResponsible');
+    const customInput = document.getElementById('customResponsible');
+    
+    if (responsibleSelect.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
+}
+
 // Datos en memoria
 let inventory = [];
 let entries = [];
@@ -557,47 +571,64 @@ function openAddEntryModal() {
 
 // Guardar entrada
 function saveEntry() {
-    let itemId = document.getElementById('entryItem').value;
-    let voucher = document.getElementById('entryVoucher').value;
-    let quantity = parseInt(document.getElementById('entryQuantity').value);
-    let date = document.getElementById('entryDate').value;
+    // Obtener valores del formulario
+    const itemId = document.getElementById('entryItem').value;
+    const voucher = document.getElementById('entryVoucher').value;
+    const invoice = document.getElementById('entryInvoice').value;
+    const quantity = parseInt(document.getElementById('entryQuantity').value);
+    const comments = document.getElementById('entryComments').value;
+    const date = document.getElementById('entryDate').value;
     
-    if (!itemId || !voucher || isNaN(quantity) || quantity <= 0 || !date) {
-        alert('Por favor complete todos los campos correctamente');
+    // Manejo del responsable (selección o manual)
+    let responsible = document.getElementById('entryResponsible').value;
+    if (responsible === 'OTRO') {
+        responsible = document.getElementById('customResponsible').value.trim();
+        if (!responsible) {
+            alert('Por favor ingrese el nombre del responsable');
+            return;
+        }
+    }
+    
+    // Validaciones
+    if (!itemId || !voucher || isNaN(quantity) || quantity <= 0 || !date || !responsible) {
+        alert('Complete los campos requeridos (*)');
         return;
     }
     
-    let itemIndex = inventory.findIndex(i => i.id === itemId);
+    // Buscar el insumo en el inventario
+    const itemIndex = inventory.findIndex(i => i.id === itemId);
     if (itemIndex === -1) {
         alert('Insumo no encontrado');
         return;
     }
     
-    let entryId = Date.now().toString();
-    let entry = {
+    // Crear objeto de entrada
+    const entryId = Date.now().toString();
+    const entry = {
         id: entryId,
         itemId: itemId,
         voucher: voucher,
+        invoice: invoice || null, // Guarda null si no hay factura
         quantity: quantity,
-        date: new Date(date).toISOString()
+        responsible: responsible,
+        comments: comments || null, // Guarda null si no hay comentarios
+        date: new Date(date).toISOString(),
+        isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
     };
     
-    // Guardar entrada en Firebase
+    // Guardar en Firebase
     entriesRef.child(entryId).set(entry)
         .then(() => {
-            // Actualizar stock en Firebase
-            let newStock = inventory[itemIndex].stock + quantity;
+            // Actualizar stock
+            const newStock = inventory[itemIndex].stock + quantity;
             inventoryRef.child(itemId).update({ stock: newStock })
                 .then(() => {
                     closeModal('entryModal');
+                    showToast('✅ Entrada registrada');
                 })
-                .catch(error => {
-                    alert('Error al actualizar el stock: ' + error.message);
-                });
+                .catch(error => alert('Error al actualizar stock: ' + error));
         })
-        .catch(error => {
-            alert('Error al guardar la entrada: ' + error.message);
-        });
+        .catch(error => alert('Error al guardar entrada: ' + error));
 }
 
 // Ver detalles de entrada
