@@ -15,6 +15,29 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Prueba de conexión
+// Modifica la función de verificación de conexión para que sea más informativa
+database.ref('.info/connected').on('value', (snapshot) => {
+  const connectionStatus = document.getElementById('connection-status');
+  
+  if (snapshot.val() === true) {
+    console.log("✅ Conectado a Firebase");
+    if (connectionStatus) {
+      connectionStatus.textContent = "Conectado";
+      connectionStatus.style.color = "green";
+    }
+  } else {
+    console.error("❌ Error de conexión a Firebase - Verifica tu conexión a internet");
+    if (connectionStatus) {
+      connectionStatus.textContent = "Desconectado - Verifica tu internet";
+      connectionStatus.style.color = "red";
+    }
+    // Intenta reconectar después de 5 segundos
+    setTimeout(() => {
+      database.ref('.info/connected').once('value');
+    }, 5000);
+  }
+});
+
 
 // Referencias a la base de datos
 const inventoryRef = database.ref('inventory');
@@ -1402,8 +1425,16 @@ function setDefaultDates() {
     let today = new Date();
     let firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     
-    document.getElementById('movementDateFrom').value = firstDayOfMonth.toISOString().split('T')[0];
-    document.getElementById('movementDateTo').value = today.toISOString().split('T')[0];
+    // Verifica si los elementos existen antes de intentar establecer valores
+    const dateFromInput = document.getElementById('movementDateFrom');
+    const dateToInput = document.getElementById('movementDateTo');
+    
+    if (dateFromInput && dateToInput) {
+        dateFromInput.value = firstDayOfMonth.toISOString().split('T')[0];
+        dateToInput.value = today.toISOString().split('T')[0];
+    } else {
+        console.log("Los elementos de fecha no están disponibles en el DOM");
+    }
 }
 
 // Configurar listeners para cambios en tiempo real
@@ -1442,12 +1473,32 @@ function setupRealTimeListeners() {
 
 // Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
+    // Añade un elemento para mostrar el estado de la conexión
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'connection-status';
+    statusDiv.style.position = 'fixed';
+    statusDiv.style.bottom = '10px';
+    statusDiv.style.right = '10px';
+    statusDiv.style.padding = '5px 10px';
+    statusDiv.style.backgroundColor = '#f8f8f8';
+    statusDiv.style.borderRadius = '5px';
+    document.body.appendChild(statusDiv);
+
     // Configurar listeners para cambios en tiempo real
     setupRealTimeListeners();
     
-    // Cargar opciones de los selects
-    loadItemOptions();
-    loadItemTypeOptions();
-    loadTypeFilterOptions();
-    setDefaultDates();
+    // Cargar opciones de los selects solo si estamos en la pestaña correcta
+    if (document.getElementById('inventoryTable')) {
+        loadItemOptions();
+        loadTypeFilterOptions();
+    }
+    
+    if (document.getElementById('itemType')) {
+        loadItemTypeOptions();
+    }
+    
+    // Solo establecer fechas si estamos en la pestaña de reportes
+    if (document.getElementById('reportType')) {
+        setDefaultDates();
+    }
 });
