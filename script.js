@@ -751,9 +751,9 @@ function openAddOutputModal() {
     document.getElementById('outputModalTitle').textContent = 'Registrar Salida';
     document.getElementById('outputForm').reset();
     document.getElementById('outputDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('customEngineer').style.display = 'none';
     document.getElementById('outputModal').style.display = 'block';
 }
-
 // Actualizar stock disponible al seleccionar un insumo
 function updateAvailableStock() {
     let itemId = document.getElementById('outputItem').value;
