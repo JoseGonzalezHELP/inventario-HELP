@@ -278,22 +278,33 @@ function toggleCustomType() {
 }
 
 function loadItemTypeOptions() {
-    let typeSelect = document.getElementById('itemType');
+    const typeSelect = document.getElementById('itemType');
+    const currentValue = typeSelect.value;
     
-    // Mantener las primeras 6 opciones (las fijas + "OTRO")
-    while (typeSelect.options.length > 6) {
-        typeSelect.remove(6);
+    // Limpiar manteniendo las primeras opciones fijas
+    while (typeSelect.options.length > 2) {
+        typeSelect.remove(2);
     }
     
-    // Agregar los tipos desde Firebase
-    itemTypes.forEach(type => {
-        let option = document.createElement('option');
-        option.value = type.name;
-        option.textContent = type.name;
-        typeSelect.insertBefore(option, typeSelect.options[typeSelect.options.length - 1]);
+    // Eliminar duplicados usando Set
+    const uniqueTypes = [...new Set(itemTypes.map(t => t.name))];
+    
+    // Ordenar alfabéticamente
+    uniqueTypes.sort((a, b) => a.localeCompare(b));
+    
+    // Agregar opciones
+    uniqueTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeSelect.add(option);
     });
+    
+    // Restaurar valor seleccionado si existe
+    if (currentValue && [...typeSelect.options].some(o => o.value === currentValue)) {
+        typeSelect.value = currentValue;
+    }
 }
-
 // Función para abrir el modal de nuevo tipo
 function openAddTypeModal() {
     document.getElementById('newTypeName').value = '';
@@ -384,25 +395,25 @@ function saveItem() {
     let itemInitialStock = parseInt(document.getElementById('itemInitialStock').value);
     let itemMinStock = parseInt(document.getElementById('itemMinStock').value);
     let itemExpiration = document.getElementById('itemExpiration').value;
-    
+
+    // Resetear el tipo si es "Europea" (caso especial)
+    if (document.getElementById('itemType').value === "Europea" && !customType) {
+        document.getElementById('itemType').value = "";
+    }
+  
     // Manejo de tipos personalizados
     if (itemType === 'OTRO' && customType) {
         itemType = customType.toUpperCase();
-        
-        // Verificar si el tipo ya existe en Firebase
+        // Verificar si el tipo ya existe
         if (!itemTypes.some(t => t.name.toUpperCase() === itemType)) {
-            // Crear nuevo tipo en Firebase
-            const newType = {
-                id: Date.now().toString(),
-                name: itemType
-            };
-            typesRef.child(newType.id).set(newType)
-                .catch(error => {
-                    console.error('Error al guardar el nuevo tipo:', error);
-                });
+            const newType = { id: Date.now().toString(), name: itemType };
+            typesRef.child(newType.id).set(newType);
         }
+    } else if (!itemType) {
+        alert('Seleccione un tipo de insumo');
+        return;
     }
-    
+        
     // Validaciones
     if (!itemNumber || !itemName || !itemType || isNaN(itemInitialStock) || isNaN(itemMinStock)) {
         alert('Por favor complete todos los campos requeridos');
@@ -625,7 +636,7 @@ function saveEntry() {
         quantity: quantity,
         responsible: responsible,
         comments: comments || null, // Guarda null si no hay comentarios
-        date: new Date(date).toISOString(),
+        date: document.getElementById('entryDate').value + 'T00:00:00',
         isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
     };
     
@@ -729,13 +740,26 @@ function loadEntries() {
     entries.forEach(entry => {
         let item = inventory.find(i => i.id === entry.itemId) || { name: "Insumo no encontrado" };
         
+        // Formatear fecha correctamente (dd/mm/aaaa)
+        let entryDate = 'N/A';
+        if (entry.date) {
+            const dateObj = new Date(entry.date);
+            if (!isNaN(dateObj.getTime())) {
+                entryDate = dateObj.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        }
+
         let row = document.createElement('tr');
         row.innerHTML = `
             <td>${entry.voucher || 'N/A'}</td>
             <td>${item.name}</td>
             <td>${entry.quantity}</td>
             <td>${entry.responsible || 'N/A'}</td>
-            <td>${entry.date ? new Date(entry.date).toLocaleDateString() : 'N/A'}</td>
+            <td>${entryDate}</td>
             <td class="action-buttons">
                 <button class="btn btn-primary" onclick="viewEntryDetails('${entry.id}')">
                     <i class="fas fa-eye"></i> Ver
@@ -811,7 +835,7 @@ function saveOutput() {
         os: os,
         engineer: engineer,
         quantity: quantity,
-        date: new Date(date).toISOString(),
+        date: document.getElementById('outputDate').value + 'T00:00:00',
         movementType: movementType,
         status: movementType === 'loan' ? 'pending' : 'completed',
         isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO'
@@ -952,24 +976,39 @@ function loadOutputs() {
     tableBody.innerHTML = '';
     
     outputs.forEach(output => {
-        let item = inventory.find(i => i.id === output.itemId);
-        if (!item) return;
-        
+        let item = inventory.find(i => i.id === output.itemId) || { name: "Insumo no encontrado" };
+
+        // Formatear fecha correctamente (dd/mm/aaaa)
+        let outputDate = 'N/A';
+        if (output.date) {
+            const dateObj = new Date(output.date);
+            if (!isNaN(dateObj.getTime())) {
+                outputDate = dateObj.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        }
+
         let row = document.createElement('tr');
         row.className = output.movementType === 'loan' ? 'loan-row' : '';
         row.innerHTML = `
             <td>${output.os}</td>
             <td>${item.name}</td>
             <td>${output.quantity}</td>
-            <td>${output.engineer}</td>
-            <td>${new Date(output.date).toLocaleDateString()}</td>
+            <td>${output.engineer || 'N/A'}</td>
+            <td>${outputDate}</td>
             <td class="action-buttons">
-                <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">Ver</button>
+                <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
                 ${output.movementType === 'loan' && output.status === 'pending' ? 
-                 `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">Restaurar</button>` : ''}
+                 `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
+                    <i class="fas fa-undo"></i> Restaurar
+                 </button>` : ''}
             </td>
         `;
-        
         tableBody.appendChild(row);
     });
 }
