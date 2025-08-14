@@ -15,14 +15,6 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Prueba de conexión
-database.ref('.info/connected').on('value', (snapshot) => {
-  if (snapshot.val() === true) {
-    console.log("✅ Conectado a Firebase");
-  } else {
-    console.error("❌ Error de conexión a Firebase");
-    alert("Error de conexión. Recarga la página o revisa tu internet.");
-  }
-});
 
 // Referencias a la base de datos
 const inventoryRef = database.ref('inventory');
