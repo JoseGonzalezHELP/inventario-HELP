@@ -30,47 +30,6 @@ const entriesRef = database.ref('entries');
 const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
 
-// Función para formatear fecha en formato dd/mm/aaaa
-function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A';
-    
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    
-    return `${day}/${month}/${year}`;
-}
-
-// Función para mostrar/ocultar el campo de responsable manual
-function toggleCustomResponsible() {
-    const select = document.getElementById('entryResponsible');
-    const customInput = document.getElementById('customResponsible');
-    
-    if (select.value === 'OTRO') {
-        customInput.style.display = 'block';
-        customInput.required = true;
-    } else {
-        customInput.style.display = 'none';
-        customInput.required = false;
-    }
-}
-
-// Mostrar/ocultar campo de ingeniero manual
-function toggleCustomEngineer() {
-    const select = document.getElementById('outputEngineer');
-    const customInput = document.getElementById('customEngineer');
-    if (select.value === 'OTRO') {
-        customInput.style.display = 'block';
-        customInput.required = true;
-    } else {
-        customInput.style.display = 'none';
-        customInput.required = false;
-    }
-}
-
 // Datos en memoria
 let inventory = [];
 let entries = [];
@@ -122,6 +81,48 @@ function setupRealTimeListeners() {
       itemTypes = data ? Object.values(data) : [];
       loadItemTypeOptions();
     });
+}
+
+
+// Función para formatear fecha en formato dd/mm/aaaa
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+}
+
+// Función para mostrar/ocultar el campo de responsable manual
+function toggleCustomResponsible() {
+    const select = document.getElementById('entryResponsible');
+    const customInput = document.getElementById('customResponsible');
+    
+    if (select.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
+}
+
+// Mostrar/ocultar campo de ingeniero manual
+function toggleCustomEngineer() {
+    const select = document.getElementById('outputEngineer');
+    const customInput = document.getElementById('customEngineer');
+    if (select.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
 }
 
 // Funciones para manejar las pestañas
