@@ -354,34 +354,38 @@
             <span class="close" onclick="closeModal('outputModal')">&times;</span>
             <h2 id="outputModalTitle"><i class="fas fa-sign-out-alt"></i> Registrar Salida</h2>
             
-            <form id="outputForm">
-                <div class="form-group">
-                    <label for="outputItem"><i class="fas fa-box-open"></i> Insumo:</label>
-                    <select id="outputItem" required onchange="updateAvailableStock()">
-                        <option value="">Seleccione un insumo</option>
-                        <!-- Opciones se llenarán dinámicamente -->
-                    </select>
+           <form id="outputForm">
+                <!-- Primera fila: Insumo y Stock -->
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="outputItem"><i class="fas fa-box-open"></i> Insumo:</label>
+                        <select id="outputItem" required onchange="updateAvailableStock()">
+                            <option value="">Seleccione un insumo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="availableStock"><i class="fas fa-boxes"></i> Existencias:</label>
+                        <input type="text" id="availableStock" readonly>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="availableStock"><i class="fas fa-boxes"></i> Existencias disponibles:</label>
-                    <input type="text" id="availableStock" readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label for="movementType"><i class="fas fa-exchange-alt"></i> Tipo de movimiento:</label>
-                    <select id="movementType" required>
-                        <option value="output">Salida</option>
-                        <option value="loan">Préstamo</option>
-                    </select>
-                </div>
-                
+            
+                <!-- Segunda fila: Folio OS y Tipo -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="outputOS"><i class="fas fa-file-alt"></i> Folio de Orden:</label>
+                        <label for="outputOS"><i class="fas fa-file-alt"></i> Folio OS:</label>
                         <input type="text" id="outputOS" required>
                     </div>
-                    
+                    <div class="form-group">
+                        <label for="movementType"><i class="fas fa-exchange-alt"></i> Tipo:</label>
+                        <select id="movementType" required>
+                            <option value="output">Salida</option>
+                            <option value="loan">Préstamo</option>
+                        </select>
+                    </div>
+                </div>
+            
+                <!-- Tercera fila: Ingeniero y Cantidad -->
+                <div class="form-row">
                     <div class="form-group">
                         <label for="outputEngineer"><i class="fas fa-user-tie"></i> Ingeniero:</label>
                         <select id="outputEngineer" required onchange="toggleCustomEngineer()">
@@ -392,23 +396,25 @@
                             <option value="OTRO">Otro (especificar)</option>
                         </select>
                         <input type="text" id="customEngineer" style="display: none; margin-top: 0.5rem;" 
-                               placeholder="Nombre completo del ingeniero" class="form-input">
+                               placeholder="Nombre completo" class="form-input">
                     </div>
-                
-                <div class="form-row">
                     <div class="form-group">
-                        <label for="outputQuantity"><i class="fas fa-boxes"></i> Cantidad:</label>
+                        <label for="outputQuantity"><i class="fas fa-calculator"></i> Cantidad:</label>
                         <input type="number" id="outputQuantity" min="1" required>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="outputDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
-                        <input type="date" id="outputDate" required>
-                    </div>
                 </div>
-                
+            
+                <!-- Cuarta fila: Fecha -->
+                <div class="form-group">
+                    <label for="outputDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                    <input type="date" id="outputDate" required>
+                </div>
+            
+                <!-- Botón de guardar -->
                 <div class="form-actions">
-                    <button type="button" class="btn btn-primary" onclick="saveOutput()"><i class="fas fa-save"></i> Guardar Salida</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOutput()">
+                        <i class="fas fa-save"></i> Guardar Salida
+                    </button>
                 </div>
             </form>
         </div>
