@@ -730,6 +730,33 @@ input:focus, select:focus {
     padding-left: 1.5rem !important;
 }
 
+/* Estilos para los nuevos campos */
+#entryInvoice, #customResponsible {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+}
+
+#entryComments {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Efecto focus */
+#entryInvoice:focus, 
+#customResponsible:focus, 
+#entryComments:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
 #inventoryTable tr.low-stock td,
 #inventoryTable tr.critical-stock td {
     padding-left: 1.5rem !important;
