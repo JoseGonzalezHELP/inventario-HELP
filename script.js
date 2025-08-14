@@ -22,10 +22,10 @@ const typesRef = database.ref('types');
 
 // Función para mostrar/ocultar el campo de responsable manual
 function toggleCustomResponsible() {
-    const responsibleSelect = document.getElementById('entryResponsible');
+    const select = document.getElementById('entryResponsible');
     const customInput = document.getElementById('customResponsible');
     
-    if (responsibleSelect.value === 'OTRO') {
+    if (select.value === 'OTRO') {
         customInput.style.display = 'block';
         customInput.required = true;
     } else {
@@ -566,9 +566,9 @@ function openAddEntryModal() {
     document.getElementById('entryModalTitle').textContent = 'Registrar Entrada';
     document.getElementById('entryForm').reset();
     document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('customResponsible').style.display = 'none';
     document.getElementById('entryModal').style.display = 'block';
 }
-
 // Guardar entrada
 function saveEntry() {
     // Obtener valores del formulario
