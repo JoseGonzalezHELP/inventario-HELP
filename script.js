@@ -20,6 +20,20 @@ const entriesRef = database.ref('entries');
 const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
 
+// Función para formatear fecha en formato dd/mm/aaaa
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'N/A';
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+}
+
 // Función para mostrar/ocultar el campo de responsable manual
 function toggleCustomResponsible() {
     const select = document.getElementById('entryResponsible');
@@ -663,7 +677,7 @@ function viewEntryDetails(id) {
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
     // Formatear fecha correctamente
-    const formattedDate = entry.date ? 
+   const formattedDate = formatDate(entry.date); 
         new Date(entry.date).toLocaleDateString('es-ES') : 'N/A';
 
     const printWindow = window.open('', '_blank');
@@ -852,7 +866,7 @@ function viewOutputDetails(id) {
     const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
     // Formatear fecha correctamente
-    const formattedDate = output.date ? 
+    const formattedDate = formatDate(output.date); 
         new Date(output.date).toLocaleDateString('es-ES') : 'N/A';
 
     const printWindow = window.open('', '_blank');
