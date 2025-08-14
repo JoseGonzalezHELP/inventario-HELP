@@ -775,3 +775,35 @@ input:focus, select:focus {
 #inventoryTable tr.critical-stock td {
     padding-left: 1.5rem !important;
 }
+/* Estilos específicos para el formulario de salidas */
+#outputModal .modal-content {
+    max-width: 700px;
+}
+
+#outputForm .form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#outputForm .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+#outputForm .form-actions {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+#outputForm label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+#outputForm select, 
+#outputForm input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+}
