@@ -657,73 +657,63 @@ function saveEntry() {
 
 // Ver detalles de entrada
 function viewEntryDetails(id) {
-    let entry = entries.find(e => e.id === id);
+    const entry = entries.find(e => e.id === id);
     if (!entry) return;
+
+    const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
-    let item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
-    
-    let printWindow = window.open('', '_blank', 'width=800,height=600');
+    // Formatear fecha correctamente
+    const formattedDate = entry.date ? 
+        new Date(entry.date).toLocaleDateString('es-ES') : 'N/A';
+
+    const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
         <head>
             <title>Vale de Entrada - ${entry.voucher}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 2rem; }
-                .header { text-align: center; margin-bottom: 2rem; }
-                .title { font-size: 1.5rem; font-weight: bold; }
-                .subtitle { font-size: 1.2rem; margin-bottom: 1rem; }
-                .details { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
-                .details th, .details td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
-                .details th { background-color: #f2f2f2; }
-                .signature { margin-top: 3rem; display: flex; justify-content: space-between; }
-                .signature-box { width: 45%; border-top: 1px solid #000; padding-top: 0.5rem; }
-                .footer { margin-top: 3rem; font-size: 0.8rem; text-align: center; }
-                @media print { button { display: none; } }
+                body { font-family: Arial; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .signature { margin-top: 50px; display: flex; justify-content: space-between; }
             </style>
         </head>
         <body>
-            <div class="header">
-                <div class="title">VALE DE ENTRADA DE INSUMOS BIOMÉDICOS</div>
-                <div class="subtitle">Sub-almacén de insumos</div>
-            </div>
-            
-            <table class="details">
-                <tr>
-                    <th>Folio Vale:</th>
-                    <td>${entry.voucher}</td>
-                </tr>
-                <tr>
-                    <th>Fecha:</th>
-                    <td>${new Date(entry.date).toLocaleDateString()}</td>
-                </tr>
-                <tr>
-                    <th>Insumo:</th>
-                    <td>${item.name} (${item.id})</td>
-                </tr>
-                <tr>
-                    <th>Cantidad:</th>
-                    <td>${entry.quantity}</td>
-                </tr>
+            <h2 style="text-align: center;">VALE DE ENTRADA</h2>
+            <table>
+                <tr><th>Folio Vale:</th><td>${entry.voucher || 'N/A'}</td></tr>
+                <tr><th>Fecha:</th><td>${formattedDate}</td></tr>
+                <tr><th>Insumo:</th><td>${item.name} (${entry.itemId})</td></tr>
+                <tr><th>Cantidad:</th><td>${entry.quantity}</td></tr>
+                <tr><th>Responsable:</th><td>${entry.responsible || 'N/A'}</td></tr>
+                ${entry.invoice ? `<tr><th>Factura:</th><td>${entry.invoice}</td></tr>` : ''}
             </table>
             
+            ${entry.comments ? `
+            <div style="margin-top: 20px;">
+                <strong>Comentarios:</strong><br>
+                ${entry.comments}
+            </div>
+            ` : ''}
+            
             <div class="signature">
-                <div class="signature-box">
+                <div style="width: 45%; border-top: 1px solid #000;">
                     <strong>Recibí conforme:</strong><br><br>
                     Firma y sello
                 </div>
-                <div class="signature-box">
+                <div style="width: 45%; border-top: 1px solid #000;">
                     <strong>Autorizó:</strong><br><br>
                     Firma y sello
                 </div>
             </div>
             
-            <div class="footer">
-                Sistema de Inventario Biomédico - ${new Date().toLocaleDateString()}
-            </div>
-            
             <script>
                 window.onload = function() {
-                    window.print();
+                    setTimeout(() => {
+                        window.print();
+                        window.close();
+                    }, 300);
                 };
             </script>
         </body>
@@ -856,81 +846,56 @@ function saveOutput() {
 
 // Ver detalles de salida
 function viewOutputDetails(id) {
-    let output = outputs.find(o => o.id === id);
+    const output = outputs.find(o => o.id === id);
     if (!output) return;
+
+    const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
-    let item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
-    
-    let printWindow = window.open('', '_blank', 'width=800,height=600');
+    // Formatear fecha correctamente
+    const formattedDate = output.date ? 
+        new Date(output.date).toLocaleDateString('es-ES') : 'N/A';
+
+    const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
         <head>
             <title>Vale de Salida - ${output.os}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 2rem; }
-                .header { text-align: center; margin-bottom: 2rem; }
-                .title { font-size: 1.5rem; font-weight: bold; }
-                .subtitle { font-size: 1.2rem; margin-bottom: 1rem; }
-                .details { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
-                .details th, .details td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; }
-                .details th { background-color: #f2f2f2; }
-                .signature { margin-top: 3rem; display: flex; justify-content: space-between; }
-                .signature-box { width: 45%; border-top: 1px solid #000; padding-top: 0.5rem; }
-                .footer { margin-top: 3rem; font-size: 0.8rem; text-align: center; }
-                @media print { button { display: none; } }
+                body { font-family: Arial; margin: 20px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .signature { margin-top: 50px; display: flex; justify-content: space-between; }
             </style>
         </head>
         <body>
-            <div class="header">
-                <div class="title">VALE DE SALIDA DE INSUMOS BIOMÉDICOS</div>
-                <div class="subtitle">Sub-almacén de insumos</div>
-            </div>
-            
-            <table class="details">
-                <tr>
-                    <th>Folio OS:</th>
-                    <td>${output.os}</td>
-                </tr>
-                <tr>
-                    <th>Fecha:</th>
-                    <td>${new Date(output.date).toLocaleDateString()}</td>
-                </tr>
-                <tr>
-                    <th>Insumo:</th>
-                    <td>${item.name} (${item.id})</td>
-                </tr>
-                <tr>
-                    <th>Cantidad:</th>
-                    <td>${output.quantity}</td>
-                </tr>
-                <tr>
-                    <th>Tipo de movimiento:</th>
-                    <td>${output.movementType === 'loan' ? 'Préstamo' : 'Salida'}</td>
-                </tr>
-                <tr>
-                    <th>Ingeniero solicitante:</th>
-                    <td>${output.engineer}</td>
-                </tr>
+            <h2 style="text-align: center;">VALE DE SALIDA</h2>
+            <table>
+                <tr><th>Folio OS:</th><td>${output.os || 'N/A'}</td></tr>
+                <tr><th>Fecha:</th><td>${formattedDate}</td></tr>
+                <tr><th>Insumo:</th><td>${item.name} (${output.itemId})</td></tr>
+                <tr><th>Cantidad:</th><td>${output.quantity}</td></tr>
+                <tr><th>Ingeniero:</th><td>${output.engineer || 'N/A'}</td></tr>
+                <tr><th>Tipo:</th><td>${output.movementType === 'loan' ? 'Préstamo' : 'Salida'}</td></tr>
             </table>
             
             <div class="signature">
-                <div class="signature-box">
+                <div style="width: 45%; border-top: 1px solid #000;">
                     <strong>Recibí conforme:</strong><br><br>
                     Firma y sello
                 </div>
-                <div class="signature-box">
+                <div style="width: 45%; border-top: 1px solid #000;">
                     <strong>Autorizó:</strong><br><br>
                     Firma y sello
                 </div>
             </div>
             
-            <div class="footer">
-                Sistema de Inventario Biomédico - ${new Date().toLocaleDateString()}
-            </div>
-            
             <script>
                 window.onload = function() {
-                    window.print();
+                    setTimeout(() => {
+                        window.print();
+                        window.close();
+                    }, 300);
                 };
             </script>
         </body>
