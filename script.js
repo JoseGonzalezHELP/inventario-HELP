@@ -714,20 +714,21 @@ function loadEntries() {
     tableBody.innerHTML = '';
     
     entries.forEach(entry => {
-        let item = inventory.find(i => i.id === entry.itemId);
-        if (!item) return;
+        let item = inventory.find(i => i.id === entry.itemId) || { name: "Insumo no encontrado" };
         
         let row = document.createElement('tr');
         row.innerHTML = `
-            <td>${entry.voucher}</td>
+            <td>${entry.voucher || 'N/A'}</td>
             <td>${item.name}</td>
             <td>${entry.quantity}</td>
-            <td>${new Date(entry.date).toLocaleDateString()}</td>
+            <td>${entry.responsible || 'N/A'}</td>
+            <td>${entry.date ? new Date(entry.date).toLocaleDateString() : 'N/A'}</td>
             <td class="action-buttons">
-                <button class="btn btn-primary" onclick="viewEntryDetails('${entry.id}')">Ver</button>
+                <button class="btn btn-primary" onclick="viewEntryDetails('${entry.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
             </td>
         `;
-        
         tableBody.appendChild(row);
     });
 }
