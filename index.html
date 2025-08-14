@@ -384,14 +384,16 @@
                     
                     <div class="form-group">
                         <label for="outputEngineer"><i class="fas fa-user-tie"></i> Ingeniero:</label>
-                        <select id="outputEngineer" required>
-                            <option value="">Seleccione un ingeniero</option>
+                        <select id="outputEngineer" required onchange="toggleCustomEngineer()">
+                            <option value="">Seleccionar</option>
                             <option value="Ing. José González Cruz">Ing. José González Cruz</option>
                             <option value="Ing. María Magdalena Robles Ramírez">Ing. María Magdalena Robles Ramírez</option>
                             <option value="Ing. Pedro Eduardo Vargas Ibarro">Ing. Pedro Eduardo Vargas Ibarro</option>
+                            <option value="OTRO">Otro (especificar)</option>
                         </select>
+                        <input type="text" id="customEngineer" style="display: none; margin-top: 0.5rem;" 
+                               placeholder="Nombre completo del ingeniero" class="form-input">
                     </div>
-                </div>
                 
                 <div class="form-row">
                     <div class="form-group">
