@@ -34,6 +34,19 @@ function toggleCustomResponsible() {
     }
 }
 
+// Mostrar/ocultar campo de ingeniero manual
+function toggleCustomEngineer() {
+    const select = document.getElementById('outputEngineer');
+    const customInput = document.getElementById('customEngineer');
+    if (select.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
+}
+
 // Datos en memoria
 let inventory = [];
 let entries = [];
@@ -759,31 +772,40 @@ function updateAvailableStock() {
 
 // Guardar salida
 function saveOutput() {
-    let itemId = document.getElementById('outputItem').value;
-    let os = document.getElementById('outputOS').value;
+    const itemId = document.getElementById('outputItem').value;
+    const os = document.getElementById('outputOS').value;
     let engineer = document.getElementById('outputEngineer').value;
-    let quantity = parseInt(document.getElementById('outputQuantity').value);
-    let date = document.getElementById('outputDate').value;
-    let movementType = document.getElementById('movementType').value;
-    
+    const quantity = parseInt(document.getElementById('outputQuantity').value);
+    const date = document.getElementById('outputDate').value;
+    const movementType = document.getElementById('movementType').value;
+
+    // Validar ingeniero manual
+    if (engineer === 'OTRO') {
+        engineer = document.getElementById('customEngineer').value.trim();
+        if (!engineer) {
+            alert('Por favor ingrese el nombre del ingeniero');
+            return;
+        }
+    }
+
     if (!itemId || !os || !engineer || isNaN(quantity) || quantity <= 0 || !date) {
-        alert('Por favor complete todos los campos correctamente');
+        alert('Complete los campos requeridos');
         return;
     }
-    
-    let itemIndex = inventory.findIndex(i => i.id === itemId);
-    if (itemIndex === -1) {
+
+    const item = inventory.find(i => i.id === itemId);
+    if (!item) {
         alert('Insumo no encontrado');
         return;
     }
-    
-    if (inventory[itemIndex].stock < quantity) {
-        alert('No hay suficiente stock para esta salida');
+
+    if (item.stock < quantity) {
+        alert('Stock insuficiente');
         return;
     }
-    
-    let outputId = Date.now().toString();
-    let output = {
+
+    const outputId = Date.now().toString();
+    const output = {
         id: outputId,
         itemId: itemId,
         os: os,
@@ -791,26 +813,22 @@ function saveOutput() {
         quantity: quantity,
         date: new Date(date).toISOString(),
         movementType: movementType,
-        status: movementType === 'loan' ? 'pending' : 'completed'
+        status: movementType === 'loan' ? 'pending' : 'completed',
+        isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO'
     };
-    
-    // Guardar salida en Firebase
+
     outputsRef.child(outputId).set(output)
         .then(() => {
-            // Actualizar stock en Firebase
-            let newStock = inventory[itemIndex].stock - quantity;
+            const newStock = item.stock - quantity;
             inventoryRef.child(itemId).update({ stock: newStock })
                 .then(() => {
                     closeModal('outputModal');
-                })
-                .catch(error => {
-                    alert('Error al actualizar el stock: ' + error.message);
+                    showToast('Salida registrada');
                 });
         })
-        .catch(error => {
-            alert('Error al guardar la salida: ' + error.message);
-        });
+        .catch(error => alert('Error: ' + error.message));
 }
+
 
 // Ver detalles de salida
 function viewOutputDetails(id) {
