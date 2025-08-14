@@ -67,29 +67,31 @@
         </div>
         
         <!-- Entradas Tab -->
-        <div id="entries" class="tab-content">
-            <div class="tab-header">
-                <h2><i class="fas fa-sign-in-alt"></i> Registro de Entradas</h2>
-                <button class="btn btn-primary" onclick="openAddEntryModal()"><i class="fas fa-plus"></i> Registrar Nueva Entrada</button>
-            </div>
-            
-            <div class="table-container">
-                <table id="entriesTable">
-                    <thead>
-                        <tr>
-                            <th>Folio Vale</th>
-                            <th>Insumo</th>
-                            <th>Cantidad</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="entriesTableBody">
-                        <!-- Los datos se cargarán dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<!-- Entradas Tab -->
+<div id="entries" class="tab-content">
+    <div class="tab-header">
+        <h2><i class="fas fa-sign-in-alt"></i> Registro de Entradas</h2>
+        <button class="btn btn-primary" onclick="openAddEntryModal()"><i class="fas fa-plus"></i> Registrar Nueva Entrada</button>
+    </div>
+    
+    <div class="table-container">
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>Folio Vale</th>
+                    <th>Insumo</th>
+                    <th>Cantidad</th>
+                    <th>Responsable</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="entriesTableBody">
+                <!-- Los datos se cargarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+</div>
         
         <!-- Salidas Tab -->
         <div id="outputs" class="tab-content">
@@ -284,63 +286,67 @@
     </div>
     
     <!-- Modal para entrada -->
-<form id="entryForm">
-    <div class="form-group">
-        <label for="entryItem"><i class="fas fa-box-open"></i> Insumo:</label>
-        <select id="entryItem" required>
-            <option value="">Seleccione un insumo</option>
-            <!-- Opciones se llenarán dinámicamente -->
-        </select>
+<!-- Modal para entrada -->
+<div id="entryModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('entryModal')">&times;</span>
+        <h2 id="entryModalTitle"><i class="fas fa-sign-in-alt"></i> Registrar Entrada</h2>
+        
+        <form id="entryForm">
+            <div class="form-group">
+                <label for="entryItem"><i class="fas fa-box-open"></i> Insumo:</label>
+                <select id="entryItem" required>
+                    <option value="">Seleccione un insumo</option>
+                    <!-- Opciones se llenarán dinámicamente -->
+                </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="entryVoucher"><i class="fas fa-file-invoice"></i> Folio del Vale:</label>
+                    <input type="text" id="entryVoucher" required>
+                </div>
+                <div class="form-group">
+                    <label for="entryInvoice"><i class="fas fa-receipt"></i> N° Factura:</label>
+                    <input type="text" id="entryInvoice">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="entryQuantity"><i class="fas fa-boxes"></i> Cantidad:</label>
+                    <input type="number" id="entryQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="entryResponsible"><i class="fas fa-user-tie"></i> Responsable:</label>
+                    <select id="entryResponsible" required onchange="toggleCustomResponsible()">
+                        <option value="">Seleccionar</option>
+                        <option value="Ing. José González Cruz">Ing. José González Cruz</option>
+                        <option value="Ing. María Magdalena Robles Ramírez">Ing. María Magdalena Robles Ramírez</option>
+                        <option value="Ing. Pedro Eduardo Vargas Ibarro">Ing. Pedro Eduardo Vargas Ibarro</option>
+                        <option value="OTRO">Otro (especificar)</option>
+                    </select>
+                    <input type="text" id="customResponsible" style="display: none; margin-top: 0.5rem;" 
+                           placeholder="Nombre completo del responsable" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="entryComments"><i class="fas fa-comment"></i> Comentarios:</label>
+                <textarea id="entryComments" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="entryDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
+                <input type="date" id="entryDate" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="saveEntry()"><i class="fas fa-save"></i> Guardar Entrada</button>
+            </div>
+        </form>
     </div>
-    
-    <!-- NUEVO: Sección de factura y vale -->
-    <div class="form-row">
-        <div class="form-group">
-            <label for="entryVoucher"><i class="fas fa-file-invoice"></i> Folio del Vale:</label>
-            <input type="text" id="entryVoucher" required>
-        </div>
-        <div class="form-group">
-            <label for="entryInvoice"><i class="fas fa-receipt"></i> N° Factura:</label>
-            <input type="text" id="entryInvoice">
-        </div>
-    </div>
-    
-    <!-- NUEVO: Sección de cantidad y responsable -->
-    <div class="form-row">
-        <div class="form-group">
-            <label for="entryQuantity"><i class="fas fa-boxes"></i> Cantidad:</label>
-            <input type="number" id="entryQuantity" min="1" required>
-        </div>
-        <div class="form-group">
-            <label for="entryResponsible"><i class="fas fa-user-tie"></i> Responsable:</label>
-            <select id="entryResponsible" required onchange="toggleCustomResponsible()">
-                <option value="">Seleccionar</option>
-                <option value="Ing. José González Cruz">Ing. José González Cruz</option>
-                <option value="Ing. María Magdalena Robles Ramírez">Ing. María Magdalena Robles Ramírez</option>
-                <option value="Ing. Pedro Eduardo Vargas Ibarro">Ing. Pedro Eduardo Vargas Ibarro</option>
-                <option value="OTRO">Otro (especificar)</option>
-            </select>
-            <input type="text" id="customResponsible" style="display: none; margin-top: 0.5rem;" 
-                placeholder="Nombre completo del responsable" class="form-input">
-        </div>
-    </div>
-    
-    <!-- NUEVO: Campo de comentarios -->
-    <div class="form-group">
-        <label for="entryComments"><i class="fas fa-comment"></i> Comentarios:</label>
-        <textarea id="entryComments" rows="3"></textarea>
-    </div>
-    
-    <!-- Campo de fecha (existente) -->
-    <div class="form-group">
-        <label for="entryDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
-        <input type="date" id="entryDate" required>
-    </div>
-    
-    <div class="form-actions">
-        <button type="button" class="btn btn-primary" onclick="saveEntry()"><i class="fas fa-save"></i> Guardar Entrada</button>
-    </div>
-</form>
+</div>
     
     <!-- Modal para salida -->
     <div id="outputModal" class="modal">
