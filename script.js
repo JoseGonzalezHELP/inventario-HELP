@@ -878,8 +878,9 @@ function viewOutputDetails(id) {
     const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
     // Formatear fecha correctamente
-    const formattedDate = formatDate(output.date); 
-        new Date(output.date).toLocaleDateString('es-ES') : 'N/A';
+const formattedDate = output.date 
+  ? new Date(output.date).toLocaleDateString('es-ES') 
+  : 'N/A';
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
