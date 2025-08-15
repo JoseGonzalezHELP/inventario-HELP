@@ -808,52 +808,62 @@ input:focus, select:focus {
     padding: 0.75rem 1rem;
 }
 
-/* Asegurar consistencia en las filas */
-#inventoryTable tr {
-    height: auto;
-    min-height: 60px;
+/* Estilos para la tabla */
+#inventoryTable {
+    table-layout: fixed; /* Fija el ancho de las columnas */
+    width: 100%;
 }
 
-#inventoryTable td {
-    vertical-align: middle;
-    padding: 0.75rem 1rem;
-    word-wrap: break-word;
-}
-
-/* Estilo específico para celdas de acción */
+/* Estilos para las celdas de acción */
 #inventoryTable td.action-buttons {
-    white-space: nowrap;
-    width: 1%; /* Fuerza el ancho mínimo */
+    width: 280px; /* Ancho fijo para la columna de acciones */
+    padding: 0.5rem 1rem;
 }
 
-/* Mejorar los botones de acción */
+/* Contenedor de botones - HORIZONTAL */
 .action-buttons {
     display: flex;
+    flex-direction: row; /* Dirección horizontal */
+    flex-wrap: nowrap; /* Evitar saltos de línea */
     gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.action-buttons button {
-    min-width: 70px;
-    padding: 0.5rem 0.75rem;
-    height: 38px;
-    display: inline-flex;
+    justify-content: flex-end; /* Alinear a la derecha */
     align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
 }
 
-/* Asegurar que los botones mantengan proporción en móviles */
-@media (max-width: 768px) {
-    .action-buttons {
-        flex-direction: column;
-        gap: 0.25rem;
+/* Estilos para los botones */
+.action-buttons button {
+    min-width: 60px; /* Ancho mínimo */
+    padding: 0.5rem 0.75rem;
+    height: 36px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 992px) {
+    #inventoryTable td.action-buttons {
+        width: 240px; /* Reducir ancho en tablets */
     }
     
     .action-buttons button {
-        width: 100%;
+        min-width: 50px;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
     }
 }
+
+@media (max-width: 768px) {
+    #inventoryTable td.action-buttons {
+        width: auto; /* Ancho flexible en móviles */
+    }
+    
+    .action-buttons {
+        justify-content: center; /* Centrar en móviles */
+    }
+    
+    .action-buttons button {
+        flex: 1; /* Que ocupen espacio disponible */
     }
 }
