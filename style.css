@@ -854,3 +854,59 @@ input:focus, select:focus {
         width: 100%;
     }
 }
+
+
+/* Asegurar que todas las celdas tengan la misma alineación */
+#inventoryTable tbody tr {
+    position: relative; /* Necesario para el pseudo-elemento */
+    border-bottom: 1px solid var(--light-gray);
+}
+
+/* Eliminar el border-bottom de las celdas individuales */
+#inventoryTable td {
+    border-bottom: none !important;
+    vertical-align: middle;
+    padding: 1rem 1.5rem;
+}
+
+/* Pseudo-elemento para la línea divisoria que cubre toda la fila */
+#inventoryTable tbody tr::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--light-gray);
+    margin: 0 1.5rem; /* Igual al padding de las celdas */
+}
+
+/* Ajustes específicos para la columna de acciones */
+#inventoryTable td.action-buttons {
+    position: relative;
+    z-index: 1; /* Asegurar que esté sobre el pseudo-elemento */
+    white-space: nowrap;
+}
+
+/* Ajustar los botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    height: 100%;
+}
+
+.action-buttons button {
+    height: 38px;
+    min-width: 70px;
+    padding: 0.5rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Corrección para filas con estado especial */
+#inventoryTable tr.low-stock::after,
+#inventoryTable tr.critical-stock::after {
+    left: 4px; /* Compensar el borde izquierdo */
+}
