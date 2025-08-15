@@ -808,68 +808,52 @@ input:focus, select:focus {
     padding: 0.75rem 1rem;
 }
 
-/* Asegurar que todas las celdas tengan la misma alineación */
-#inventoryTable tbody tr {
-    position: relative;
-    border-bottom: 1px solid var(--light-gray);
+/* Asegurar consistencia en las filas */
+#inventoryTable tr {
+    height: auto;
+    min-height: 60px;
 }
 
-/* Eliminar el border-bottom de las celdas individuales */
 #inventoryTable td {
-    border-bottom: none !important;
     vertical-align: middle;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
+    word-wrap: break-word;
 }
 
-/* Línea divisoria para toda la fila */
-#inventoryTable tbody tr::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background-color: var(--light-gray);
-    margin: 0 1.5rem;
-}
-
-/* Estilo específico para la columna de acciones */
+/* Estilo específico para celdas de acción */
 #inventoryTable td.action-buttons {
-    position: relative;
-    z-index: 1;
     white-space: nowrap;
+    width: 1%; /* Fuerza el ancho mínimo */
 }
 
-/* Botones de acción en HORIZONTAL */
+/* Mejorar los botones de acción */
 .action-buttons {
     display: flex;
-    flex-direction: row; /* Esto los mantiene horizontales */
     gap: 0.5rem;
-    align-items: center;
-    justify-content: flex-end; /* Alineados a la derecha */
-    flex-wrap: nowrap; /* Evita que se rompan en múltiples líneas */
-    height: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .action-buttons button {
-    height: 38px;
     min-width: 70px;
     padding: 0.5rem 0.75rem;
+    height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.85rem;
 }
 
-/* Ajuste para pantallas pequeñas (opcional) */
+/* Asegurar que los botones mantengan proporción en móviles */
 @media (max-width: 768px) {
     .action-buttons {
-        flex-wrap: wrap; /* Permite que los botones se ajusten en pantallas pequeñas */
-        justify-content: center; /* Centrado en móviles */
+        flex-direction: column;
+        gap: 0.25rem;
     }
     
     .action-buttons button {
-        min-width: 60px;
-        font-size: 0.8rem;
-        padding: 0.4rem 0.6rem;
+        width: 100%;
+    }
+}
     }
 }
