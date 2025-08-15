@@ -154,24 +154,24 @@ function loadInventory() {
             row.className = item.stock === 0 ? 'critical-stock' : 'low-stock';
         }
         
-        row.innerHTML = `
-            <td>${item.id}</td>
-            <td>${item.name}</td>
-            <td>${item.type}</td>
-            <td>${item.brand}</td>
-            <td>${item.model}</td>
-            <td>${item.size}</td>
-            <td>${item.stock}</td>
-            <td>${item.minStock}</td>
-            <td class="action-buttons">
-                <div>
-                    <button class="btn btn-primary" onclick="viewItemDetails('${item.id}')">Ver</button>
-                    <button class="btn btn-warning" onclick="editItem('${item.id}')">Editar</button>
-                    <button class="btn btn-success" onclick="generateItemQR('${item.id}')">QR</button>
-                    <button class="btn btn-danger" onclick="confirmDeleteItem('${item.id}')">Eliminar</button>
-                </div>
-            </td>
-        `;
+          row.innerHTML = `
+              <td>${item.id}</td>
+              <td>${item.name}</td>
+              <td>${item.type}</td>
+              <td>${item.brand}</td>
+              <td>${item.model}</td>
+              <td>${item.size}</td>
+              <td>${item.stock}</td>
+              <td>${item.minStock}</td>
+              <td class="action-buttons">
+                  <div>
+                      <button class="btn btn-primary" onclick="viewItemDetails('${item.id}')">Ver</button>
+                      <button class="btn btn-warning" onclick="editItem('${item.id}')">Editar</button>
+                      <button class="btn btn-success" onclick="generateItemQR('${item.id}')">QR</button>
+                      <button class="btn btn-danger" onclick="confirmDeleteItem('${item.id}')">Eliminar</button>
+                  </div>
+              </td>
+          `;
                 
         tableBody.appendChild(row);
     });
