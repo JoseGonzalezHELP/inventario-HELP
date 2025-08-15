@@ -1493,4 +1493,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loadTypeFilterOptions();
     }
     
-    if (document.getElementById('itemType')) {
+   if (document.getElementById('itemType')) {
+          loadItemTypeOptions();
+      }
+      
+      // Solo establecer fechas si estamos en la pestaña de reportes
+      if (document.getElementById('reportType')) {
+          setDefaultDates();
+      }
+  });
+
