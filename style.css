@@ -807,53 +807,6 @@ input:focus, select:focus {
     width: 100%;
     padding: 0.75rem 1rem;
 }
-/* Asegurar consistencia en las filas */
-#inventoryTable tr {
-    height: auto;
-    min-height: 60px;
-}
-
-#inventoryTable td {
-    vertical-align: middle;
-    padding: 0.75rem 1rem;
-    word-wrap: break-word;
-}
-
-/* Estilo específico para celdas de acción */
-#inventoryTable td.action-buttons {
-    white-space: nowrap;
-    width: 1%; /* Fuerza el ancho mínimo */
-}
-
-/* Mejorar los botones de acción */
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.action-buttons button {
-    min-width: 70px;
-    padding: 0.5rem 0.75rem;
-    height: 38px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-}
-
-/* Asegurar que los botones mantengan proporción en móviles */
-@media (max-width: 768px) {
-    .action-buttons {
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-    
-    .action-buttons button {
-        width: 100%;
-    }
-}
 
 
 /* Asegurar que todas las celdas tengan la misma alineación */
