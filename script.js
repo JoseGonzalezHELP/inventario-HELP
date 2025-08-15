@@ -164,13 +164,15 @@ function loadInventory() {
             <td>${item.stock}</td>
             <td>${item.minStock}</td>
             <td class="action-buttons">
-                <button class="btn btn-primary" onclick="viewItemDetails('${item.id}')">Ver</button>
-                <button class="btn btn-warning" onclick="editItem('${item.id}')">Editar</button>
-                <button class="btn btn-success" onclick="generateItemQR('${item.id}')">QR</button>
-                <button class="btn btn-danger" onclick="confirmDeleteItem('${item.id}')">Eliminar</button>
+                <div>
+                    <button class="btn btn-primary" onclick="viewItemDetails('${item.id}')">Ver</button>
+                    <button class="btn btn-warning" onclick="editItem('${item.id}')">Editar</button>
+                    <button class="btn btn-success" onclick="generateItemQR('${item.id}')">QR</button>
+                    <button class="btn btn-danger" onclick="confirmDeleteItem('${item.id}')">Eliminar</button>
+                </div>
             </td>
         `;
-        
+                
         tableBody.appendChild(row);
     });
 }
