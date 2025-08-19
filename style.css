@@ -807,3 +807,33 @@ input:focus, select:focus {
     width: 100%;
     padding: 0.75rem 1rem;
 }
+
+/* Estilos para los selectores de marca y tipo */
+select {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%2364748b" viewBox="0 0 16 16"><path d="M8 12L2 6h12L8 12z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Mejorar la apariencia de los selectores en formularios */
+.form-group select {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: white;
+    color: var(--dark);
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
