@@ -202,27 +202,30 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="itemBrand"><i class="fas fa-copyright"></i> Marca Compatible:</label>
+                        <label for="itemBrands"><i class="fas fa-copyright"></i> Marcas Compatibles:</label>
                         <div style="display: flex; gap: 0.5rem;">
-                            <select id="itemBrand" onchange="toggleCustomBrand()" style="flex: 1;">
-                                <option value="">Seleccione una marca</option>
+                            <select id="brandSelector" style="flex: 1;" onchange="addBrand()">
+                                <option value="">Seleccionar marca para agregar</option>
                                 <!-- Las opciones se llenarán dinámicamente -->
                             </select>
                             <button type="button" class="btn btn-info" onclick="openAddBrandModal()" style="width: auto;">
                                 <i class="fas fa-plus"></i> Nueva
                             </button>
                         </div>
-                        <input type="text" id="customBrand" style="display: none; margin-top: 0.5rem;" 
-                               placeholder="Especificar marca" class="form-input">
+                        
+                        <!-- Contenedor para mostrar las marcas seleccionadas -->
+                        <div id="selectedBrandsContainer" style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <!-- Las marcas seleccionadas aparecerán aquí -->
+                        </div>
+                        
+                        <input type="hidden" id="itemBrands">
                     </div>
                     
                     <div class="form-group">
                         <label for="itemModel"><i class="fas fa-cube"></i> Modelo Compatible:</label>
                         <input type="text" id="itemModel">
                     </div>
-                </div>
-                
-                <div class="form-row">
+                </div>                <div class="form-row">
                     <div class="form-group">
                         <label for="itemSize"><i class="fas fa-ruler-combined"></i> Tamaño:</label>
                         <select id="itemSize">
