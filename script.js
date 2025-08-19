@@ -15,7 +15,6 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Prueba de conexión
-// Modifica la función de verificación de conexión para que sea más informativa
 database.ref('.info/connected').on('value', (snapshot) => {
   const connectionStatus = document.getElementById('connection-status');
   
@@ -37,7 +36,6 @@ database.ref('.info/connected').on('value', (snapshot) => {
     }, 5000);
   }
 });
-
 
 // Referencias a la base de datos
 const inventoryRef = database.ref('inventory');
@@ -147,6 +145,8 @@ function openTab(evt, tabName) {
 // Cargar inventario en la tabla
 function loadInventory() {
     let tableBody = document.getElementById('inventoryTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = '';
     
     inventory.forEach(item => {
@@ -160,7 +160,7 @@ function loadInventory() {
             <td>${item.id}</td>
             <td>${item.name}</td>
             <td>${item.type}</td>
-            <td>${item.brand}</td>
+            <td>${item.brand || item.brands || 'N/A'}</td>
             <td>${item.model}</td>
             <td>${item.size}</td>
             <td>${item.stock}</td>
@@ -213,6 +213,8 @@ function searchInventory() {
     let input = document.getElementById('inventorySearch');
     let filter = input.value.toUpperCase();
     let table = document.getElementById('inventoryTable');
+    if (!table) return;
+    
     let tr = table.getElementsByTagName('tr');
     
     for (let i = 1; i < tr.length; i++) {
@@ -234,6 +236,8 @@ function searchInventory() {
 function filterByType() {
     let type = document.getElementById('typeFilter').value;
     let table = document.getElementById('inventoryTable');
+    if (!table) return;
+    
     let tr = table.getElementsByTagName('tr');
     
     for (let i = 1; i < tr.length; i++) {
@@ -249,6 +253,8 @@ function filterByType() {
 // Cargar opciones de filtro por tipo
 function loadTypeFilterOptions() {
     let typeFilter = document.getElementById('typeFilter');
+    if (!typeFilter) return;
+    
     while (typeFilter.options.length > 1) {
         typeFilter.remove(1);
     }
@@ -265,6 +271,8 @@ function loadTypeFilterOptions() {
 // Verificar alertas de stock
 function checkStockAlerts() {
     let alertsDiv = document.getElementById('stockAlerts');
+    if (!alertsDiv) return;
+    
     alertsDiv.innerHTML = '';
     
     let criticalItems = inventory.filter(item => item.stock === 0 && item.stock <= item.minStock);
@@ -299,6 +307,8 @@ function toggleCustomType() {
 
 function loadItemTypeOptions() {
     const typeSelect = document.getElementById('itemType');
+    if (!typeSelect) return;
+    
     const currentValue = typeSelect.value;
     
     // Limpiar manteniendo las primeras opciones fijas
@@ -415,6 +425,8 @@ function saveNewBrand() {
 // Cargar opciones de marcas en el selector
 function loadItemBrandOptions() {
     const brandSelect = document.getElementById('itemBrand');
+    if (!brandSelect) return;
+    
     const currentValue = brandSelect.value;
     
     // Limpiar manteniendo las primeras opciones fijas
@@ -530,6 +542,7 @@ function editItem(id) {
     
     document.getElementById('itemModal').style.display = 'block';
 }
+
 // Guardar insumo (nuevo o editado)
 function saveItem() {
     let id = document.getElementById('itemId').value;
@@ -720,6 +733,8 @@ function loadItemOptions() {
     let entryItemSelect = document.getElementById('entryItem');
     let outputItemSelect = document.getElementById('outputItem');
     
+    if (!entryItemSelect || !outputItemSelect) return;
+    
     while (entryItemSelect.options.length > 1) {
         entryItemSelect.remove(1);
     }
@@ -880,6 +895,8 @@ function viewEntryDetails(id) {
 // Cargar entradas en la tabla
 function loadEntries() {
     let tableBody = document.getElementById('entriesTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = '';
     
     entries.forEach(entry => {
@@ -1094,6 +1111,8 @@ function restoreLoan(id) {
 // Cargar salidas en la tabla
 function loadOutputs() {
     let tableBody = document.getElementById('outputsTableBody');
+    if (!tableBody) return;
+    
     tableBody.innerHTML = '';
     
     outputs.forEach(output => {
@@ -1255,7 +1274,7 @@ function updateReportForm() {
             filtersDiv.innerHTML = `
                 <div class="form-group">
                     <label for="expiringDays">Días hasta caducidad:</label>
-                    <input type="number" id="expiringDays" min="1" value="30">
+                    <input type="number" id="expiringDays' min="1" value="30">
                 </div>
             `;
             break;
@@ -1643,6 +1662,8 @@ function updateSelectedBrandsField() {
 // Función para cargar marcas en el selector
 function loadBrandSelectorOptions() {
     const brandSelector = document.getElementById('brandSelector');
+    if (!brandSelector) return;
+    
     const currentValue = brandSelector.value;
     
     // Limpiar manteniendo la primera opción
@@ -1673,6 +1694,8 @@ function loadBrandSelectorOptions() {
 // Función para cargar marcas seleccionadas al editar un insumo
 function loadSelectedBrands(brandsString) {
     const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+    if (!selectedBrandsContainer) return;
+    
     selectedBrandsContainer.innerHTML = '';
     
     if (!brandsString) return;
@@ -1745,22 +1768,23 @@ function setupRealTimeListeners() {
         loadOutputs();
     });
 
-  // Listener para tipos
+    // Listener para tipos
     typesRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      itemTypes = data ? Object.values(data) : [];
-      loadItemTypeOptions();
+        const data = snapshot.val();
+        itemTypes = data ? Object.values(data) : [];
+        loadItemTypeOptions();
     });
 
-// Listener para marcas
-brandsRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    itemBrands = data ? Object.values(data) : [];
-    
-    loadItemBrandOptions();
-    loadBrandSelectorOptions(); // <- AGREGAR esta línea importante
-    console.log(`Marcas predefinidas cargadas: ${itemBrands.length}`);
-});
+    // Listener para marcas
+    brandsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        itemBrands = data ? Object.values(data) : [];
+        
+        loadItemBrandOptions();
+        loadBrandSelectorOptions();
+        console.log(`Marcas predefinidas cargadas: ${itemBrands.length}`);
+    });
+}
 
 // Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
