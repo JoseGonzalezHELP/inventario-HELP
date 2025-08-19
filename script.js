@@ -44,6 +44,7 @@ const inventoryRef = database.ref('inventory');
 const entriesRef = database.ref('entries');
 const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
+const brandsRef = database.ref('brands');  
 
 // Datos en memoria
 let inventory = [];
@@ -51,6 +52,7 @@ let entries = [];
 let outputs = [];
 let qrScanner = null;
 let itemTypes = [];
+let itemBrands = [];  
 
 // Función para mostrar notificaciones toast
 function showToast(message) {
@@ -360,6 +362,93 @@ function saveNewType() {
         });
 }
 
+// Función para mostrar/ocultar el campo de marca manual
+function toggleCustomBrand() {
+    const select = document.getElementById('itemBrand');
+    const customInput = document.getElementById('customBrand');
+    
+    if (select.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
+}
+
+// Función para abrir el modal de nueva marca
+function openAddBrandModal() {
+    document.getElementById('newBrandName').value = '';
+    document.getElementById('brandModal').style.display = 'block';
+}
+
+// Función para guardar una nueva marca
+function saveNewBrand() {
+    const brandName = document.getElementById('newBrandName').value.trim();
+    
+    if (!brandName) {
+        alert('Por favor ingrese un nombre para la marca');
+        return;
+    }
+    
+    // Verificar si la marca ya existe
+    if (itemBrands.some(b => b.name.toUpperCase() === brandName.toUpperCase())) {
+        alert('Esta marca ya existe');
+        return;
+    }
+    
+    const newBrand = {
+        id: Date.now().toString(),
+        name: brandName.toUpperCase()
+    };
+    
+    brandsRef.child(newBrand.id).set(newBrand)
+        .then(() => {
+            alert('Marca agregada correctamente');
+            closeModal('brandModal');
+        })
+        .catch(error => {
+            alert('Error al guardar la marca: ' + error.message);
+        });
+}
+
+// Cargar opciones de marcas en el selector
+function loadItemBrandOptions() {
+    const brandSelect = document.getElementById('itemBrand');
+    const currentValue = brandSelect.value;
+    
+    // Limpiar manteniendo las primeras opciones fijas
+    while (brandSelect.options.length > 1) {
+        brandSelect.remove(1);
+    }
+    
+    // Eliminar duplicados usando Set
+    const uniqueBrands = [...new Set(itemBrands.map(b => b.name))];
+    
+    // Ordenar alfabéticamente
+    uniqueBrands.sort((a, b) => a.localeCompare(b));
+    
+    // Agregar opción "Otro"
+    const otherOption = document.createElement('option');
+    otherOption.value = 'OTRO';
+    otherOption.textContent = 'Otro (especificar)';
+    brandSelect.add(otherOption);
+    
+    // Agregar opciones de marcas
+    uniqueBrands.forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        brandSelect.add(option);
+    });
+    
+    // Restaurar valor seleccionado si existe
+    if (currentValue && [...brandSelect.options].some(o => o.value === currentValue)) {
+        brandSelect.value = currentValue;
+        toggleCustomBrand();
+    }
+}
+
 // Abrir modal para agregar insumo
 function openAddItemModal() {
     document.getElementById('itemModalTitle').textContent = 'Agregar Nuevo Insumo';
@@ -410,6 +499,7 @@ function saveItem() {
     let itemVoucher = document.getElementById('itemVoucher').value;
     let itemCharacteristic = document.getElementById('itemCharacteristic').value;
     let itemBrand = document.getElementById('itemBrand').value;
+    let customBrand = document.getElementById('customBrand').value;
     let itemModel = document.getElementById('itemModel').value;
     let itemSize = document.getElementById('itemSize').value;
     let itemInitialStock = parseInt(document.getElementById('itemInitialStock').value);
@@ -433,7 +523,19 @@ function saveItem() {
         alert('Seleccione un tipo de insumo');
         return;
     }
-        
+
+    // Manejo de marcas personalizadas
+    if (itemBrand === 'OTRO' && customBrand) {
+        itemBrand = customBrand.toUpperCase();
+        // Verificar si la marca ya existe
+        if (!itemBrands.some(b => b.name.toUpperCase() === itemBrand)) {
+            const newBrand = { id: Date.now().toString(), name: itemBrand };
+            brandsRef.child(newBrand.id).set(newBrand);
+        }
+    } else if (!itemBrand) {
+        itemBrand = ''; // O cualquier valor por defecto que prefieras
+    }
+  
     // Validaciones
     if (!itemNumber || !itemName || !itemType || isNaN(itemInitialStock) || isNaN(itemMinStock)) {
         alert('Por favor complete todos los campos requeridos');
@@ -1464,10 +1566,18 @@ function setupRealTimeListeners() {
         loadOutputs();
     });
 
+  // Listener para tipos
     typesRef.on('value', (snapshot) => {
       const data = snapshot.val();
       itemTypes = data ? Object.values(data) : [];
       loadItemTypeOptions();
+    });
+
+    // Listener para marcas
+    brandsRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        itemBrands = data ? Object.values(data) : [];
+        loadItemBrandOptions();
     });
 }
 
@@ -1496,7 +1606,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('itemType')) {
         loadItemTypeOptions();
     }
-    
+
+    if (document.getElementById('itemBrand')) {
+        loadItemBrandOptions();
+    }
+  
     // Solo establecer fechas si estamos en la pestaña de reportes
     if (document.getElementById('reportType')) {
         setDefaultDates();
