@@ -203,7 +203,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="itemBrand"><i class="fas fa-copyright"></i> Marca Compatible:</label>
-                        <input type="text" id="itemBrand">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select id="itemBrand" onchange="toggleCustomBrand()" style="flex: 1;">
+                                <option value="">Seleccione una marca</option>
+                                <!-- Las opciones se llenarán dinámicamente -->
+                            </select>
+                            <button type="button" class="btn btn-info" onclick="openAddBrandModal()" style="width: auto;">
+                                <i class="fas fa-plus"></i> Nueva
+                            </button>
+                        </div>
+                        <input type="text" id="customBrand" style="display: none; margin-top: 0.5rem;" 
+                               placeholder="Especificar marca" class="form-input">
                     </div>
                     
                     <div class="form-group">
@@ -465,6 +475,25 @@
             <div class="form-actions">
                 <button type="button" class="btn btn-primary" onclick="saveNewType()">
                     <i class="fas fa-save"></i> Guardar Tipo
+                </button>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Modal para agregar marca -->
+    <div id="brandModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('brandModal')">&times;</span>
+            <h2><i class="fas fa-copyright"></i> Agregar Nueva Marca</h2>
+            
+            <div class="form-group">
+                <label for="newBrandName">Nombre de la Marca:</label>
+                <input type="text" id="newBrandName" class="form-input" placeholder="Ej: Philips, GE Healthcare">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" onclick="saveNewBrand()">
+                    <i class="fas fa-save"></i> Guardar Marca
                 </button>
             </div>
         </div>
