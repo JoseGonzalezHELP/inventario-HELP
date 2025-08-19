@@ -43,6 +43,7 @@ const entriesRef = database.ref('entries');
 const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
 const brandsRef = database.ref('brands');  
+const areasRef = database.ref('areas');
 
 // Datos en memoria
 let inventory = [];
@@ -51,6 +52,7 @@ let outputs = [];
 let qrScanner = null;
 let itemTypes = [];
 let itemBrands = [];  
+let areas = [];
 
 // Función para mostrar notificaciones toast
 function showToast(message) {
@@ -89,6 +91,95 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     
     return `${day}/${month}/${year}`;
+}
+
+// Función para mostrar/ocultar campo de área manual
+function toggleCustomArea() {
+    const select = document.getElementById('outputArea');
+    const customInput = document.getElementById('customArea');
+    
+    if (select.value === 'OTRO') {
+        customInput.style.display = 'block';
+        customInput.required = true;
+    } else {
+        customInput.style.display = 'none';
+        customInput.required = false;
+    }
+}
+
+// Función para abrir modal de nueva área
+function openAddAreaModal() {
+    document.getElementById('newAreaName').value = '';
+    document.getElementById('areaModal').style.display = 'block';
+}
+
+// Función para guardar nueva área
+function saveNewArea() {
+    const areaName = document.getElementById('newAreaName').value.trim();
+    
+    if (!areaName) {
+        alert('Por favor ingrese un nombre para el área');
+        return;
+    }
+    
+    // Verificar si el área ya existe
+    if (areas.some(a => a.name.toUpperCase() === areaName.toUpperCase())) {
+        alert('Esta área ya existe');
+        return;
+    }
+    
+    const newArea = {
+        id: Date.now().toString(),
+        name: areaName.toUpperCase()
+    };
+    
+    areasRef.child(newArea.id).set(newArea)
+        .then(() => {
+            alert('Área agregada correctamente');
+            closeModal('areaModal');
+        })
+        .catch(error => {
+            alert('Error al guardar el área: ' + error.message);
+        });
+}
+
+// Cargar opciones de áreas
+function loadAreaOptions() {
+    const areaSelect = document.getElementById('outputArea');
+    if (!areaSelect) return;
+    
+    const currentValue = areaSelect.value;
+    
+    // Limpiar manteniendo las opciones base
+    while (areaSelect.options.length > 1) {
+        areaSelect.remove(1);
+    }
+    
+    // Eliminar duplicados
+    const uniqueAreas = [...new Set(areas.map(a => a.name))];
+    
+    // Ordenar alfabéticamente
+    uniqueAreas.sort((a, b) => a.localeCompare(b));
+    
+    // Agregar opción "Otro"
+    const otherOption = document.createElement('option');
+    otherOption.value = 'OTRO';
+    otherOption.textContent = 'Otro (especificar)';
+    areaSelect.add(otherOption);
+    
+    // Agregar opciones de áreas
+    uniqueAreas.forEach(area => {
+        const option = document.createElement('option');
+        option.value = area;
+        option.textContent = area;
+        areaSelect.add(option);
+    });
+    
+    // Restaurar valor seleccionado si existe
+    if (currentValue && [...areaSelect.options].some(o => o.value === currentValue)) {
+        areaSelect.value = currentValue;
+        toggleCustomArea();
+    }
 }
 
 // Función para mostrar/ocultar el campo de responsable manual
@@ -762,6 +853,30 @@ function openAddEntryModal() {
     document.getElementById('entryModal').style.display = 'block';
 }
 
+// Buscar en entradas
+function searchEntries() {
+    let input = document.getElementById('entriesSearch');
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById('entriesTable');
+    if (!table) return;
+    
+    let tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        let found = false;
+        let td = tr[i].getElementsByTagName('td');
+        
+        for (let j = 0; j < td.length - 1; j++) {
+            if (td[j] && td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        
+        tr[i].style.display = found ? "" : "none";
+    }
+}
+
 // Guardar entrada
 function saveEntry() {
     // Obtener valores del formulario
@@ -788,6 +903,16 @@ function saveEntry() {
         return;
     }
     
+    // VERIFICAR FOLIO DUPLICADO
+    const folioExists = entries.some(entry => entry.voucher === voucher) || 
+                       outputs.some(output => output.os === voucher);
+    
+    if (folioExists) {
+        alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
+        return;
+    }
+    
+    // Resto del código existente...
     // Buscar el insumo en el inventario
     const itemIndex = inventory.findIndex(i => i.id === itemId);
     if (itemIndex === -1) {
@@ -801,10 +926,10 @@ function saveEntry() {
         id: entryId,
         itemId: itemId,
         voucher: voucher,
-        invoice: invoice || null, // Guarda null si no hay factura
+        invoice: invoice || null,
         quantity: quantity,
         responsible: responsible,
-        comments: comments || null, // Guarda null si no hay comentarios
+        comments: comments || null,
         date: document.getElementById('entryDate').value + 'T00:00:00',
         isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
     };
@@ -817,7 +942,7 @@ function saveEntry() {
             inventoryRef.child(itemId).update({ stock: newStock })
                 .then(() => {
                     closeModal('entryModal');
-                    showToast('✅ Entrada registrada');
+                    showToast('✅ Entrada registrada correctamente');
                 })
                 .catch(error => alert('Error al actualizar stock: ' + error));
         })
@@ -957,6 +1082,30 @@ function updateAvailableStock() {
     }
 }
 
+// Buscar en salidas
+function searchOutputs() {
+    let input = document.getElementById('outputsSearch');
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById('outputsTable');
+    if (!table) return;
+    
+    let tr = table.getElementsByTagName('tr');
+    
+    for (let i = 1; i < tr.length; i++) {
+        let found = false;
+        let td = tr[i].getElementsByTagName('td');
+        
+        for (let j = 0; j < td.length - 1; j++) {
+            if (td[j] && td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                found = true;
+                break;
+            }
+        }
+        
+        tr[i].style.display = found ? "" : "none";
+    }
+}
+
 // Guardar salida
 function saveOutput() {
     const itemId = document.getElementById('outputItem').value;
@@ -965,6 +1114,19 @@ function saveOutput() {
     const quantity = parseInt(document.getElementById('outputQuantity').value);
     const date = document.getElementById('outputDate').value;
     const movementType = document.getElementById('movementType').value;
+    
+    // Nuevos campos
+    let area = document.getElementById('outputArea').value;
+    const comments = document.getElementById('outputComments').value;
+
+    // Validar área manual
+    if (area === 'OTRO') {
+        area = document.getElementById('customArea').value.trim();
+        if (!area) {
+            alert('Por favor ingrese el nombre del área');
+            return;
+        }
+    }
 
     // Validar ingeniero manual
     if (engineer === 'OTRO') {
@@ -975,8 +1137,17 @@ function saveOutput() {
         }
     }
 
-    if (!itemId || !os || !engineer || isNaN(quantity) || quantity <= 0 || !date) {
+    if (!itemId || !os || !engineer || !area || isNaN(quantity) || quantity <= 0 || !date) {
         alert('Complete los campos requeridos');
+        return;
+    }
+
+    // VERIFICAR FOLIO DUPLICADO
+    const folioExists = entries.some(entry => entry.voucher === os) || 
+                       outputs.some(output => output.os === os);
+    
+    if (folioExists) {
+        alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
         return;
     }
 
@@ -1001,7 +1172,10 @@ function saveOutput() {
         date: document.getElementById('outputDate').value + 'T00:00:00',
         movementType: movementType,
         status: movementType === 'loan' ? 'pending' : 'completed',
-        isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO'
+        isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO',
+        area: area,
+        isCustomArea: document.getElementById('outputArea').value === 'OTRO',
+        comments: comments || null
     };
 
     outputsRef.child(outputId).set(output)
@@ -1010,7 +1184,7 @@ function saveOutput() {
             inventoryRef.child(itemId).update({ stock: newStock })
                 .then(() => {
                     closeModal('outputModal');
-                    showToast('Salida registrada');
+                    showToast('✅ Salida registrada correctamente');
                 });
         })
         .catch(error => alert('Error: ' + error.message));
@@ -1138,6 +1312,7 @@ function loadOutputs() {
             <td>${item.name}</td>
             <td>${output.quantity}</td>
             <td>${output.engineer || 'N/A'}</td>
+            <td>${output.area || 'N/A'}</td>
             <td>${outputDate}</td>
             <td class="action-buttons">
                 <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
@@ -1783,6 +1958,13 @@ function setupRealTimeListeners() {
         loadItemBrandOptions();
         loadBrandSelectorOptions();
         console.log(`Marcas predefinidas cargadas: ${itemBrands.length}`);
+    });
+
+      // Listener para áreas
+    areasRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        areas = data ? Object.values(data) : [];
+        loadAreaOptions();
     });
 }
 
