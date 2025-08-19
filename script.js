@@ -452,9 +452,26 @@ function loadItemBrandOptions() {
 // Abrir modal para agregar insumo
 function openAddItemModal() {
     document.getElementById('itemModalTitle').textContent = 'Agregar Nuevo Insumo';
+    
+    // Resetear el formulario
     document.getElementById('itemForm').reset();
     document.getElementById('itemId').value = '';
+    
+    // Limpiar marcas seleccionadas
+    const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+    if (selectedBrandsContainer) {
+        selectedBrandsContainer.innerHTML = '';
+    }
+    
+    const itemBrandsInput = document.getElementById('itemBrands');
+    if (itemBrandsInput) {
+        itemBrandsInput.value = '';
+    }
+    
+    // Ocultar campo de tipo personalizado
     document.getElementById('customType').style.display = 'none';
+    document.getElementById('customType').required = false;
+    
     document.getElementById('itemModal').style.display = 'block';
 }
 
@@ -474,7 +491,32 @@ function editItem(id) {
     
     document.getElementById('itemVoucher').value = item.voucher;
     document.getElementById('itemCharacteristic').value = item.characteristic;
-    document.getElementById('itemBrand').value = item.brand;
+    
+    // Cargar marcas (puede ser string o array) - COMPATIBILIDAD CON DATOS ANTIGUOS Y NUEVOS
+    if (item.brands) {
+        // Nuevo sistema: múltiples marcas en campo "brands"
+        if (Array.isArray(item.brands)) {
+            // Si es un array, unir con comas
+            loadSelectedBrands(item.brands.join(','));
+        } else {
+            // Si es string, usar directamente
+            loadSelectedBrands(item.brands);
+        }
+    } else if (item.brand) {
+        // Sistema antiguo: marca única en campo "brand"
+        loadSelectedBrands(item.brand);
+    } else {
+        // Limpiar si no hay marcas
+        const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+        if (selectedBrandsContainer) {
+            selectedBrandsContainer.innerHTML = '';
+        }
+        const itemBrandsInput = document.getElementById('itemBrands');
+        if (itemBrandsInput) {
+            itemBrandsInput.value = '';
+        }
+    }
+    
     document.getElementById('itemModel').value = item.model;
     document.getElementById('itemSize').value = item.size;
     document.getElementById('itemInitialStock').value = item.stock;
@@ -488,7 +530,6 @@ function editItem(id) {
     
     document.getElementById('itemModal').style.display = 'block';
 }
-
 // Guardar insumo (nuevo o editado)
 function saveItem() {
     let id = document.getElementById('itemId').value;
@@ -498,8 +539,10 @@ function saveItem() {
     let customType = document.getElementById('customType').value;
     let itemVoucher = document.getElementById('itemVoucher').value;
     let itemCharacteristic = document.getElementById('itemCharacteristic').value;
-    let itemBrand = document.getElementById('itemBrand').value;
-    let customBrand = document.getElementById('customBrand').value;
+    
+    // Obtener marcas seleccionadas (ahora es una lista)
+    let itemBrandsValue = document.getElementById('itemBrands').value;
+    
     let itemModel = document.getElementById('itemModel').value;
     let itemSize = document.getElementById('itemSize').value;
     let itemInitialStock = parseInt(document.getElementById('itemInitialStock').value);
@@ -523,19 +566,7 @@ function saveItem() {
         alert('Seleccione un tipo de insumo');
         return;
     }
-
-    // Manejo de marcas personalizadas
-    if (itemBrand === 'OTRO' && customBrand) {
-        itemBrand = customBrand.toUpperCase();
-        // Verificar si la marca ya existe
-        if (!itemBrands.some(b => b.name.toUpperCase() === itemBrand)) {
-            const newBrand = { id: Date.now().toString(), name: itemBrand };
-            brandsRef.child(newBrand.id).set(newBrand);
-        }
-    } else if (!itemBrand) {
-        itemBrand = ''; // O cualquier valor por defecto que prefieras
-    }
-  
+        
     // Validaciones
     if (!itemNumber || !itemName || !itemType || isNaN(itemInitialStock) || isNaN(itemMinStock)) {
         alert('Por favor complete todos los campos requeridos');
@@ -554,7 +585,7 @@ function saveItem() {
         type: itemType,
         voucher: itemVoucher,
         characteristic: itemCharacteristic,
-        brand: itemBrand,
+        brands: itemBrandsValue,  // Ahora guardamos múltiples marcas
         model: itemModel,
         size: itemSize,
         stock: itemInitialStock,
@@ -1539,6 +1570,154 @@ function setDefaultDates() {
     }
 }
 
+// ===== FUNCIONES PARA MÚLTIPLES MARCAS ===== //
+
+// Función para agregar una marca a la lista de seleccionadas
+function addBrand() {
+    const brandSelector = document.getElementById('brandSelector');
+    const selectedBrand = brandSelector.value;
+    
+    if (!selectedBrand) return;
+    
+    const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+    const brandName = brandSelector.options[brandSelector.selectedIndex].text;
+    
+    // Verificar si la marca ya fue agregada
+    if (document.getElementById(`brand-${selectedBrand}`)) {
+        alert('Esta marca ya ha sido agregada');
+        brandSelector.value = '';
+        return;
+    }
+    
+    // Crear elemento para mostrar la marca seleccionada
+    const brandChip = document.createElement('div');
+    brandChip.id = `brand-${selectedBrand}`;
+    brandChip.style.display = 'flex';
+    brandChip.style.alignItems = 'center';
+    brandChip.style.gap = '0.5rem';
+    brandChip.style.padding = '0.5rem 1rem';
+    brandChip.style.backgroundColor = '#e5e7eb';
+    brandChip.style.borderRadius = 'var(--border-radius-sm)';
+    brandChip.style.marginBottom = '0.5rem';
+    
+    brandChip.innerHTML = `
+        <span>${brandName}</span>
+        <button type="button" onclick="removeBrand('${selectedBrand}')" 
+                style="background: none; border: none; cursor: pointer; color: #ef4444;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    selectedBrandsContainer.appendChild(brandChip);
+    
+    // Actualizar el campo oculto con las marcas seleccionadas
+    updateSelectedBrandsField();
+    
+    // Reiniciar el selector
+    brandSelector.value = '';
+}
+
+// Función para eliminar una marca de la lista de seleccionadas
+function removeBrand(brandId) {
+    const brandChip = document.getElementById(`brand-${brandId}`);
+    if (brandChip) {
+        brandChip.remove();
+        updateSelectedBrandsField();
+    }
+}
+
+// Función para actualizar el campo oculto con las marcas seleccionadas
+function updateSelectedBrandsField() {
+    const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+    const brandChips = selectedBrandsContainer.querySelectorAll('div[id^="brand-"]');
+    const selectedBrands = [];
+    
+    brandChips.forEach(chip => {
+        const brandId = chip.id.replace('brand-', '');
+        selectedBrands.push(brandId);
+    });
+    
+    document.getElementById('itemBrands').value = selectedBrands.join(',');
+}
+
+// Función para cargar marcas en el selector
+function loadBrandSelectorOptions() {
+    const brandSelector = document.getElementById('brandSelector');
+    const currentValue = brandSelector.value;
+    
+    // Limpiar manteniendo la primera opción
+    while (brandSelector.options.length > 1) {
+        brandSelector.remove(1);
+    }
+    
+    // Eliminar duplicados usando Set
+    const uniqueBrands = [...new Set(itemBrands.map(b => b.name))];
+    
+    // Ordenar alfabéticamente
+    uniqueBrands.sort((a, b) => a.localeCompare(b));
+    
+    // Agregar opciones de marcas
+    uniqueBrands.forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        brandSelector.add(option);
+    });
+    
+    // Restaurar valor seleccionado si existe
+    if (currentValue && [...brandSelector.options].some(o => o.value === currentValue)) {
+        brandSelector.value = currentValue;
+    }
+}
+
+// Función para cargar marcas seleccionadas al editar un insumo
+function loadSelectedBrands(brandsString) {
+    const selectedBrandsContainer = document.getElementById('selectedBrandsContainer');
+    selectedBrandsContainer.innerHTML = '';
+    
+    if (!brandsString) return;
+    
+    const brandIds = brandsString.split(',');
+    
+    brandIds.forEach(brandId => {
+        if (!brandId) return;
+        
+        const brand = itemBrands.find(b => b.name === brandId);
+        if (brand) {
+            const brandChip = document.createElement('div');
+            brandChip.id = `brand-${brand.name}`;
+            brandChip.style.display = 'flex';
+            brandChip.style.alignItems = 'center';
+            brandChip.style.gap = '0.5rem';
+            brandChip.style.padding = '0.5rem 1rem';
+            brandChip.style.backgroundColor = '#e5e7eb';
+            brandChip.style.borderRadius = 'var(--border-radius-sm)';
+            brandChip.style.marginBottom = '0.5rem';
+            
+            brandChip.innerHTML = `
+                <span>${brand.name}</span>
+                <button type="button" onclick="removeBrand('${brand.name}')" 
+                        style="background: none; border: none; cursor: pointer; color: #ef4444;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            selectedBrandsContainer.appendChild(brandChip);
+        }
+    });
+    
+    updateSelectedBrandsField();
+}
+
+// Función para resetear el formulario de insumos
+function resetItemForm() {
+    document.getElementById('itemForm').reset();
+    document.getElementById('selectedBrandsContainer').innerHTML = '';
+    document.getElementById('itemBrands').value = '';
+    document.getElementById('customType').style.display = 'none';
+    document.getElementById('customType').required = false;
+}
+
 // Configurar listeners para cambios en tiempo real
 function setupRealTimeListeners() {
     // Listener para inventario
@@ -1573,13 +1752,15 @@ function setupRealTimeListeners() {
       loadItemTypeOptions();
     });
 
-    // Listener para marcas
-    brandsRef.on('value', (snapshot) => {
-        const data = snapshot.val();
-        itemBrands = data ? Object.values(data) : [];
-        loadItemBrandOptions();
-    });
-}
+// Listener para marcas
+brandsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    itemBrands = data ? Object.values(data) : [];
+    
+    loadItemBrandOptions();
+    loadBrandSelectorOptions(); // <- AGREGAR esta línea importante
+    console.log(`Marcas predefinidas cargadas: ${itemBrands.length}`);
+});
 
 // Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
