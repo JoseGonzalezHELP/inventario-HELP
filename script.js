@@ -96,21 +96,29 @@ function formatDate(dateString) {
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// Función para mostrar la orden de servicio
-function showServiceOrder(type, data) {
-    const orderHTML = generateServiceOrder(type, data);
-    document.getElementById('serviceOrderContent').innerHTML = orderHTML;
-    document.getElementById('serviceOrderModal').style.display = 'block';
-}
-
-// Función para generar la orden de servicio
+// Función para generar la orden de servicio (formato completo)
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
-    const formattedDate = recordDate.toLocaleDateString('es-ES');
+    const formattedDate = recordDate.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
     
     let materialsHTML = '';
     if (type === 'output') {
+        materialsHTML = `
+            <tr>
+                <td>${data.quantity}</td>
+                <td>Pieza</td>
+                <td>${data.itemName} (${data.itemId})</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        `;
+    } else if (type === 'entry') {
         materialsHTML = `
             <tr>
                 <td>${data.quantity}</td>
@@ -247,6 +255,13 @@ function generateServiceOrder(type, data) {
     `;
     
     return serviceOrderHTML;
+}
+
+// Función para mostrar la orden de servicio
+function showServiceOrder(type, data) {
+    const orderHTML = generateServiceOrder(type, data);
+    document.getElementById('serviceOrderContent').innerHTML = orderHTML;
+    document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
 // Función para imprimir la orden de servicio
@@ -1139,12 +1154,11 @@ function viewEntryDetails(id) {
     
     // Mostrar la orden de servicio
     showServiceOrder('entry', {
-        voucher: entry.voucher || 'N/A',
-        quantity: entry.quantity,
-        responsible: entry.responsible || 'N/A',
-        itemId: entry.itemId,
-        itemName: item.name,
-        date: entryDate.toISOString()
+        voucher: voucher,
+        quantity: quantity,
+        responsible: responsible,
+        itemId: itemId,
+        itemName: inventory[itemIndex].name
     });
 }
 
