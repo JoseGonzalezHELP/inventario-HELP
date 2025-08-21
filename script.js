@@ -272,74 +272,34 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// ===== FUNCIÓN MEJORADA PARA IMPRIMIR ORDEN DE SERVICIO =====
+// Función para imprimir la orden de servicio (MEJORADA)
 function printServiceOrder() {
-    // Crear HTML limpio para imprimir
-    const cleanHtml = `
+    const printContent = document.getElementById('serviceOrderContent').innerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    // Crear un documento limpio para imprimir
+    const printDocument = `
         <!DOCTYPE html>
         <html>
         <head>
             <title>Orden de Servicio</title>
-            <meta charset="UTF-8">
             <style>
-                /* ELIMINAR COMPLETAMENTE ENCABEZADOS/PIES */
-                @page { 
-                    margin: 0 !important; 
-                    padding: 0 !important; 
-                    size: auto; 
-                }
-                @page :left { margin: 0 !important; }
-                @page :right { margin: 0 !important; }
-                @page :first { margin: 0 !important; }
-                
-                html, body { 
-                    margin: 0 !important; 
-                    padding: 5mm !important; 
-                    width: 100% !important; 
-                    height: auto !important; 
-                    font-family: Arial, sans-serif !important;
-                    font-size: 12pt !important;
-                }
-                
-                /* Ocultar cualquier elemento que pueda ser interpretado como header/footer */
-                .header, .footer, [class*="header"], [class*="footer"] {
-                    display: none !important;
-                }
-                
-                /* Estilos específicos para la orden de servicio */
-                .service-order-container {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    width: 100% !important;
-                }
-                
-                table { 
-                    width: 100%; 
-                    border-collapse: collapse; 
-                    font-size: 10pt; 
-                    page-break-inside: avoid;
-                }
-                
-                th, td { 
-                    padding: 3px; 
-                    border: 1px solid black; 
-                }
-                
-                * { 
-                    color: black !important; 
-                    background: transparent !important; 
-                }
+                @page { margin: 0; size: auto; }
+                body { margin: 0; padding: 10px; }
+                .no-print, .btn, .close, .modal-actions { display: none !important; }
+                * { color: black !important; background: white !important; }
+                .service-order-container { box-shadow: none !important; border: none !important; }
+                .text-area[contenteditable="true"] { border: 1px solid #ccc !important; background: white !important; }
             </style>
         </head>
-        <body onload="window.print(); setTimeout(function() { window.close(); }, 100);">
-            ${document.getElementById('serviceOrderContent').innerHTML}
+        <body onload="window.print(); window.close();">
+            ${printContent}
         </body>
         </html>
     `;
     
-    // Abrir ventana de impresión
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(cleanHtml);
+    printWindow.document.write(printDocument);
     printWindow.document.close();
 }
 
