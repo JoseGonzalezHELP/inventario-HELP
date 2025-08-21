@@ -96,7 +96,7 @@ function formatDate(dateString) {
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// Función para generar la orden de servicio (CORREGIDA)
+// Función para generar la orden de servicio (VERSIÓN COMPLETA CORREGIDA)
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
@@ -151,8 +151,12 @@ function generateServiceOrder(type, data) {
     const serviceOrderHTML = `
         <div class="service-order-container">
             <div class="images-container">
-                <div class="logo">[Imagen 1 - Secretaría de Salud]</div>
-                <div class="logo">[Imagen 2 - Hospital]</div>
+                <div class="logo">
+                    <img src="SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
+                </div>
+                <div class="logo">
+                    <img src="PEDIATRICO.jpeg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
+                </div>
             </div>
             
             <div class="hospital-name">HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN</div>
@@ -198,17 +202,17 @@ function generateServiceOrder(type, data) {
             
             <div class="section">
                 <div class="section-title">Descripción y problema presentado en el área:</div>
-                <div class="text-area">${description}</div>
+                <div class="text-area" contenteditable="true">${description}</div>
             </div>
             
             <div class="section">
                 <div class="section-title">Reporte de trabajo realizado:</div>
-                <div class="text-area">${report}</div>
+                <div class="text-area" contenteditable="true">${report}</div>
             </div>
             
             <div class="section">
                 <div class="section-title">Trabajadores: (Nombres):</div>
-                <div class="text-area">${workers}</div>
+                <div class="text-area" contenteditable="true">${workers}</div>
             </div>
             
             <div class="centered-title">Materiales:</div>
@@ -268,17 +272,24 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio
+// Función para imprimir la orden de servicio (CORREGIDA)
 function printServiceOrder() {
-    const printContent = document.getElementById('serviceOrderContent').innerHTML;
+    // Obtener el contenido editable actualizado
+    const serviceOrderContent = document.getElementById('serviceOrderContent');
+    
+    // Crear una copia para imprimir
+    const printContent = serviceOrderContent.innerHTML;
     const originalContent = document.body.innerHTML;
     
-    document.body.innerHTML = printContent;
+    // Reemplazar el contenido editable con texto normal para impresión
+    const printableContent = printContent.replace(/contenteditable="true"/g, '');
+    
+    document.body.innerHTML = printableContent;
     window.print();
     document.body.innerHTML = originalContent;
     
-    // Recargar la página para restaurar la funcionalidad
-    location.reload();
+    // No es necesario recargar la página completa
+    // location.reload();
 }
 
 // Función para mostrar/ocultar campo de área manual
