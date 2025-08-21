@@ -272,35 +272,24 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (MEJORADA)
+// Función para imprimir la orden de servicio (CORREGIDA)
 function printServiceOrder() {
-    const printContent = document.getElementById('serviceOrderContent').innerHTML;
+    // Obtener el contenido editable actualizado
+    const serviceOrderContent = document.getElementById('serviceOrderContent');
+    
+    // Crear una copia para imprimir
+    const printContent = serviceOrderContent.innerHTML;
     const originalContent = document.body.innerHTML;
     
-    // Crear un documento limpio para imprimir
-    const printDocument = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Orden de Servicio</title>
-            <style>
-                @page { margin: 0; size: auto; }
-                body { margin: 0; padding: 10px; }
-                .no-print, .btn, .close, .modal-actions { display: none !important; }
-                * { color: black !important; background: white !important; }
-                .service-order-container { box-shadow: none !important; border: none !important; }
-                .text-area[contenteditable="true"] { border: 1px solid #ccc !important; background: white !important; }
-            </style>
-        </head>
-        <body onload="window.print(); window.close();">
-            ${printContent}
-        </body>
-        </html>
-    `;
+    // Reemplazar el contenido editable con texto normal para impresión
+    const printableContent = printContent.replace(/contenteditable="true"/g, '');
     
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(printDocument);
-    printWindow.document.close();
+    document.body.innerHTML = printableContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    
+    // No es necesario recargar la página completa
+    // location.reload();
 }
 
 // Función para mostrar/ocultar campo de área manual
