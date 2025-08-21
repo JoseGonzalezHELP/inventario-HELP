@@ -1162,3 +1162,122 @@ select {
         display: none;
     }
 }
+
+/* Estilos para eliminar encabezados y pies de página al imprimir */
+@media print {
+    @page {
+        margin: 0;
+        size: auto;
+    }
+    
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Eliminar encabezados y pies de página predeterminados del navegador */
+    header, footer, .no-print {
+        display: none !important;
+    }
+    
+    /* Ocultar botones y elementos de interfaz en impresión */
+    .btn, .close, .modal-actions, .tabs, .search-container,
+    .form-actions, .action-buttons, .tab-header {
+        display: none !important;
+    }
+    
+    /* Asegurar que el contenido de modales se imprima correctamente */
+    .modal {
+        position: static !important;
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        overflow: visible !important;
+    }
+    
+    .modal-content {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+    
+    /* Para la orden de servicio específicamente */
+    .service-order-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Asegurar que las imágenes se muestren en impresión */
+    .logo img {
+        display: inline-block !important;
+        max-width: 150px !important;
+    }
+    
+    /* Mejorar la legibilidad en impresión */
+    * {
+        color: black !important;
+        background: white !important;
+    }
+    
+    /* Eliminar espacios innecesarios */
+    .container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+    
+    /* Para tablas en reportes */
+    .report-table {
+        page-break-inside: avoid;
+    }
+    
+    /* Evitar que las tablas se corten entre páginas */
+    table {
+        page-break-inside: auto;
+    }
+    
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+}
+
+/* Estilos adicionales para mejorar la impresión */
+@media print {
+    /* Asegurar buen contraste */
+    .alert, .low-stock, .critical-stock {
+        background: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
+    
+    /* Mejorar la visualización de tablas */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    
+    th, td {
+        border: 1px solid black !important;
+        padding: 4px !important;
+        font-size: 12px !important;
+    }
+    
+    th {
+        background: #f0f0f0 !important;
+    }
+    
+    /* Para la orden de servicio - hacer los campos editables no editables al imprimir */
+    .text-area[contenteditable="true"] {
+        border: 1px solid #ccc !important;
+        background: white !important;
+        min-height: auto !important;
+    }
+}
