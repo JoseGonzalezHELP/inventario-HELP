@@ -79,6 +79,7 @@ function showToast(message) {
   }, 3000);
 }
 
+
 // Función para formatear fecha en formato dd/mm/aaaa
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
@@ -91,6 +92,174 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     
     return `${day}/${month}/${year}`;
+}
+
+// ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
+
+// Función para mostrar la orden de servicio
+function showServiceOrder(type, data) {
+    const orderHTML = generateServiceOrder(type, data);
+    document.getElementById('serviceOrderContent').innerHTML = orderHTML;
+    document.getElementById('serviceOrderModal').style.display = 'block';
+}
+
+// Función para generar la orden de servicio
+function generateServiceOrder(type, data) {
+    // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
+    const recordDate = data.date ? new Date(data.date) : new Date();
+    const formattedDate = recordDate.toLocaleDateString('es-ES');
+    
+    let materialsHTML = '';
+    if (type === 'output') {
+        materialsHTML = `
+            <tr>
+                <td>${data.quantity}</td>
+                <td>Pieza</td>
+                <td>${data.itemName} (${data.itemId})</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        `;
+    }
+    
+    let description = '';
+    let workers = '';
+    
+    if (type === 'output') {
+        description = `Solicitud de ${data.movementType === 'loan' ? 'préstamo' : 'salida'} de insumo biomédico`;
+        workers = data.engineer || 'Personal de biomédica';
+    } else if (type === 'entry') {
+        description = `Entrada de insumos biomédicos al almacén`;
+        workers = data.responsible || 'Personal de almacén';
+    }
+    
+    const serviceOrderHTML = `
+        <div class="service-order-container">
+            <div class="images-container">
+                <div class="logo">[Imagen 1 - Secretaría de Salud]</div>
+                <div class="logo">[Imagen 2 - Hospital]</div>
+            </div>
+            
+            <div class="hospital-name">HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN</div>
+            
+            <div class="header-info">
+                <div class="order-title">ORDEN DE SERVICIO</div>
+                <div class="right-header">
+                    <div class="folio">No. de Folio: <span class="folio-input">${type === 'output' ? data.os : data.voucher}</span></div>
+                    <div class="department">DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA</div>
+                </div>
+            </div>
+            
+            <div class="expedition-container">
+                <div></div>
+                <div class="expedition-date">
+                    <span>Fecha de Expediente</span>
+                    <div class="date-field">${formattedDate}</div>
+                    <div class="oval-rectangle">MP</div>
+                    <div class="oval-rectangle">MC</div>
+                </div>
+            </div>
+            
+            <div class="reference-data">
+                <div class="data-row">
+                    <div class="data-field">
+                        <div class="section-title">Datos de referencia:</div>
+                    </div>
+                </div>
+                <div class="data-row">
+                    <div class="data-field">
+                        <div class="underline">${formattedDate}</div>
+                    </div>
+                    <div class="data-field">
+                        <div class="underline"></div>
+                    </div>
+                </div>
+                <div class="data-row">
+                    <div class="data-field" style="flex: 1;">
+                        <div class="underline">${type === 'output' ? (data.area || 'Área solicitante') : 'Almacén Biomédico'}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Descripción y problema presentado en el área:</div>
+                <div class="text-area">${description}</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Reporte de trabajo realizado:</div>
+                <div class="text-area">${type === 'output' ? 
+                    `Entrega de ${data.quantity} unidad(es) de insumo biomédico` : 
+                    `Recepción de ${data.quantity} unidad(es) de insumo biomédico`}</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Trabajadores: (Nombres):</div>
+                <div class="text-area">${workers}</div>
+            </div>
+            
+            <div class="centered-title">Materiales:</div>
+            <div class="materials-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="10%">Cant.</th>
+                            <th width="15%">Unidad</th>
+                            <th width="35%">Descripción</th>
+                            <th width="15%">Costo almacén</th>
+                            <th width="15%">Compra directa</th>
+                            <th width="10%">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${materialsHTML}
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer-container">
+                <div class="signatures-container">
+                    <div class="signature-box">
+                        <div class="signature-title">Autoriza salida de material</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El jefe de mantenimiento,<br>biomédica e informática</div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-title">Realizó trabajo</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El trabajador</div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-title">Recibe a satisfacción</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El Jefe del área solicitante</div>
+                    </div>
+                </div>
+                
+                <div class="note-box">
+                    Nota: Si los materiales usados no caben en este lado, anótelos en la parte de atrás.
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return serviceOrderHTML;
+}
+
+// Función para imprimir la orden de servicio
+function printServiceOrder() {
+    const printContent = document.getElementById('serviceOrderContent').innerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = printContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    
+    // Recargar la página para restaurar la funcionalidad
+    location.reload();
 }
 
 // Función para mostrar/ocultar campo de área manual
@@ -958,23 +1127,27 @@ function saveEntry() {
         .catch(error => alert('Error al guardar entrada: ' + error));
 }
 
-// Ver detalles de entrada 
+// Ver detalles de entrada - NUEVA VERSIÓN CON FORMATO DE ORDEN DE SERVICIO
 function viewEntryDetails(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
 
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
-    // Mostrar la orden de servicio en lugar del formato anterior
+    // Formatear fecha correctamente para la orden de servicio
+    const entryDate = entry.date ? new Date(entry.date) : new Date();
+    
+    // Mostrar la orden de servicio
     showServiceOrder('entry', {
-        voucher: entry.voucher,
+        voucher: entry.voucher || 'N/A',
         quantity: entry.quantity,
-        responsible: entry.responsible,
+        responsible: entry.responsible || 'N/A',
         itemId: entry.itemId,
         itemName: item.name,
-        date: entry.date
+        date: entryDate.toISOString()
     });
 }
+
 // Cargar entradas en la tabla
 function loadEntries() {
     let tableBody = document.getElementById('entriesTableBody');
@@ -1159,23 +1332,26 @@ function saveOutput() {
         .catch(error => alert('Error: ' + error.message));
 }
 
-// Ver detalles de salida
+// Ver detalles de salida - NUEVA VERSIÓN CON FORMATO DE ORDEN DE SERVICIO
 function viewOutputDetails(id) {
     const output = outputs.find(o => o.id === id);
     if (!output) return;
 
     const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
-    // Mostrar la orden de servicio en lugar del formato anterior
+    // Formatear fecha correctamente para la orden de servicio
+    const outputDate = output.date ? new Date(output.date) : new Date();
+    
+    // Mostrar la orden de servicio
     showServiceOrder('output', {
-        os: output.os,
+        os: output.os || 'N/A',
         quantity: output.quantity,
-        engineer: output.engineer,
-        area: output.area,
-        movementType: output.movementType,
+        engineer: output.engineer || 'N/A',
+        area: output.area || 'N/A',
+        movementType: output.movementType || 'output',
         itemId: output.itemId,
         itemName: item.name,
-        date: output.date
+        date: outputDate.toISOString()
     });
 }
 
@@ -1909,173 +2085,6 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.style.borderRadius = '5px';
     document.body.appendChild(statusDiv);
 
-    // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
-
-// Función para generar la orden de servicio - ACTUALIZADA PARA USAR FECHAS
-function generateServiceOrder(type, data) {
-    // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
-    const recordDate = data.date ? new Date(data.date) : new Date();
-    const formattedDate = recordDate.toLocaleDateString('es-ES');
-    
-    let materialsHTML = '';
-    if (type === 'output' && data.item) {
-        const item = inventory.find(i => i.id === data.itemId) || { name: data.itemName || 'Insumo' };
-        materialsHTML = `
-            <tr>
-                <td>${data.quantity}</td>
-                <td>Pieza</td>
-                <td>${item.name} (${data.itemId})</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        `;
-    }
-    
-    let description = '';
-    let workers = '';
-    
-    if (type === 'output') {
-        description = `Solicitud de ${data.movementType === 'loan' ? 'préstamo' : 'salida'} de insumo biomédico`;
-        workers = data.engineer || 'Personal de biomédica';
-    } else if (type === 'entry') {
-        description = `Entrada de insumos biomédicos al almacén`;
-        workers = data.responsible || 'Personal de almacén';
-    }
-    
-    const serviceOrderHTML = `
-        <div class="service-order-container">
-            <div class="images-container">
-                <div class="logo">[Imagen 1 - Secretaría de Salud]</div>
-                <div class="logo">[Imagen 2 - Hospital]</div>
-            </div>
-            
-            <div class="hospital-name">HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN</div>
-            
-            <div class="header-info">
-                <div class="order-title">ORDEN DE SERVICIO</div>
-                <div class="right-header">
-                    <div class="folio">No. de Folio: <span class="folio-input">${type === 'output' ? data.os : data.voucher}</span></div>
-                    <div class="department">DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA</div>
-                </div>
-            </div>
-            
-            <div class="expedition-container">
-                <div></div>
-                <div class="expedition-date">
-                    <span>Fecha de Expediente</span>
-                    <div class="date-field">${formattedDate}</div>
-                    <div class="oval-rectangle">MP</div>
-                    <div class="oval-rectangle">MC</div>
-                </div>
-            </div>
-            
-            <div class="reference-data">
-                <div class="data-row">
-                    <div class="data-field">
-                        <div class="section-title">Datos de referencia:</div>
-                    </div>
-                </div>
-                <div class="data-row">
-                    <div class="data-field">
-                        <div class="underline">${formattedDate}</div>
-                    </div>
-                    <div class="data-field">
-                        <div class="underline"></div>
-                    </div>
-                </div>
-                <div class="data-row">
-                    <div class="data-field" style="flex: 1;">
-                        <div class="underline">${type === 'output' ? (data.area || 'Área solicitante') : 'Almacén Biomédico'}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Descripción y problema presentado en el área:</div>
-                <div class="text-area">${description}</div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Reporte de trabajo realizado:</div>
-                <div class="text-area">${type === 'output' ? 
-                    `Entrega de ${data.quantity} unidad(es) de insumo biomédico` : 
-                    `Recepción de ${data.quantity} unidad(es) de insumo biomédico`}</div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">Trabajadores: (Nombres):</div>
-                <div class="text-area">${workers}</div>
-            </div>
-            
-            <div class="centered-title">Materiales:</div>
-            <div class="materials-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="10%">Cant.</th>
-                            <th width="15%">Unidad</th>
-                            <th width="35%">Descripción</th>
-                            <th width="15%">Costo almacén</th>
-                            <th width="15%">Compra directa</th>
-                            <th width="10%">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${materialsHTML}
-                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="footer-container">
-                <div class="signatures-container">
-                    <div class="signature-box">
-                        <div class="signature-title">Autoriza salida de material</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">El jefe de mantenimiento,<br>biomédica e informática</div>
-                    </div>
-                    <div class="signature-box">
-                        <div class="signature-title">Realizó trabajo</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">El trabajador</div>
-                    </div>
-                    <div class="signature-box">
-                        <div class="signature-title">Recibe a satisfacción</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">El Jefe del área solicitante</div>
-                    </div>
-                </div>
-                
-                <div class="note-box">
-                    Nota: Si los materiales usados no caben en este lado, anótelos en la parte de atrás.
-                </div>
-            </div>
-        </div>
-    `;
-    
-    return serviceOrderHTML;
-}
-// Función para mostrar la orden de servicio
-function showServiceOrder(type, data) {
-    const orderHTML = generateServiceOrder(type, data);
-    document.getElementById('serviceOrderContent').innerHTML = orderHTML;
-    document.getElementById('serviceOrderModal').style.display = 'block';
-}
-
-// Función para imprimir la orden de servicio
-function printServiceOrder() {
-    const printContent = document.getElementById('serviceOrderContent').innerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-    
-    // Recargar la página para restaurar la funcionalidad
-    location.reload();
-}
   
     // Configurar listeners para cambios en tiempo real
     setupRealTimeListeners();
