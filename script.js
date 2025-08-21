@@ -152,10 +152,10 @@ function generateServiceOrder(type, data) {
         <div class="service-order-container">
             <div class="images-container">
                 <div class="logo">
-                    <img src="SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
+                    <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
                 </div>
                 <div class="logo">
-                    <img src="PEDIATRICO.jpeg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
+                    <img src="./PEDIATRICO.jpeg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
                 </div>
             </div>
             
