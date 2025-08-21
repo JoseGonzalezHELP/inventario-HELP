@@ -272,24 +272,35 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (CORREGIDA)
+// Función para imprimir la orden de servicio (MEJORADA)
 function printServiceOrder() {
-    // Obtener el contenido editable actualizado
-    const serviceOrderContent = document.getElementById('serviceOrderContent');
-    
-    // Crear una copia para imprimir
-    const printContent = serviceOrderContent.innerHTML;
+    const printContent = document.getElementById('serviceOrderContent').innerHTML;
     const originalContent = document.body.innerHTML;
     
-    // Reemplazar el contenido editable con texto normal para impresión
-    const printableContent = printContent.replace(/contenteditable="true"/g, '');
+    // Crear un documento limpio para imprimir
+    const printDocument = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Orden de Servicio</title>
+            <style>
+                @page { margin: 0; size: auto; }
+                body { margin: 0; padding: 10px; }
+                .no-print, .btn, .close, .modal-actions { display: none !important; }
+                * { color: black !important; background: white !important; }
+                .service-order-container { box-shadow: none !important; border: none !important; }
+                .text-area[contenteditable="true"] { border: 1px solid #ccc !important; background: white !important; }
+            </style>
+        </head>
+        <body onload="window.print(); window.close();">
+            ${printContent}
+        </body>
+        </html>
+    `;
     
-    document.body.innerHTML = printableContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-    
-    // No es necesario recargar la página completa
-    // location.reload();
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printDocument);
+    printWindow.document.close();
 }
 
 // Función para mostrar/ocultar campo de área manual
@@ -945,16 +956,31 @@ function generateItemQR(id) {
 }
 
 // Imprimir código QR
+// Modifica las funciones de impresión existentes
 function printQR() {
-    let printWindow = window.open('', '', 'width=600,height=600');
-    printWindow.document.write('<html><head><title>Imprimir Código QR</title></head><body>');
-    printWindow.document.write(document.getElementById('qrCode').innerHTML);
-    printWindow.document.write(document.getElementById('qrItemInfo').innerHTML);
-    printWindow.document.write('</body></html>');
+    const qrCode = document.getElementById('qrCode').innerHTML;
+    const qrInfo = document.getElementById('qrItemInfo').innerHTML;
+    
+    const printDocument = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Código QR</title>
+            <style>
+                @page { margin: 0; size: auto; }
+                body { margin: 0; padding: 20px; text-align: center; }
+            </style>
+        </head>
+        <body onload="window.print(); window.close();">
+            ${qrCode}
+            ${qrInfo}
+        </body>
+        </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printDocument);
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
 }
 
 // Ver detalles del insumo
@@ -1857,16 +1883,35 @@ function getFilterDescription(filter) {
     }
 }
 
-// Imprimir reporte
+// Función similar para imprimir reportes
 function printReport() {
-    let printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write('<html><head><title>Imprimir Reporte</title><style>body{font-family:Arial;}</style></head><body>');
-    printWindow.document.write(document.getElementById('reportResults').innerHTML);
-    printWindow.document.write('</body></html>');
+    const printContent = document.getElementById('reportResults').innerHTML;
+    
+    const printDocument = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Reporte del Sistema</title>
+            <style>
+                @page { margin: 0; size: auto; }
+                body { margin: 0; padding: 10px; font-family: Arial; }
+                .no-print { display: none !important; }
+                * { color: black !important; background: white !important; }
+                table { border-collapse: collapse; width: 100%; page-break-inside: auto; }
+                th, td { border: 1px solid black; padding: 4px; font-size: 12px; }
+                th { background: #f0f0f0 !important; }
+                tr { page-break-inside: avoid; }
+            </style>
+        </head>
+        <body onload="window.print(); window.close();">
+            ${printContent}
+        </body>
+        </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printDocument);
     printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
 }
 
 // Cerrar modal
