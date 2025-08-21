@@ -272,34 +272,74 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (MEJORADA)
+// ===== FUNCIÓN MEJORADA PARA IMPRIMIR ORDEN DE SERVICIO =====
 function printServiceOrder() {
-    const printContent = document.getElementById('serviceOrderContent').innerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    // Crear un documento limpio para imprimir
-    const printDocument = `
+    // Crear HTML limpio para imprimir
+    const cleanHtml = `
         <!DOCTYPE html>
         <html>
         <head>
             <title>Orden de Servicio</title>
+            <meta charset="UTF-8">
             <style>
-                @page { margin: 0; size: auto; }
-                body { margin: 0; padding: 10px; }
-                .no-print, .btn, .close, .modal-actions { display: none !important; }
-                * { color: black !important; background: white !important; }
-                .service-order-container { box-shadow: none !important; border: none !important; }
-                .text-area[contenteditable="true"] { border: 1px solid #ccc !important; background: white !important; }
+                /* ELIMINAR COMPLETAMENTE ENCABEZADOS/PIES */
+                @page { 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                    size: auto; 
+                }
+                @page :left { margin: 0 !important; }
+                @page :right { margin: 0 !important; }
+                @page :first { margin: 0 !important; }
+                
+                html, body { 
+                    margin: 0 !important; 
+                    padding: 5mm !important; 
+                    width: 100% !important; 
+                    height: auto !important; 
+                    font-family: Arial, sans-serif !important;
+                    font-size: 12pt !important;
+                }
+                
+                /* Ocultar cualquier elemento que pueda ser interpretado como header/footer */
+                .header, .footer, [class*="header"], [class*="footer"] {
+                    display: none !important;
+                }
+                
+                /* Estilos específicos para la orden de servicio */
+                .service-order-container {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: 100% !important;
+                }
+                
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    font-size: 10pt; 
+                    page-break-inside: avoid;
+                }
+                
+                th, td { 
+                    padding: 3px; 
+                    border: 1px solid black; 
+                }
+                
+                * { 
+                    color: black !important; 
+                    background: transparent !important; 
+                }
             </style>
         </head>
-        <body onload="window.print(); window.close();">
-            ${printContent}
+        <body onload="window.print(); setTimeout(function() { window.close(); }, 100);">
+            ${document.getElementById('serviceOrderContent').innerHTML}
         </body>
         </html>
     `;
     
+    // Abrir ventana de impresión
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(printDocument);
+    printWindow.document.write(cleanHtml);
     printWindow.document.close();
 }
 
@@ -957,21 +997,29 @@ function generateItemQR(id) {
 
 // Imprimir código QR
 // Modifica las funciones de impresión existentes
+// ===== FUNCIÓN MEJORADA PARA IMPRIMIR QR =====
 function printQR() {
     const qrCode = document.getElementById('qrCode').innerHTML;
     const qrInfo = document.getElementById('qrItemInfo').innerHTML;
     
-    const printDocument = `
+    const cleanHtml = `
         <!DOCTYPE html>
         <html>
         <head>
             <title>Código QR</title>
+            <meta charset="UTF-8">
             <style>
-                @page { margin: 0; size: auto; }
-                body { margin: 0; padding: 20px; text-align: center; }
+                @page { margin: 0 !important; }
+                body { 
+                    margin: 0 !important; 
+                    padding: 10mm !important; 
+                    text-align: center;
+                    font-family: Arial, sans-serif;
+                }
+                img { max-width: 200px; height: auto; }
             </style>
         </head>
-        <body onload="window.print(); window.close();">
+        <body onload="window.print(); setTimeout(function() { window.close(); }, 100);">
             ${qrCode}
             ${qrInfo}
         </body>
@@ -979,10 +1027,9 @@ function printQR() {
     `;
     
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(printDocument);
+    printWindow.document.write(cleanHtml);
     printWindow.document.close();
 }
-
 // Ver detalles del insumo
 function viewItemDetails(id) {
     let item = inventory.find(i => i.id === id);
@@ -1883,34 +1930,50 @@ function getFilterDescription(filter) {
     }
 }
 
-// Función similar para imprimir reportes
+// ===== FUNCIÓN MEJORADA PARA IMPRIMIR REPORTES =====
 function printReport() {
-    const printContent = document.getElementById('reportResults').innerHTML;
-    
-    const printDocument = `
+    const cleanHtml = `
         <!DOCTYPE html>
         <html>
         <head>
             <title>Reporte del Sistema</title>
+            <meta charset="UTF-8">
             <style>
-                @page { margin: 0; size: auto; }
-                body { margin: 0; padding: 10px; font-family: Arial; }
-                .no-print { display: none !important; }
-                * { color: black !important; background: white !important; }
-                table { border-collapse: collapse; width: 100%; page-break-inside: auto; }
-                th, td { border: 1px solid black; padding: 4px; font-size: 12px; }
-                th { background: #f0f0f0 !important; }
-                tr { page-break-inside: avoid; }
+                @page { 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
+                }
+                body { 
+                    margin: 0 !important; 
+                    padding: 5mm !important; 
+                    font-family: Arial, sans-serif;
+                }
+                * { 
+                    color: black !important; 
+                    background: transparent !important; 
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    font-size: 10pt; 
+                }
+                th, td { 
+                    padding: 3px; 
+                    border: 1px solid black; 
+                }
+                .report-table {
+                    page-break-inside: avoid;
+                }
             </style>
         </head>
-        <body onload="window.print(); window.close();">
-            ${printContent}
+        <body onload="window.print(); setTimeout(function() { window.close(); }, 100);">
+            ${document.getElementById('reportResults').innerHTML}
         </body>
         </html>
     `;
     
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(printDocument);
+    printWindow.document.write(cleanHtml);
     printWindow.document.close();
 }
 
