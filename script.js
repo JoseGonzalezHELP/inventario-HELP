@@ -957,74 +957,24 @@ function saveEntry() {
         })
         .catch(error => alert('Error al guardar entrada: ' + error));
 }
-// Ver detalles de entrada
+
+// Ver detalles de entrada 
 function viewEntryDetails(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
 
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
-    // Formatear fecha correctamente
-    const formattedDate = entry.date 
-      ? new Date(entry.date).toLocaleDateString('es-ES') 
-      : 'N/A';
-
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Vale de Entrada - ${entry.voucher}</title>
-            <style>
-                body { font-family: Arial; margin: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; }
-                .signature { margin-top: 50px; display: flex; justify-content: space-between; }
-            </style>
-        </head>
-        <body>
-            <h2 style="text-align: center;">VALE DE ENTRADA</h2>
-            <table>
-                <tr><th>Folio Vale:</th><td>${entry.voucher || 'N/A'}</td></tr>
-                <tr><th>Fecha:</th><td>${formattedDate}</td></tr>
-                <tr><th>Insumo:</th><td>${item.name} (${entry.itemId})</td></tr>
-                <tr><th>Cantidad:</th><td>${entry.quantity}</td></tr>
-                <tr><th>Responsable:</th><td>${entry.responsible || 'N/A'}</td></tr>
-                ${entry.invoice ? `<tr><th>Factura:</th><td>${entry.invoice}</td></tr>` : ''}
-            </table>
-            
-            ${entry.comments ? `
-            <div style="margin-top: 20px;">
-                <strong>Comentarios:</strong><br>
-                ${entry.comments}
-            </div>
-            ` : ''}
-            
-            <div class="signature">
-                <div style="width: 45%; border-top: 1px solid #000;">
-                    <strong>Recibí conforme:</strong><br><br>
-                    Firma y sello
-                </div>
-                <div style="width: 45%; border-top: 1px solid #000;">
-                    <strong>Autorizó:</strong><br><br>
-                    Firma y sello
-                </div>
-            </div>
-            
-            <script>
-                window.onload = function() {
-                    setTimeout(() => {
-                        window.print();
-                        window.close();
-                    }, 300);
-                };
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+    // Mostrar la orden de servicio en lugar del formato anterior
+    showServiceOrder('entry', {
+        voucher: entry.voucher,
+        quantity: entry.quantity,
+        responsible: entry.responsible,
+        itemId: entry.itemId,
+        itemName: item.name,
+        date: entry.date
+    });
 }
-
 // Cargar entradas en la tabla
 function loadEntries() {
     let tableBody = document.getElementById('entriesTableBody');
@@ -1216,58 +1166,17 @@ function viewOutputDetails(id) {
 
     const item = inventory.find(i => i.id === output.itemId) || { name: "Desconocido" };
     
-    // Formatear fecha correctamente
-    const formattedDate = output.date 
-      ? new Date(output.date).toLocaleDateString('es-ES') 
-      : 'N/A';
-
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Vale de Salida - ${output.os}</title>
-            <style>
-                body { font-family: Arial; margin: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f2f2f2; }
-                .signature { margin-top: 50px; display: flex; justify-content: space-between; }
-            </style>
-        </head>
-        <body>
-            <h2 style="text-align: center;">VALE DE SALIDA</h2>
-            <table>
-                <tr><th>Folio OS:</th><td>${output.os || 'N/A'}</td></tr>
-                <tr><th>Fecha:</th><td>${formattedDate}</td></tr>
-                <tr><th>Insumo:</th><td>${item.name} (${output.itemId})</td></tr>
-                <tr><th>Cantidad:</th><td>${output.quantity}</td></tr>
-                <tr><th>Ingeniero:</th><td>${output.engineer || 'N/A'}</td></tr>
-                <tr><th>Tipo:</th><td>${output.movementType === 'loan' ? 'Préstamo' : 'Salida'}</td></tr>
-            </table>
-            
-            <div class="signature">
-                <div style="width: 45%; border-top: 1px solid #000;">
-                    <strong>Recibí conforme:</strong><br><br>
-                    Firma y sello
-                </div>
-                <div style="width: 45%; border-top: 1px solid #000;">
-                    <strong>Autorizó:</strong><br><br>
-                    Firma y sello
-                </div>
-            </div>
-            
-            <script>
-                window.onload = function() {
-                    setTimeout(() => {
-                        window.print();
-                        window.close();
-                    }, 300);
-                };
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+    // Mostrar la orden de servicio en lugar del formato anterior
+    showServiceOrder('output', {
+        os: output.os,
+        quantity: output.quantity,
+        engineer: output.engineer,
+        area: output.area,
+        movementType: output.movementType,
+        itemId: output.itemId,
+        itemName: item.name,
+        date: output.date
+    });
 }
 
 // Restaurar préstamo
@@ -2002,10 +1911,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// Función para generar la orden de servicio
+// Función para generar la orden de servicio - ACTUALIZADA PARA USAR FECHAS
 function generateServiceOrder(type, data) {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('es-ES');
+    // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
+    const recordDate = data.date ? new Date(data.date) : new Date();
+    const formattedDate = recordDate.toLocaleDateString('es-ES');
     
     let materialsHTML = '';
     if (type === 'output' && data.item) {
@@ -2147,7 +2057,6 @@ function generateServiceOrder(type, data) {
     
     return serviceOrderHTML;
 }
-
 // Función para mostrar la orden de servicio
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
