@@ -1136,7 +1136,28 @@ select {
     .modal-actions {
         display: none;
     }
-    
+
+
+    /* Estilos para text-areas editables en la orden de servicio */
+.text-area[contenteditable="true"] {
+    background-color: #ffffe0;
+    border: 2px dashed #ffa500;
+    min-height: 60px;
+    outline: none;
+    padding: 10px;
+}
+
+.text-area[contenteditable="true"]:focus {
+    background-color: #ffffcc;
+    border: 2px solid #ff8c00;
+}
+
+/* Asegurar que los text-areas sean editables */
+.text-area {
+    -webkit-user-modify: read-write-plaintext-only;
+    -moz-user-modify: read-write-plaintext-only;
+    user-modify: read-write-plaintext-only;
+}
     .close {
         display: none;
     }
