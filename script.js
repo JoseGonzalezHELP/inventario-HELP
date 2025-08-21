@@ -96,7 +96,7 @@ function formatDate(dateString) {
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// Función para generar la orden de servicio (formato completo)
+// Función para generar la orden de servicio (CORREGIDA)
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
@@ -132,14 +132,20 @@ function generateServiceOrder(type, data) {
     }
     
     let description = '';
+    let report = '';
     let workers = '';
+    let areaText = '';
     
     if (type === 'output') {
         description = `Solicitud de ${data.movementType === 'loan' ? 'préstamo' : 'salida'} de insumo biomédico`;
+        report = `Entrega de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.engineer || 'Personal de biomédica';
+        areaText = `Departamento o área: ${data.area || 'Área solicitante'}`;
     } else if (type === 'entry') {
-        description = `Entrada de insumos biomédicos al almacén`;
+        description = `Recepción de insumos biomédicos en el almacén`;
+        report = `Recepción de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.responsible || 'Personal de almacén';
+        areaText = 'Departamento o área: Almacén Biomédico';
     }
     
     const serviceOrderHTML = `
@@ -177,15 +183,15 @@ function generateServiceOrder(type, data) {
                 </div>
                 <div class="data-row">
                     <div class="data-field">
-                        <div class="underline">${formattedDate}</div>
+                        <div class="underline">Fecha de reporte: ${formattedDate}</div>
                     </div>
                     <div class="data-field">
-                        <div class="underline"></div>
+                        <div class="underline">Fecha de terminación:</div>
                     </div>
                 </div>
                 <div class="data-row">
                     <div class="data-field" style="flex: 1;">
-                        <div class="underline">${type === 'output' ? (data.area || 'Área solicitante') : 'Almacén Biomédico'}</div>
+                        <div class="underline">${areaText}</div>
                     </div>
                 </div>
             </div>
@@ -197,9 +203,7 @@ function generateServiceOrder(type, data) {
             
             <div class="section">
                 <div class="section-title">Reporte de trabajo realizado:</div>
-                <div class="text-area">${type === 'output' ? 
-                    `Entrega de ${data.quantity} unidad(es) de insumo biomédico` : 
-                    `Recepción de ${data.quantity} unidad(es) de insumo biomédico`}</div>
+                <div class="text-area">${report}</div>
             </div>
             
             <div class="section">
@@ -1142,23 +1146,21 @@ function saveEntry() {
         .catch(error => alert('Error al guardar entrada: ' + error));
 }
 
-// Ver detalles de entrada - NUEVA VERSIÓN CON FORMATO DE ORDEN DE SERVICIO
+// Ver detalles de entrada - CORREGIDA
 function viewEntryDetails(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
 
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
-    // Formatear fecha correctamente para la orden de servicio
-    const entryDate = entry.date ? new Date(entry.date) : new Date();
-    
     // Mostrar la orden de servicio
     showServiceOrder('entry', {
-        voucher: voucher,
-        quantity: quantity,
-        responsible: responsible,
-        itemId: itemId,
-        itemName: inventory[itemIndex].name
+        voucher: entry.voucher || 'N/A',
+        quantity: entry.quantity,
+        responsible: entry.responsible || 'N/A',
+        itemId: entry.itemId,
+        itemName: item.name,
+        date: entry.date || new Date().toISOString()
     });
 }
 
@@ -1201,7 +1203,6 @@ function loadEntries() {
         tableBody.appendChild(row);
     });
 }
-
 // Abrir modal para registrar salida
 function openAddOutputModal() {
     document.getElementById('outputModalTitle').textContent = 'Registrar Salida';
