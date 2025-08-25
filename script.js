@@ -97,7 +97,7 @@ function generateNextFolio() {
 
 // Formatear el folio
 function formatFolio(data) {
-    return `${data.year}-${data.letter}-${data.number.toString().padStart(2, '0')}`;
+    return `${data.year}${data.letter}${data.number.toString().padStart(2, '0')}`;
 }
 
 // Guardar datos del folio en Firebase
@@ -1322,6 +1322,9 @@ function loadEntries() {
                 <button class="btn btn-primary" onclick="viewEntryDetails('${entry.id}')">
                     <i class="fas fa-eye"></i> Ver
                 </button>
+                <button class="btn btn-danger" onclick="verifyPasswordBeforeDelete('deleteEntry', '${entry.id}')">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
             </td>
         `;
         tableBody.appendChild(row);
@@ -1564,15 +1567,18 @@ function loadOutputs() {
             <td>${output.area || 'N/A'}</td>
             <td>${outputDate}</td>
             <td class="action-buttons">
-                <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
-                    <i class="fas fa-eye"></i> Ver
-                </button>
-                ${output.movementType === 'loan' && output.status === 'pending' ? 
-                 `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
-                    <i class="fas fa-undo"></i> Restaurar
-                 </button>` : ''}
-            </td>
-        `;
+        <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
+            <i class="fas fa-eye"></i> Ver
+        </button>
+        ${output.movementType === 'loan' && output.status === 'pending' ? 
+         `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
+            <i class="fas fa-undo"></i> Restaurar
+         </button>` : ''}
+        <button class="btn btn-danger" onclick="verifyPasswordBeforeDelete('deleteOutput', '${output.id}')">
+            <i class="fas fa-trash"></i> Eliminar
+        </button>
+    </td>
+`;
         tableBody.appendChild(row);
     });
 }
