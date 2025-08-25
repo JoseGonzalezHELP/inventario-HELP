@@ -2323,11 +2323,74 @@ function resetItemForm() {
     document.getElementById('customType').required = false;
 }
 
+// ===== FUNCIONES DE ORDENAMIENTO ===== //
+// Función para ordenamiento numérico inteligente de IDs
+function smartIdSort(a, b) {
+    // Función para dividir el ID en partes numéricas y de texto
+    const parseIdParts = (id) => {
+        return id.split(/(\d+)/).filter(part => part !== '');
+    };
 
+    const partsA = parseIdParts(a);
+    const partsB = parseIdParts(b);
+
+    // Comparar parte por parte
+    const maxLength = Math.max(partsA.length, partsB.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+        const partA = partsA[i] || '';
+        const partB = partsB[i] || '';
+
+        // Convertir a números si ambos son numéricos
+        const numA = parseInt(partA);
+        const numB = parseInt(partB);
+        
+        // Si ambas partes son números puros, comparar numéricamente
+        if (!isNaN(numA) && !isNaN(numB) && partA === numA.toString() && partB === numB.toString()) {
+            if (numA < numB) return -1;
+            if (numA > numB) return 1;
+        } else {
+            // Comparar como strings (para partes con texto o mixed)
+            if (partA < partB) return -1;
+            if (partA > partB) return 1;
+        }
+    }
+
+    return 0; // Son iguales
+}
+
+// Función específica para IDs con guiones bajos (8_3, 9_16_2, etc.)
+function customIdSort(a, b) {
+    // Si ambos IDs contienen guiones bajos, usar comparación especial
+    if (a.includes('_') && b.includes('_')) {
+        const partsA = a.split('_').map(part => {
+            const num = parseInt(part);
+            return isNaN(num) ? part : num;
+        });
+        
+        const partsB = b.split('_').map(part => {
+            const num = parseInt(part);
+            return isNaN(num) ? part : num;
+        });
+
+        // Comparar parte por parte
+        for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+            const partA = partsA[i] || 0;
+            const partB = partsB[i] || 0;
+
+            if (partA < partB) return -1;
+            if (partA > partB) return 1;
+        }
+        return 0;
+    }
+    
+    // Para otros casos, usar el ordenamiento inteligente general
+    return smartIdSort(a, b);
+}
 
 // Configurar listeners para cambios en tiempo real - VERSIÓN CORREGIDA
 function setupRealTimeListeners() {
-    // Listener para inventario - CORREGIDO
+    // Listener para inventario - CON ORDENAMIENTO
     inventoryRef.on('value', (snapshot) => {
         const data = snapshot.val();
         // Convertir objeto a array manteniendo el ID
@@ -2336,7 +2399,10 @@ function setupRealTimeListeners() {
             ...data[key]
         })) : [];
         
-        console.log('Inventario cargado:', inventory.length, 'items');
+        // ORDENAR MANUALMENTE - LÍNEA NUEVA
+        inventory.sort((a, b) => customIdSort(a.id, b.id));
+        
+        console.log('Inventario cargado y ordenado:', inventory.length, 'items');
         loadInventory();
         checkStockAlerts();
         loadItemOptions();
