@@ -54,6 +54,78 @@ let itemTypes = [];
 let itemBrands = [];  
 let areas = [];
 
+// Variables para el sistema de folios
+let currentFolioData = { year: null, letter: 'A', number: 1 };
+const foliosRef = database.ref('folios');
+
+// Función para generar el próximo folio
+function generateNextFolio() {
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+    
+    // Si el año cambió, reiniciar la secuencia
+    if (currentFolioData.year !== currentYear) {
+        currentFolioData = { 
+            year: currentYear, 
+            letter: 'A', 
+            number: 1 
+        };
+        saveFolioData();
+        return formatFolio(currentFolioData);
+    }
+    
+    // Incrementar número
+    currentFolioData.number++;
+    
+    // Si llegamos a 99, cambiar letra y reiniciar número
+    if (currentFolioData.number > 99) {
+        currentFolioData.number = 1;
+        
+        // Obtener la siguiente letra del alfabeto
+        const nextCharCode = currentFolioData.letter.charCodeAt(0) + 1;
+        
+        // Si pasamos de Z, reiniciar a A (no debería pasar en un año)
+        if (nextCharCode > 90) { // 90 es el código de 'Z'
+            currentFolioData.letter = 'A';
+        } else {
+            currentFolioData.letter = String.fromCharCode(nextCharCode);
+        }
+    }
+    
+    saveFolioData();
+    return formatFolio(currentFolioData);
+}
+
+// Formatear el folio
+function formatFolio(data) {
+    return `${data.year}-${data.letter}-${data.number.toString().padStart(2, '0')}`;
+}
+
+// Guardar datos del folio en Firebase
+function saveFolioData() {
+    foliosRef.set(currentFolioData);
+}
+
+// Cargar datos del folio desde Firebase
+function loadFolioData() {
+    foliosRef.once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+            currentFolioData = data;
+            
+            // Verificar si el año cambió
+            const currentYear = new Date().getFullYear().toString().slice(-2);
+            if (currentFolioData.year !== currentYear) {
+                currentFolioData = { 
+                    year: currentYear, 
+                    letter: 'A', 
+                    number: 1 
+                };
+                saveFolioData();
+            }
+        }
+    });
+}
+
 // Función para mostrar notificaciones toast
 function showToast(message) {
   let toast = document.getElementById('toast');
@@ -1081,10 +1153,13 @@ function loadItemOptions() {
     });
 }
 
-// Abrir modal para registrar entrada
 function openAddEntryModal() {
     document.getElementById('entryModalTitle').textContent = 'Registrar Entrada';
     document.getElementById('entryForm').reset();
+    
+    // Generar folio automático
+    document.getElementById('entryVoucher').value = generateNextFolio();
+    
     document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('customResponsible').style.display = 'none';
     document.getElementById('entryModal').style.display = 'block';
@@ -1252,13 +1327,19 @@ function loadEntries() {
         tableBody.appendChild(row);
     });
 }
-// Abrir modal para registrar salida
+
 function openAddOutputModal() {
     document.getElementById('outputModalTitle').textContent = 'Registrar Salida';
     document.getElementById('outputForm').reset();
+    
+    // Generar folio automático para OS
+    document.getElementById('outputOS').value = generateNextFolio();
+    
     document.getElementById('outputDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('customEngineer').style.display = 'none';
+    document.getElementById('customArea').style.display = 'none';
     document.getElementById('outputModal').style.display = 'block';
+    updateAvailableStock();
 }
 
 // Actualizar stock disponible al seleccionar un insumo
@@ -2119,6 +2200,8 @@ function resetItemForm() {
     document.getElementById('customType').required = false;
 }
 
+
+
 // Configurar listeners para cambios en tiempo real
 function setupRealTimeListeners() {
     // Listener para inventario
@@ -2173,6 +2256,8 @@ function setupRealTimeListeners() {
 
 // Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar sistema de folios
+    loadFolioData();
     // Añade un elemento para mostrar el estado de la conexión
     const statusDiv = document.createElement('div');
     statusDiv.id = 'connection-status';
@@ -2206,4 +2291,76 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('reportType')) {
         setDefaultDates();
     }
+
+  // Contraseña para eliminar
+const DELETE_PASSWORD = "josehepl2025";
+
+// Función para verificar contraseña antes de eliminar
+function verifyPasswordBeforeDelete(action, id, type) {
+    const password = prompt("🔒 Ingrese la contraseña para eliminar:");
+    
+    if (password === DELETE_PASSWORD) {
+        if (action === 'deleteItem') {
+            deleteItem(id);
+        } else if (action === 'deleteEntry') {
+            deleteEntry(id);
+        } else if (action === 'deleteOutput') {
+            deleteOutput(id);
+        }
+    } else if (password !== null) {
+        alert("❌ Contraseña incorrecta. No se puede eliminar.");
+    }
+}
+
+// Función para eliminar entrada (reemplaza la existente si la tienes)
+function deleteEntry(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    
+    // Restaurar stock
+    const item = inventory.find(i => i.id === entry.itemId);
+    if (item) {
+        const newStock = item.stock - entry.quantity;
+        inventoryRef.child(entry.itemId).update({ stock: newStock });
+    }
+    
+    // Eliminar entrada
+    entriesRef.child(id).remove()
+        .then(() => {
+            showToast('✅ Entrada eliminada correctamente');
+        })
+        .catch(error => {
+            alert('Error al eliminar entrada: ' + error.message);
+        });
+}
+
+// Función para eliminar salida (reemplaza la existente si la tienes)
+function deleteOutput(id) {
+    const output = outputs.find(o => o.id === id);
+    if (!output) return;
+    
+    // Restaurar stock solo si no es préstamo pendiente
+    if (output.movementType !== 'loan' || output.status !== 'pending') {
+        const item = inventory.find(i => i.id === output.itemId);
+        if (item) {
+            const newStock = item.stock + output.quantity;
+            inventoryRef.child(output.itemId).update({ stock: newStock });
+        }
+    }
+    
+    // Eliminar salida
+    outputsRef.child(id).remove()
+        .then(() => {
+            showToast('✅ Salida eliminada correctamente');
+        })
+        .catch(error => {
+            alert('Error al eliminar salida: ' + error.message);
+        });
+}
+
+// Modificar la función confirmDeleteItem existente
+function confirmDeleteItem(id) {
+    verifyPasswordBeforeDelete('deleteItem', id, 'item');
+}
+  
 });
