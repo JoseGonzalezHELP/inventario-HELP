@@ -2276,33 +2276,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(statusDiv);
 
   
-    // Configurar listeners para cambios en tiempo real
-    setupRealTimeListeners();
-    
-    // Cargar opciones de los selects solo si estamos en la pestaña correcta
-    if (document.getElementById('inventoryTable')) {
-        loadItemOptions();
-        loadTypeFilterOptions();
-    }
-    
-    if (document.getElementById('itemType')) {
-        loadItemTypeOptions();
-    }
-
-    if (document.getElementById('itemBrand')) {
-        loadItemBrandOptions();
-    }
-  
-    // Solo establecer fechas si estamos en la pestaña de reportes
-    if (document.getElementById('reportType')) {
-        setDefaultDates();
-    }
-
-  // Contraseña para eliminar
-const DELETE_PASSWORD = "josehepl2025";
+// Contraseña para eliminar (cambia esta contraseña por una segura)
+const DELETE_PASSWORD = "admin123";
 
 // Función para verificar contraseña antes de eliminar
-function verifyPasswordBeforeDelete(action, id, type) {
+function verifyPasswordBeforeDelete(action, id) {
     const password = prompt("🔒 Ingrese la contraseña para eliminar:");
     
     if (password === DELETE_PASSWORD) {
@@ -2318,55 +2296,100 @@ function verifyPasswordBeforeDelete(action, id, type) {
     }
 }
 
-// Función para eliminar entrada (reemplaza la existente si la tienes)
+// Función para eliminar entrada
 function deleteEntry(id) {
     const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-    
-    // Restaurar stock
-    const item = inventory.find(i => i.id === entry.itemId);
-    if (item) {
-        const newStock = item.stock - entry.quantity;
-        inventoryRef.child(entry.itemId).update({ stock: newStock });
+    if (!entry) {
+        alert('Entrada no encontrada');
+        return;
     }
     
-    // Eliminar entrada
-    entriesRef.child(id).remove()
-        .then(() => {
-            showToast('✅ Entrada eliminada correctamente');
-        })
-        .catch(error => {
-            alert('Error al eliminar entrada: ' + error.message);
-        });
+    // Restaurar stock
+    const itemIndex = inventory.findIndex(i => i.id === entry.itemId);
+    if (itemIndex !== -1) {
+        const item = inventory[itemIndex];
+        const newStock = item.stock - entry.quantity;
+        
+        inventoryRef.child(entry.itemId).update({ stock: newStock })
+            .then(() => {
+                // Eliminar la entrada de Firebase
+                entriesRef.child(id).remove()
+                    .then(() => {
+                        showToast('✅ Entrada eliminada correctamente');
+                    })
+                    .catch(error => {
+                        alert('Error al eliminar entrada: ' + error.message);
+                    });
+            })
+            .catch(error => {
+                alert('Error al actualizar stock: ' + error.message);
+            });
+    } else {
+        // Si no encuentra el item, igual eliminar la entrada
+        entriesRef.child(id).remove()
+            .then(() => {
+                showToast('✅ Entrada eliminada correctamente');
+            })
+            .catch(error => {
+                alert('Error al eliminar entrada: ' + error.message);
+            });
+    }
 }
 
-// Función para eliminar salida (reemplaza la existente si la tienes)
+// Función para eliminar salida
 function deleteOutput(id) {
     const output = outputs.find(o => o.id === id);
-    if (!output) return;
+    if (!output) {
+        alert('Salida no encontrada');
+        return;
+    }
     
     // Restaurar stock solo si no es préstamo pendiente
     if (output.movementType !== 'loan' || output.status !== 'pending') {
-        const item = inventory.find(i => i.id === output.itemId);
-        if (item) {
+        const itemIndex = inventory.findIndex(i => i.id === output.itemId);
+        if (itemIndex !== -1) {
+            const item = inventory[itemIndex];
             const newStock = item.stock + output.quantity;
-            inventoryRef.child(output.itemId).update({ stock: newStock });
+            
+            inventoryRef.child(output.itemId).update({ stock: newStock })
+                .then(() => {
+                    // Eliminar la salida de Firebase
+                    outputsRef.child(id).remove()
+                        .then(() => {
+                            showToast('✅ Salida eliminada correctamente');
+                        })
+                        .catch(error => {
+                            alert('Error al eliminar salida: ' + error.message);
+                        });
+                })
+                .catch(error => {
+                    alert('Error al actualizar stock: ' + error.message);
+                });
+        } else {
+            // Si no encuentra el item, igual eliminar la salida
+            outputsRef.child(id).remove()
+                .then(() => {
+                    showToast('✅ Salida eliminada correctamente');
+                })
+                .catch(error => {
+                    alert('Error al eliminar salida: ' + error.message);
+                });
         }
+    } else {
+        // Para préstamos pendientes, solo eliminar sin restaurar stock
+        outputsRef.child(id).remove()
+            .then(() => {
+                showToast('✅ Salida eliminada correctamente');
+            })
+            .catch(error => {
+                alert('Error al eliminar salida: ' + error.message);
+            });
     }
-    
-    // Eliminar salida
-    outputsRef.child(id).remove()
-        .then(() => {
-            showToast('✅ Salida eliminada correctamente');
-        })
-        .catch(error => {
-            alert('Error al eliminar salida: ' + error.message);
-        });
 }
 
 // Modificar la función confirmDeleteItem existente
 function confirmDeleteItem(id) {
-    verifyPasswordBeforeDelete('deleteItem', id, 'item');
+    verifyPasswordBeforeDelete('deleteItem', id);
 }
   
 });
