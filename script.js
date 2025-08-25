@@ -44,6 +44,8 @@ const outputsRef = database.ref('outputs');
 const typesRef = database.ref('types');
 const brandsRef = database.ref('brands');  
 const areasRef = database.ref('areas');
+// Contraseña para eliminar (cambia esta contraseña por una segura)
+const DELETE_PASSWORD = "admin123";
 
 // Datos en memoria
 let inventory = [];
@@ -54,60 +56,6 @@ let itemTypes = [];
 let itemBrands = [];  
 let areas = [];
 
-// Variables para el sistema de folios
-let currentFolioData = { year: null, letter: 'A', number: 1 };
-const foliosRef = database.ref('folios');
-
-// Función para generar el próximo folio
-function generateNextFolio() {
-    const currentYear = new Date().getFullYear().toString().slice(-2);
-    
-    // Si el año cambió, reiniciar la secuencia
-    if (currentFolioData.year !== currentYear) {
-        currentFolioData = { 
-            year: currentYear, 
-            letter: 'A', 
-            number: 1 
-        };
-        saveFolioData();
-        return formatFolio(currentFolioData);
-    }
-    
-    // Incrementar número
-    currentFolioData.number++;
-    
-    // Si llegamos a 99, cambiar letra y reiniciar número
-    if (currentFolioData.number > 99) {
-        currentFolioData.number = 1;
-        
-        // Obtener la siguiente letra del alfabeto
-        const nextCharCode = currentFolioData.letter.charCodeAt(0) + 1;
-        
-        // Si pasamos de Z, reiniciar a A (no debería pasar en un año)
-        if (nextCharCode > 90) { // 90 es el código de 'Z'
-            currentFolioData.letter = 'A';
-        } else {
-            currentFolioData.letter = String.fromCharCode(nextCharCode);
-        }
-    }
-    
-    saveFolioData();
-    return formatFolio(currentFolioData);
-}
-
-// Formatear el folio
-function formatFolio(data) {
-    return `${data.year}${data.letter}${data.number.toString().padStart(2, '0')}`;
-}
-
-// Guardar datos del folio en Firebase
-function saveFolioData() {
-    foliosRef.set(currentFolioData);
-}
-
-
-// Contraseña para eliminar (cambia esta contraseña por una segura)
-const DELETE_PASSWORD = "admin123";
 
 // Función para verificar contraseña antes de eliminar
 function verifyPasswordBeforeDelete(action, id) {
@@ -221,6 +169,59 @@ function deleteOutput(id) {
 function confirmDeleteItem(id) {
     verifyPasswordBeforeDelete('deleteItem', id);
 }
+
+
+// Variables para el sistema de folios
+let currentFolioData = { year: null, letter: 'A', number: 1 };
+const foliosRef = database.ref('folios');
+
+// Función para generar el próximo folio
+function generateNextFolio() {
+    const currentYear = new Date().getFullYear().toString().slice(-2);
+    
+    // Si el año cambió, reiniciar la secuencia
+    if (currentFolioData.year !== currentYear) {
+        currentFolioData = { 
+            year: currentYear, 
+            letter: 'A', 
+            number: 1 
+        };
+        saveFolioData();
+        return formatFolio(currentFolioData);
+    }
+    
+    // Incrementar número
+    currentFolioData.number++;
+    
+    // Si llegamos a 99, cambiar letra y reiniciar número
+    if (currentFolioData.number > 99) {
+        currentFolioData.number = 1;
+        
+        // Obtener la siguiente letra del alfabeto
+        const nextCharCode = currentFolioData.letter.charCodeAt(0) + 1;
+        
+        // Si pasamos de Z, reiniciar a A (no debería pasar en un año)
+        if (nextCharCode > 90) { // 90 es el código de 'Z'
+            currentFolioData.letter = 'A';
+        } else {
+            currentFolioData.letter = String.fromCharCode(nextCharCode);
+        }
+    }
+    
+    saveFolioData();
+    return formatFolio(currentFolioData);
+}
+
+// Formatear el folio
+function formatFolio(data) {
+    return `${data.year}${data.letter}${data.number.toString().padStart(2, '0')}`;
+}
+
+// Guardar datos del folio en Firebase
+function saveFolioData() {
+    foliosRef.set(currentFolioData);
+}
+
 
 
 // Cargar datos del folio desde Firebase
