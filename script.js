@@ -2325,12 +2325,18 @@ function resetItemForm() {
 
 
 
-// Configurar listeners para cambios en tiempo real
+// Configurar listeners para cambios en tiempo real - VERSIÓN CORREGIDA
 function setupRealTimeListeners() {
-    // Listener para inventario
+    // Listener para inventario - CORREGIDO
     inventoryRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        inventory = data ? Object.values(data) : [];
+        // Convertir objeto a array manteniendo el ID
+        inventory = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
+        
+        console.log('Inventario cargado:', inventory.length, 'items');
         loadInventory();
         checkStockAlerts();
         loadItemOptions();
@@ -2338,49 +2344,81 @@ function setupRealTimeListeners() {
         loadTypeFilterOptions();
     });
     
-    // Listener para entradas
+    // Listener para entradas - CORREGIDO
     entriesRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        entries = data ? Object.values(data) : [];
+        entries = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
+        console.log('Entradas cargadas:', entries.length, 'registros');
         loadEntries();
     });
     
-    // Listener para salidas
+    // Listener para salidas - CORREGIDO
     outputsRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        outputs = data ? Object.values(data) : [];
+        outputs = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
+        console.log('Salidas cargadas:', outputs.length, 'registros');
         loadOutputs();
     });
 
     // Listener para tipos
     typesRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        itemTypes = data ? Object.values(data) : [];
+        itemTypes = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
         loadItemTypeOptions();
     });
 
     // Listener para marcas
     brandsRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        itemBrands = data ? Object.values(data) : [];
+        itemBrands = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
         
         loadItemBrandOptions();
         loadBrandSelectorOptions();
-        console.log(`Marcas predefinidas cargadas: ${itemBrands.length}`);
+        console.log('Marcas cargadas:', itemBrands.length);
     });
 
-      // Listener para áreas
+    // Listener para áreas
     areasRef.on('value', (snapshot) => {
         const data = snapshot.val();
-        areas = data ? Object.values(data) : [];
+        areas = data ? Object.keys(data).map(key => ({
+            id: key,
+            ...data[key]
+        })) : [];
         loadAreaOptions();
+        console.log('Áreas cargadas:', areas.length);
     });
+}
+
+// Función para inicializar la aplicación
+function initializeApp() {
+    console.log('Inicializando aplicación...');
+    
+    // Configurar fechas por defecto
+    setDefaultDates();
+    
+    // Iniciar listeners de Firebase
+    setupRealTimeListeners();
+    
+    // Cargar datos de folios
+    loadFolioData();
+    
+    console.log('Aplicación inicializada correctamente');
 }
 
 // Cargar datos iniciales al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar sistema de folios
-    loadFolioData();
     // Añade un elemento para mostrar el estado de la conexión
     const statusDiv = document.createElement('div');
     statusDiv.id = 'connection-status';
@@ -2390,6 +2428,10 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.style.padding = '5px 10px';
     statusDiv.style.backgroundColor = '#f8f8f8';
     statusDiv.style.borderRadius = '5px';
+    statusDiv.style.zIndex = '10000';
+    statusDiv.style.fontSize = '12px';
     document.body.appendChild(statusDiv);
-  
+    
+    // Inicializar la aplicación
+    initializeApp();
 });
