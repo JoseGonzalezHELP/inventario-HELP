@@ -833,7 +833,7 @@ function editItem(id) {
     document.getElementById('itemModal').style.display = 'block';
 }
 
-// Guardar insumo (nuevo o editado)
+// Guardar insumo (nuevo o editado) - CON VALIDACIÓN DE ID DUPLICADO
 function saveItem() {
     let id = document.getElementById('itemId').value;
     let itemNumber = document.getElementById('itemNumber').value;
@@ -879,6 +879,22 @@ function saveItem() {
     if (itemInitialStock < 0 || itemMinStock < 1) {
         alert('El stock inicial no puede ser negativo y el stock mínimo debe ser al menos 1');
         return;
+    }
+    
+    // VALIDACIÓN DE ID DUPLICADO (solo para nuevos insumos)
+    if (!id) { // Si es un nuevo insumo (no edición)
+        const existingItem = inventory.find(item => item.id === itemNumber);
+        if (existingItem) {
+            alert('❌ Error: Ya existe un insumo con este ID. Por favor, utilice un ID único.');
+            
+            // Resaltar el campo de ID
+            const idInput = document.getElementById('itemNumber');
+            idInput.style.borderColor = 'red';
+            idInput.style.boxShadow = '0 0 0 2px rgba(239, 68, 68, 0.2)';
+            idInput.focus();
+            
+            return;
+        }
     }
     
     // Preparar datos del insumo
