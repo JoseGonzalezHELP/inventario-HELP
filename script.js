@@ -210,7 +210,6 @@ function generateNextFolio() {
     saveFolioData();
     return formatFolio(currentFolioData);
 }
-
 // Formatear el folio
 function formatFolio(data) {
     return `${data.year}${data.letter}${data.number.toString().padStart(2, '0')}`;
