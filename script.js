@@ -1567,18 +1567,18 @@ function loadOutputs() {
             <td>${output.area || 'N/A'}</td>
             <td>${outputDate}</td>
             <td class="action-buttons">
-        <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
-            <i class="fas fa-eye"></i> Ver
-        </button>
-        ${output.movementType === 'loan' && output.status === 'pending' ? 
-         `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
-            <i class="fas fa-undo"></i> Restaurar
-         </button>` : ''}
-        <button class="btn btn-danger" onclick="verifyPasswordBeforeDelete('deleteOutput', '${output.id}')">
-            <i class="fas fa-trash"></i> Eliminar
-        </button>
-    </td>
-`;
+                <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
+                    <i class="fas fa-eye"></i> Ver
+                </button>
+                ${output.movementType === 'loan' && output.status === 'pending' ? 
+                 `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
+                    <i class="fas fa-undo"></i> Restaurar
+                 </button>` : ''}
+                <button class="btn btn-danger" onclick="verifyPasswordBeforeDelete('deleteOutput', '${output.id}')">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </td>
+          `;
         tableBody.appendChild(row);
     });
 }
