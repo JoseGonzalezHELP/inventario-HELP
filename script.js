@@ -478,7 +478,7 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (VERSIÓN MEJORADA PARA MÓVILES)
+// Función para imprimir la orden de servicio (VERSIÓN CORREGIDA PARA EVITAR CORTES)
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
@@ -492,114 +492,145 @@ function printServiceOrder() {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {
+                * {
+                    box-sizing: border-box;
                     margin: 0;
                     padding: 0;
+                }
+                body {
+                    margin: 0;
+                    padding: 10px;
                     font-family: Arial, sans-serif;
                     color: #000;
                     background: #fff;
                     width: 100%;
+                    font-size: 13px;
                 }
                 .service-order-container {
                     width: 100%;
+                    max-width: 100%;
                     background: white;
-                    padding: 15px;
+                    padding: 10px;
                     font-family: Arial, sans-serif;
                     color: #000;
+                    overflow: hidden;
                 }
                 .service-order-container .images-container {
                     display: flex;
                     justify-content: space-between;
-                    align-items: flex-start;
+                    align-items: center;
                     margin-bottom: 10px;
+                    flex-wrap: wrap;
                 }
                 .service-order-container .left-logo,
                 .service-order-container .right-logo {
                     text-align: center;
                     flex: 1;
+                    min-width: 120px;
+                    max-width: 45%;
                 }
                 .service-order-container .logo img {
-                    max-height: 80px;
+                    max-height: 70px;
                     width: auto;
+                    max-width: 100%;
                 }
                 .service-order-container .hospital-name {
                     text-align: center;
-                    font-size: 16px;
+                    font-size: 14px;
                     font-weight: bold;
-                    margin-bottom: 10px;
+                    margin: 10px 0;
                     text-transform: uppercase;
+                    width: 100%;
                 }
                 .service-order-container .header-info {
                     display: flex;
-                    justify-content: space-between;
+                    flex-direction: column;
                     margin-bottom: 10px;
+                    width: 100%;
                 }
                 .service-order-container .order-title {
                     font-weight: bold;
                     text-transform: uppercase;
-                    font-size: 16px;
+                    font-size: 14px;
+                    text-align: center;
+                    margin-bottom: 10px;
                 }
                 .service-order-container .right-header {
-                    text-align: right;
+                    text-align: center;
+                    width: 100%;
                 }
                 .service-order-container .folio {
                     font-weight: bold;
                     margin-bottom: 3px;
-                    font-size: 14px;
+                    font-size: 12px;
                 }
                 .service-order-container .folio-input {
                     display: inline-block;
-                    width: 80px;
+                    width: 70px;
                     border-bottom: 1px solid #000;
-                    height: 18px;
+                    height: 16px;
                     vertical-align: bottom;
+                    font-size: 12px;
                 }
                 .service-order-container .department {
                     font-weight: bold;
                     text-transform: uppercase;
-                    margin-bottom: 8px;
-                    font-size: 12px;
+                    margin: 5px 0;
+                    font-size: 11px;
+                    line-height: 1.2;
                 }
                 .service-order-container .expedition-container {
                     display: flex;
                     justify-content: space-between;
                     margin-bottom: 10px;
+                    flex-wrap: wrap;
+                    width: 100%;
                 }
                 .service-order-container .expedition-date {
                     display: flex;
                     align-items: center;
-                    font-size: 14px;
+                    font-size: 12px;
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
+                    width: 100%;
                 }
                 .service-order-container .expedition-date span {
                     font-weight: bold;
-                    margin-right: 8px;
+                    margin-right: 5px;
+                    font-size: 12px;
                 }
                 .service-order-container .date-field {
-                    width: 100px;
+                    width: 80px;
                     border-bottom: 1px solid #000;
-                    margin-right: 8px;
-                    height: 20px;
+                    margin-right: 5px;
+                    height: 18px;
+                    font-size: 12px;
                 }
                 .service-order-container .oval-rectangle {
                     display: inline-block;
-                    padding: 2px 12px;
+                    padding: 2px 8px;
                     border: 1px solid #000;
-                    border-radius: 12px;
-                    margin: 0 4px;
-                    min-width: 50px;
+                    border-radius: 8px;
+                    margin: 0 2px;
+                    min-width: 40px;
                     text-align: center;
-                    font-size: 13px;
+                    font-size: 11px;
                 }
                 .service-order-container .reference-data {
-                    margin-bottom: 15px;
+                    margin-bottom: 10px;
+                    width: 100%;
                 }
                 .service-order-container .data-row {
                     display: flex;
-                    margin-bottom: 8px;
+                    margin-bottom: 5px;
+                    flex-wrap: wrap;
+                    width: 100%;
                 }
                 .service-order-container .data-field {
                     flex: 1;
-                    padding: 0 8px;
+                    padding: 0 5px;
+                    min-width: 45%;
+                    margin-bottom: 5px;
                 }
                 .service-order-container .data-field:first-child {
                     padding-left: 0;
@@ -609,43 +640,46 @@ function printServiceOrder() {
                 }
                 .service-order-container .underline {
                     border-bottom: 1px solid #000;
-                    padding: 4px 0;
-                    min-height: 20px;
-                    font-size: 13px;
+                    padding: 3px 0;
+                    min-height: 18px;
+                    font-size: 12px;
+                    width: 100%;
                 }
                 .service-order-container .section {
-                    margin: 12px 0;
+                    margin: 8px 0;
+                    width: 100%;
                 }
                 .service-order-container .section-title {
                     font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 14px;
+                    margin-bottom: 3px;
+                    font-size: 12px;
                 }
                 .service-order-container .centered-title {
                     font-weight: bold;
                     text-align: center;
-                    margin: 12px 0;
-                    font-size: 14px;
+                    margin: 8px 0;
+                    font-size: 12px;
                 }
                 .service-order-container .text-area {
                     width: 100%;
-                    min-height: 50px;
+                    min-height: 40px;
                     border: 1px solid #000;
-                    border-radius: 12px;
-                    padding: 8px;
-                    margin-bottom: 4px;
-                    font-size: 13px;
+                    border-radius: 8px;
+                    padding: 6px;
+                    margin-bottom: 3px;
+                    font-size: 11px;
                 }
                 .service-order-container .materials-container {
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 8px;
                     overflow: hidden;
-                    margin: 12px 0;
+                    margin: 8px 0;
+                    width: 100%;
                 }
                 .service-order-container table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
+                    font-size: 10px;
                 }
                 .service-order-container table, 
                 .service-order-container th, 
@@ -653,105 +687,126 @@ function printServiceOrder() {
                     border: 1px solid #000;
                 }
                 .service-order-container th {
-                    padding: 6px;
+                    padding: 4px;
                     text-align: center;
                     font-weight: bold;
+                    font-size: 10px;
                 }
                 .service-order-container td {
-                    padding: 5px;
-                    height: 25px;
+                    padding: 3px;
+                    height: 20px;
+                    font-size: 10px;
                 }
                 .service-order-container .footer-container {
                     display: flex;
-                    justify-content: space-between;
-                    align-items: stretch;
-                    margin-top: 15px;
+                    flex-direction: column;
+                    margin-top: 10px;
                     gap: 8px;
+                    width: 100%;
                 }
                 .service-order-container .signatures-container {
                     display: flex;
                     justify-content: space-between;
-                    width: 70%;
-                    gap: 8px;
+                    width: 100%;
+                    gap: 5px;
                 }
                 .service-order-container .signature-box {
                     text-align: center;
                     flex: 1;
-                    padding: 8px;
+                    padding: 6px;
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 8px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
+                    min-width: 30%;
                 }
                 .service-order-container .signature-title {
                     font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 13px;
+                    margin-bottom: 3px;
+                    font-size: 11px;
                 }
                 .service-order-container .signature-line {
                     border-bottom: 1px solid #000;
                     flex-grow: 1;
-                    margin: 8px 0;
-                    min-height: 30px;
+                    margin: 5px 0;
+                    min-height: 25px;
                 }
                 .service-order-container .signature-name {
                     margin-top: auto;
-                    font-size: 11px;
+                    font-size: 9px;
                     line-height: 1.2;
                 }
                 .service-order-container .note-box {
                     font-weight: bold;
-                    font-size: 10px;
+                    font-size: 9px;
                     text-align: center;
-                    padding: 8px;
+                    padding: 6px;
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 8px;
                     background-color: #f9f9f9;
-                    width: 28%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    width: 100%;
+                    margin-top: 5px;
                 }
                 .service-order-container .serial-number-container {
-                    margin: 10px 0;
+                    margin: 8px 0;
+                    width: 100%;
                 }
                 .service-order-container .serial-number-field {
                     display: flex;
                     align-items: center;
-                    font-size: 14px;
+                    font-size: 12px;
                     font-weight: bold;
+                    flex-wrap: wrap;
                 }
                 .service-order-container .serial-number-field span {
-                    margin-right: 8px;
+                    margin-right: 5px;
+                    font-size: 12px;
                 }
                 .service-order-container .serial-input {
                     display: inline-block;
-                    width: 200px;
+                    width: 150px;
                     border-bottom: 1px solid #000;
-                    min-height: 20px;
-                    padding: 2px 5px;
+                    min-height: 18px;
+                    padding: 2px 4px;
+                    font-size: 12px;
                 }
                 
                 /* Estilos de impresión específicos */
                 @media print {
                     body {
                         margin: 0 !important;
-                        padding: 0 !important;
+                        padding: 5mm !important;
                         width: 100% !important;
+                        font-size: 11px !important;
                     }
                     .service-order-container {
                         width: 100% !important;
-                        padding: 10px !important;
+                        padding: 0 !important;
                         margin: 0 !important;
                         box-shadow: none !important;
                         border: none !important;
+                        max-width: 100% !important;
                     }
                     .text-area, .date-field, .folio-input, 
                     .serial-input, .underline {
                         border: 1px solid #000 !important;
                         background-color: transparent !important;
                         color: #000 !important;
+                    }
+                    .service-order-container .logo img {
+                        max-height: 60px !important;
+                    }
+                }
+                
+                /* Media query para ajustes en impresión horizontal */
+                @media print and (orientation: landscape) {
+                    body {
+                        padding: 5mm !important;
+                    }
+                    .service-order-container {
+                        transform: scale(0.95);
+                        transform-origin: top left;
                     }
                 }
             </style>
@@ -761,10 +816,13 @@ function printServiceOrder() {
             <script>
                 // Auto-imprimir y cerrar después de un breve retraso
                 window.onload = function() {
-                    window.print();
+                    // Pequeño retraso para asegurar que todo esté cargado
                     setTimeout(function() {
-                        window.close();
-                    }, 500);
+                        window.print();
+                        setTimeout(function() {
+                            window.close();
+                        }, 100);
+                    }, 50);
                 };
             <\/script>
         </body>
@@ -773,9 +831,15 @@ function printServiceOrder() {
     
     // Abrir ventana de impresión
     const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        alert('Por favor permite ventanas emergentes para imprimir la orden de servicio.');
+        return;
+    }
+    
     printWindow.document.write(printHTML);
     printWindow.document.close();
 }
+
 // Función para mostrar/ocultar campo de área manual
 function toggleCustomArea() {
     const select = document.getElementById('outputArea');
