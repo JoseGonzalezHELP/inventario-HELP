@@ -1141,7 +1141,7 @@ select {
     /* Estilos para text-areas editables en la orden de servicio */
 .text-area[contenteditable="true"] {
     background-color: #ffffe0;
-    border: 2px dashed #ffa500;
+    border: 2px solid #ffa500;
     min-height: 60px;
     outline: none;
     padding: 10px;
