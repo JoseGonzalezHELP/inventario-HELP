@@ -285,20 +285,11 @@ function formatDate(dateString) {
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO (VERSIÓN CORREGIDA) =====
-
+// Función para generar la orden de servicio (VERSIÓN COMPLETA CORREGIDA)
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
     const formattedDate = recordDate.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-    
-    // Obtener fecha actual para "fecha de terminación"
-    const today = new Date();
-    const todayFormatted = today.toLocaleDateString('es-ES', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
@@ -333,159 +324,127 @@ function generateServiceOrder(type, data) {
     let report = '';
     let workers = '';
     let areaText = '';
-    let responsibleName = '';
     
     if (type === 'output') {
         description = `Solicitud de ${data.movementType === 'loan' ? 'préstamo' : 'salida'} de insumo biomédico`;
         report = `Entrega de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.engineer || 'Personal de biomédica';
-        responsibleName = data.engineer || 'Personal de biomédica';
         areaText = `Departamento o área: ${data.area || 'Área solicitante'}`;
     } else if (type === 'entry') {
         description = `Recepción de insumos biomédicos en el almacén`;
         report = `Recepción de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.responsible || 'Personal de almacén';
-        responsibleName = data.responsible || 'Personal de almacén';
         areaText = 'Departamento o área: Almacén Biomédico';
     }
     
     const serviceOrderHTML = `
-        <div class="service-order-container" style="width: 100%; font-family: Arial, sans-serif; color: #000;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                <div style="text-align: left; flex: 1;">
-                    <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="80" onerror="this.style.display='none'">
+        <div class="service-order-container">
+            <div class="images-container">
+                <div class="logo">
+                    <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
                 </div>
-                <div style="text-align: right; flex: 1;">
-                    <img src="./PEDIATRICO.jpg" alt="Hospital Pediátrico" height="70" onerror="this.style.display='none'">
-                </div>
-            </div>
-            
-            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 10px; text-transform: uppercase;">
-                HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <div style="font-weight: bold; text-transform: uppercase; font-size: 16px;">
-                    ORDEN DE SERVICIO
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-weight: bold; margin-bottom: 3px; font-size: 14px;">
-                        No. de Folio: <span style="display: inline-block; width: 80px; border-bottom: 1px solid #000; height: 18px; vertical-align: bottom;">${type === 'output' ? data.os : data.voucher}</span>
-                    </div>
-                    <div style="font-weight: bold; text-transform: uppercase; margin-bottom: 8px; font-size: 12px;">
-                        DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA
-                    </div>
+                <div class="logo">
+                    <img src="./PEDIATRICO.jpeg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
                 </div>
             </div>
             
-            <div style="margin: 10px 0;">
-                  <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
-                      <span style="margin-right: 8px;">No. de serie de equipo:</span>
-                      <div class="editable-field" style="display: inline-block; width: 200px; border-bottom: 1px solid #000; min-height: 20px; padding: 2px 5px;"></div>
-                  </div>
-              </div>
+            <div class="hospital-name">HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN</div>
             
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div class="header-info">
+                <div class="order-title">ORDEN DE SERVICIO</div>
+                <div class="right-header">
+                    <div class="folio">No. de Folio: <span class="folio-input">${type === 'output' ? data.os : data.voucher}</span></div>
+                    <div class="department">DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA</div>
+                </div>
+            </div>
+            
+            <div class="expedition-container">
                 <div></div>
-                <div style="display: flex; align-items: center; font-size: 14px;">
-                    <span style="font-weight: bold; margin-right: 8px;">Fecha de Expediente</span>
-                    <div style="width: 100px; border-bottom: 1px solid #000; margin-right: 8px; height: 20px;"></div>
-                    <div style="display: inline-block; padding: 2px 12px; border: 1px solid #000; border-radius: 12px; margin: 0 4px; min-width: 50px; text-align: center; font-size: 13px;">MP</div>
-                    <div style="display: inline-block; padding: 2px 12px; border: 1px solid #000; border-radius: 12px; margin: 0 4px; min-width: 50px; text-align: center; font-size: 13px;">MC</div>
+                <div class="expedition-date">
+                    <span>Fecha de Expediente</span>
+                    <div class="date-field">${formattedDate}</div>
+                    <div class="oval-rectangle">MP</div>
+                    <div class="oval-rectangle">MC</div>
                 </div>
             </div>
             
-            <div style="margin-bottom: 15px;">
-                <div style="display: flex; margin-bottom: 8px;">
-                    <div style="flex: 1; padding: 0 8px;">
-                        <div style="font-weight: bold; font-size: 14px;">Datos de referencia:</div>
+            <div class="reference-data">
+                <div class="data-row">
+                    <div class="data-field">
+                        <div class="section-title">Datos de referencia:</div>
                     </div>
                 </div>
-                <div style="display: flex; margin-bottom: 8px;">
-                    <div style="flex: 1; padding: 0 8px;">
-                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">Fecha de reporte: ${formattedDate}</div>
+                <div class="data-row">
+                    <div class="data-field">
+                        <div class="underline">Fecha de reporte: ${formattedDate}</div>
                     </div>
-                    <div style="flex: 1; padding: 0 8px;">
-                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">Fecha de terminación: ${todayFormatted}</div>
+                    <div class="data-field">
+                        <div class="underline">Fecha de terminación:</div>
                     </div>
                 </div>
-                <div style="display: flex; margin-bottom: 8px;">
-                    <div style="flex: 1; padding: 0 8px;">
-                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">${areaText}</div>
+                <div class="data-row">
+                    <div class="data-field" style="flex: 1;">
+                        <div class="underline">${areaText}</div>
                     </div>
                 </div>
             </div>
             
-          <div style="margin: 12px 0;">
-              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Descripción y problema presentado en el área:</div>
-              <div class="editable-field text-area">${description}</div>
-          </div>
-          
-          <div style="margin: 12px 0;">
-              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Reporte de trabajo realizado:</div>
-              <div class="editable-field text-area">${report}</div>
-          </div>
-          
-          <div style="margin: 12px 0;">
-              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Trabajadores: (Nombres):</div>
-              <div class="editable-field text-area">${workers}</div>
-          </div>
+            <div class="section">
+                <div class="section-title">Descripción y problema presentado en el área:</div>
+                <div class="text-area" contenteditable="true">${description}</div>
+            </div>
             
-         <div style="font-weight: bold; text-align: center; margin: 12px 0; font-size: 14px;">Materiales:</div>
-        <div style="border: 1px solid #000; border-radius: 12px; overflow: hidden; margin: 12px 0;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Cant.</th>
-                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Unidad</th>
-                        <th width="35%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Descripción</th>
-                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Costo almacén</th>
-                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Compra directa</th>
-                        <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${materialsHTML}
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="section">
+                <div class="section-title">Reporte de trabajo realizado:</div>
+                <div class="text-area" contenteditable="true">${report}</div>
+            </div>
             
-            <div style="display: flex; justify-content: space-between; align-items: stretch; margin-top: 15px; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; width: 70%; gap: 8px;">
-                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Autoriza salida de material</div>
-                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
-                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">El jefe de mantenimiento,<br>biomédica e informática</div>
+            <div class="section">
+                <div class="section-title">Trabajadores: (Nombres):</div>
+                <div class="text-area" contenteditable="true">${workers}</div>
+            </div>
+            
+            <div class="centered-title">Materiales:</div>
+            <div class="materials-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="10%">Cant.</th>
+                            <th width="15%">Unidad</th>
+                            <th width="35%">Descripción</th>
+                            <th width="15%">Costo almacén</th>
+                            <th width="15%">Compra directa</th>
+                            <th width="10%">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${materialsHTML}
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer-container">
+                <div class="signatures-container">
+                    <div class="signature-box">
+                        <div class="signature-title">Autoriza salida de material</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El jefe de mantenimiento,<br>biomédica e informática</div>
                     </div>
-                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Realizó trabajo</div>
-                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
-                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">${responsibleName}</div>
+                    <div class="signature-box">
+                        <div class="signature-title">Realizó trabajo</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El trabajador</div>
                     </div>
-                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Recibe a satisfacción</div>
-                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
-                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">El Jefe del área solicitante</div>
+                    <div class="signature-box">
+                        <div class="signature-title">Recibe a satisfacción</div>
+                        <div class="signature-line"></div>
+                        <div class="signature-name">El Jefe del área solicitante</div>
                     </div>
                 </div>
                 
-                <div style="font-weight: bold; font-size: 10px; text-align: center; padding: 8px; border: 1px solid #000; border-radius: 12px; background-color: #f9f9f9; width: 28%; display: flex; align-items: center; justify-content: center;">
+                <div class="note-box">
                     Nota: Si los materiales usados no caben en este lado, anótelos en la parte de atrás.
                 </div>
             </div>
@@ -495,354 +454,31 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
-// Función para hacer campos editables
-function makeFieldsEditable() {
-    // Hacer editables los campos específicos
-    const editableFields = document.querySelectorAll('.editable-field');
-    editableFields.forEach(field => {
-        field.setAttribute('contenteditable', 'true');
-        field.style.backgroundColor = '#ffffe0';
-        field.style.border = '2px solid #ffa500';
-        field.style.padding = '8px';
-        field.style.borderRadius = '4px';
-        field.style.minHeight = '30px';
-    });
-}
-
+// Función para mostrar la orden de servicio
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
-    
-    // Preservar el botón de cerrar existente
-    const closeButton = document.querySelector('#serviceOrderModal .close');
-    const modalActions = document.querySelector('#serviceOrderModal .modal-actions');
-    
-    // Actualizar solo el contenido, no toda la estructura
     document.getElementById('serviceOrderContent').innerHTML = orderHTML;
-    
-    // Hacer campos editables
-    makeFieldsEditable();
-    
-    // Actualizar los botones de acción (preservando el botón de cerrar)
-    if (modalActions) {
-        modalActions.innerHTML = `
-            <button class="btn btn-primary" onclick="printServiceOrder()">
-                <i class="fas fa-print"></i> Imprimir Orden
-            </button>
-        `;
-    }
-    
-    // Asegurarse de que el botón de cerrar esté visible
-    if (closeButton) {
-        closeButton.style.display = 'block';
-    }
-    
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-
-// ===== FUNCIÓN CORREGIDA PARA IMPRIMIR ORDEN DE SERVICIO =====
+// Función para imprimir la orden de servicio (CORREGIDA)
 function printServiceOrder() {
-    // Obtener el contenido de la orden de servicio
+    // Obtener el contenido editable actualizado
     const serviceOrderContent = document.getElementById('serviceOrderContent');
     
-    // Crear una ventana de impresión
-    const printWindow = window.open('', '_blank');
+    // Crear una copia para imprimir
+    const printContent = serviceOrderContent.innerHTML;
+    const originalContent = document.body.innerHTML;
     
-    // Construir el contenido HTML para imprimir
-    const printContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Orden de Servicio</title>
-            <meta charset="UTF-8">
-            <style>
-                @page { 
-                    margin: 10mm 5mm 5mm 5mm !important; /* Margen superior más grande */
-                    size: portrait;
-                }
-                body { 
-                    margin: 0 !important; 
-                    padding: 0 !important; 
-                    font-family: Arial, sans-serif;
-                    font-size: 12px;
-                    width: 100%;
-                }
-                .service-order-container {
-                    width: 100% !important;
-                    max-width: 100% !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                }
-                /* AJUSTES ESPECÍFICOS PARA LAS IMÁGENES */
-                .images-container {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-bottom: 15px !important;
-                    margin-top: 10px !important; /* Espacio superior para las imágenes */
-                    page-break-inside: avoid;
-                }
-                .left-logo, .right-logo {
-                    flex: 1;
-                    margin-bottom: 5px !important;
-                }
-                .left-logo { 
-                    text-align: left;
-                    padding-top: 5px !important;
-                }
-                .right-logo { 
-                    text-align: right;
-                    padding-top: 5px !important;
-                }
-                .logo img {
-                    max-height: 70px !important; /* Reducir ligeramente el tamaño */
-                    width: auto;
-                    object-fit: contain;
-                }
-                .hospital-name {
-                    text-align: center;
-                    font-weight: bold;
-                    font-size: 16px;
-                    margin-bottom: 15px !important;
-                    margin-top: 5px !important;
-                    text-transform: uppercase;
-                    page-break-after: avoid;
-                }
-                .header-info {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 10px;
-                }
-                .order-title {
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    font-size: 16px;
-                }
-                .folio {
-                    font-weight: bold;
-                    margin-bottom: 3px;
-                    font-size: 14px;
-                }
-                .folio-input {
-                    display: inline-block;
-                    width: 80px;
-                    border-bottom: 1px solid #000;
-                    height: 18px;
-                    vertical-align: bottom;
-                }
-                .department {
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    margin-bottom: 8px;
-                    font-size: 12px;
-                }
-                .serial-number-container {
-                    margin: 10px 0;
-                }
-                .serial-number-field {
-                    display: flex;
-                    align-items: center;
-                    font-size: 14px;
-                    font-weight: bold;
-                }
-                .serial-input {
-                    display: inline-block;
-                    width: 200px;
-                    border-bottom: 1px solid #000;
-                    min-height: 20px;
-                    padding: 2px 5px;
-                }
-                .expedition-container {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 10px;
-                }
-                .expedition-date {
-                    display: flex;
-                    align-items: center;
-                    font-size: 14px;
-                }
-                .date-field {
-                    width: 100px;
-                    border-bottom: 1px solid #000;
-                    margin-right: 8px;
-                    height: 20px;
-                }
-                .oval-rectangle {
-                    display: inline-block;
-                    padding: 2px 12px;
-                    border: 1px solid #000;
-                    border-radius: 12px;
-                    margin: 0 4px;
-                    min-width: 50px;
-                    text-align: center;
-                    font-size: 13px;
-                }
-                .reference-data {
-                    margin-bottom: 15px;
-                }
-                .data-row {
-                    display: flex;
-                    margin-bottom: 8px;
-                }
-                .data-field {
-                    flex: 1;
-                    padding: 0 8px;
-                }
-                .underline {
-                    border-bottom: 1px solid #000;
-                    padding: 4px 0;
-                    min-height: 20px;
-                    font-size: 13px;
-                }
-                .section {
-                    margin: 12px 0;
-                }
-                .section-title {
-                    font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 14px;
-                }
-                .text-area {
-                    width: 100%;
-                    min-height: 50px;
-                    border: 1px solid #000;
-                    border-radius: 12px;
-                    padding: 8px;
-                    margin-bottom: 4px;
-                    font-size: 13px;
-                    word-wrap: break-word;
-                    page-break-inside: avoid;
-                }
-                .centered-title {
-                    font-weight: bold;
-                    text-align: center;
-                    margin: 12px 0;
-                    font-size: 14px;
-                }
-                .materials-container {
-                    border: 1px solid #000;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    margin: 12px 0;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 12px;
-                }
-                th, td {
-                    border: 1px solid #000;
-                    padding: 5px;
-                    height: auto;
-                    min-height: 25px;
-                    vertical-align: top;
-                }
-                th {
-                    padding: 6px;
-                    text-align: center;
-                    font-weight: bold;
-                }
-                .footer-container {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: stretch;
-                    margin-top: 15px;
-                    gap: 8px;
-                }
-                .signatures-container {
-                    display: flex;
-                    justify-content: space-between;
-                    width: 70%;
-                    gap: 8px;
-                }
-                .signature-box {
-                    text-align: center;
-                    flex: 1;
-                    padding: 8px;
-                    border: 1px solid #000;
-                    border-radius: 12px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                }
-                .signature-title {
-                    font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 13px;
-                }
-                .signature-line {
-                    border-bottom: 1px solid #000;
-                    flex-grow: 1;
-                    margin: 8px 0;
-                    min-height: 30px;
-                }
-                .signature-name {
-                    margin-top: auto;
-                    font-size: 11px;
-                    line-height: 1.2;
-                }
-                .note-box {
-                    font-weight: bold;
-                    font-size: 10px;
-                    text-align: center;
-                    padding: 8px;
-                    border: 1px solid #000;
-                    border-radius: 12px;
-                    background-color: #f9f9f9;
-                    width: 28%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                /* ESTILOS PARA CAMPOS EDITABLES EN IMPRESIÓN */
-                .editable-field, 
-                .text-area[contenteditable="true"] {
-                    background-color: transparent !important;
-                    border: 1px solid #000 !important;
-                    padding: 4px !important;
-                    min-height: auto !important;
-                    margin: 2px 0 !important;
-                    box-sizing: border-box !important;
-                    width: 100% !important;
-                    overflow: visible !important;
-                    page-break-inside: avoid;
-                }
-                /* Asegurar que todo el contenido se ajuste */
-                * {
-                    box-sizing: border-box;
-                    max-width: 100%;
-                }
-                @media print {
-                    body { 
-                        margin: 0; 
-                        padding: 0;
-                    }
-                    .service-order-container {
-                        width: 100%;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            ${serviceOrderContent.innerHTML}
-        </body>
-        </html>
-    `;
+    // Reemplazar el contenido editable con texto normal para impresión
+    const printableContent = printContent.replace(/contenteditable="true"/g, '');
     
-    printWindow.document.write(printContent);
-    printWindow.document.close();
+    document.body.innerHTML = printableContent;
+    window.print();
+    document.body.innerHTML = originalContent;
     
-    // Esperar a que se cargue el contenido y luego imprimir
-    printWindow.onload = function() {
-        setTimeout(() => {
-            printWindow.print();
-            // No cerrar inmediatamente para dar tiempo a la impresión
-            setTimeout(() => {
-                printWindow.close();
-            }, 500);
-        }, 500);
-    };
+    // No es necesario recargar la página completa
+    // location.reload();
 }
 
 // Función para mostrar/ocultar campo de área manual
