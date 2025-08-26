@@ -495,43 +495,6 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
-// ===== FUNCIÓN MEJORADA PARA DESCARGAR PDF CAPTURANDO CAMPOS EDITADOS =====
-function downloadServiceOrderPDF() {
-    // Obtener el contenido HTML de la orden de servicio (ya editado por el usuario)
-    const serviceOrderContent = document.getElementById('serviceOrderContent');
-    
-    // Usar html2canvas para capturar el contenido como imagen
-    html2canvas(serviceOrderContent, {
-        scale: 2, // Mayor calidad
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-    }).then(canvas => {
-        // Crear PDF
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        
-        // Obtener dimensiones
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-        const imgX = (pdfWidth - imgWidth * ratio) / 2;
-        const imgY = 0;
-        
-        // Agregar imagen al PDF
-        pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-        
-        // Descargar el PDF
-        const fileName = `Orden_de_Servicio_${new Date().toISOString().slice(0, 10)}.pdf`;
-        pdf.save(fileName);
-    }).catch(error => {
-        console.error('Error al generar PDF:', error);
-        alert('Error al generar el PDF. Por favor, intente nuevamente.');
-    });
-}
 
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
@@ -546,9 +509,6 @@ function showServiceOrder(type, data) {
         modalActions.innerHTML = `
             <button class="btn btn-primary" onclick="printServiceOrder()">
                 <i class="fas fa-print"></i> Imprimir Orden
-            </button>
-            <button class="btn btn-success" onclick="downloadServiceOrderPDF()">
-                <i class="fas fa-download"></i> Descargar PDF
             </button>
         `;
     }
