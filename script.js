@@ -478,12 +478,14 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (VERSIÓN CORREGIDA PARA EVITAR CORTES)
+
+    
+// Función para imprimir la orden de servicio (VERSIÓN OPTIMIZADA PARA PDF)
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
     
-    // Crear HTML limpio para impresión
+    // Crear HTML optimizado para impresión PDF
     const printHTML = `
         <!DOCTYPE html>
         <html>
@@ -492,321 +494,299 @@ function printServiceOrder() {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
+                /* Reset y configuración general */
                 * {
                     box-sizing: border-box;
                     margin: 0;
                     padding: 0;
+                    font-family: Arial, sans-serif;
                 }
                 body {
                     margin: 0;
-                    padding: 10px;
-                    font-family: Arial, sans-serif;
+                    padding: 5mm;
+                    width: 100%;
+                    font-size: 10pt;
+                    line-height: 1.2;
                     color: #000;
                     background: #fff;
-                    width: 100%;
-                    font-size: 13px;
                 }
+                
+                /* Contenedor principal - medidas exactas para A4 */
                 .service-order-container {
-                    width: 100%;
-                    max-width: 100%;
+                    width: 180mm;
+                    max-width: 180mm;
+                    margin: 0 auto;
+                    padding: 5mm;
                     background: white;
-                    padding: 10px;
-                    font-family: Arial, sans-serif;
-                    color: #000;
-                    overflow: hidden;
                 }
-                .service-order-container .images-container {
+                
+                /* Encabezado con logos */
+                .images-container {
                     display: flex;
                     justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 10px;
-                    flex-wrap: wrap;
+                    align-items: flex-start;
+                    margin-bottom: 3mm;
+                    width: 100%;
                 }
-                .service-order-container .left-logo,
-                .service-order-container .right-logo {
-                    text-align: center;
+                .left-logo, .right-logo {
                     flex: 1;
-                    min-width: 120px;
+                    text-align: center;
                     max-width: 45%;
                 }
-                .service-order-container .logo img {
-                    max-height: 70px;
+                .logo img {
+                    max-height: 25mm;
                     width: auto;
-                    max-width: 100%;
                 }
-                .service-order-container .hospital-name {
+                
+                /* Nombre del hospital */
+                .hospital-name {
                     text-align: center;
-                    font-size: 14px;
+                    font-size: 12pt;
                     font-weight: bold;
-                    margin: 10px 0;
+                    margin: 2mm 0 4mm 0;
                     text-transform: uppercase;
                     width: 100%;
                 }
-                .service-order-container .header-info {
-                    display: flex;
-                    flex-direction: column;
-                    margin-bottom: 10px;
-                    width: 100%;
-                }
-                .service-order-container .order-title {
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    font-size: 14px;
-                    text-align: center;
-                    margin-bottom: 10px;
-                }
-                .service-order-container .right-header {
-                    text-align: center;
-                    width: 100%;
-                }
-                .service-order-container .folio {
-                    font-weight: bold;
-                    margin-bottom: 3px;
-                    font-size: 12px;
-                }
-                .service-order-container .folio-input {
-                    display: inline-block;
-                    width: 70px;
-                    border-bottom: 1px solid #000;
-                    height: 16px;
-                    vertical-align: bottom;
-                    font-size: 12px;
-                }
-                .service-order-container .department {
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    margin: 5px 0;
-                    font-size: 11px;
-                    line-height: 1.2;
-                }
-                .service-order-container .expedition-container {
+                
+                /* Sección de folio y departamento */
+                .header-info {
                     display: flex;
                     justify-content: space-between;
-                    margin-bottom: 10px;
-                    flex-wrap: wrap;
+                    margin-bottom: 4mm;
                     width: 100%;
                 }
-                .service-order-container .expedition-date {
+                .order-title {
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    font-size: 12pt;
+                }
+                .right-header {
+                    text-align: right;
+                }
+                .folio {
+                    font-weight: bold;
+                    font-size: 10pt;
+                    margin-bottom: 1mm;
+                }
+                .folio-input {
+                    display: inline-block;
+                    width: 25mm;
+                    border-bottom: 1px solid #000;
+                    height: 5mm;
+                }
+                .department {
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    font-size: 8pt;
+                    line-height: 1.1;
+                }
+                
+                /* Número de serie */
+                .serial-number-container {
+                    margin: 3mm 0;
+                    width: 100%;
+                }
+                .serial-number-field {
                     display: flex;
                     align-items: center;
-                    font-size: 12px;
-                    flex-wrap: wrap;
-                    justify-content: flex-end;
-                    width: 100%;
-                }
-                .service-order-container .expedition-date span {
+                    font-size: 10pt;
                     font-weight: bold;
-                    margin-right: 5px;
-                    font-size: 12px;
                 }
-                .service-order-container .date-field {
-                    width: 80px;
-                    border-bottom: 1px solid #000;
-                    margin-right: 5px;
-                    height: 18px;
-                    font-size: 12px;
+                .serial-number-field span {
+                    margin-right: 3mm;
                 }
-                .service-order-container .oval-rectangle {
+                .serial-input {
                     display: inline-block;
-                    padding: 2px 8px;
-                    border: 1px solid #000;
-                    border-radius: 8px;
-                    margin: 0 2px;
-                    min-width: 40px;
-                    text-align: center;
-                    font-size: 11px;
-                }
-                .service-order-container .reference-data {
-                    margin-bottom: 10px;
-                    width: 100%;
-                }
-                .service-order-container .data-row {
-                    display: flex;
-                    margin-bottom: 5px;
-                    flex-wrap: wrap;
-                    width: 100%;
-                }
-                .service-order-container .data-field {
-                    flex: 1;
-                    padding: 0 5px;
-                    min-width: 45%;
-                    margin-bottom: 5px;
-                }
-                .service-order-container .data-field:first-child {
-                    padding-left: 0;
-                }
-                .service-order-container .data-field:last-child {
-                    padding-right: 0;
-                }
-                .service-order-container .underline {
+                    width: 50mm;
                     border-bottom: 1px solid #000;
-                    padding: 3px 0;
-                    min-height: 18px;
-                    font-size: 12px;
+                    height: 5mm;
+                }
+                
+                /* Fecha de expediente */
+                .expedition-container {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-bottom: 4mm;
                     width: 100%;
                 }
-                .service-order-container .section {
-                    margin: 8px 0;
-                    width: 100%;
+                .expedition-date {
+                    display: flex;
+                    align-items: center;
+                    font-size: 10pt;
                 }
-                .service-order-container .section-title {
+                .expedition-date span {
                     font-weight: bold;
-                    margin-bottom: 3px;
-                    font-size: 12px;
+                    margin-right: 3mm;
                 }
-                .service-order-container .centered-title {
+                .date-field {
+                    width: 25mm;
+                    border-bottom: 1px solid #000;
+                    margin-right: 3mm;
+                    height: 5mm;
+                }
+                .oval-rectangle {
+                    display: inline-block;
+                    padding: 1mm 3mm;
+                    border: 1px solid #000;
+                    border-radius: 6mm;
+                    margin: 0 1mm;
+                    min-width: 12mm;
+                    text-align: center;
+                    font-size: 9pt;
+                }
+                
+                /* Datos de referencia */
+                .reference-data {
+                    margin-bottom: 4mm;
+                    width: 100%;
+                }
+                .data-row {
+                    display: flex;
+                    margin-bottom: 2mm;
+                    width: 100%;
+                }
+                .data-field {
+                    flex: 1;
+                }
+                .underline {
+                    border-bottom: 1px solid #000;
+                    padding: 1mm 0;
+                    min-height: 5mm;
+                    font-size: 10pt;
+                }
+                
+                /* Secciones de texto */
+                .section {
+                    margin: 3mm 0;
+                    width: 100%;
+                }
+                .section-title {
+                    font-weight: bold;
+                    margin-bottom: 1mm;
+                    font-size: 10pt;
+                }
+                .text-area {
+                    width: 100%;
+                    min-height: 15mm;
+                    border: 1px solid #000;
+                    border-radius: 2mm;
+                    padding: 2mm;
+                    font-size: 10pt;
+                }
+                
+                /* Título centrado */
+                .centered-title {
                     font-weight: bold;
                     text-align: center;
-                    margin: 8px 0;
-                    font-size: 12px;
+                    margin: 3mm 0;
+                    font-size: 10pt;
                 }
-                .service-order-container .text-area {
-                    width: 100%;
-                    min-height: 40px;
+                
+                /* Tabla de materiales */
+                .materials-container {
                     border: 1px solid #000;
-                    border-radius: 8px;
-                    padding: 6px;
-                    margin-bottom: 3px;
-                    font-size: 11px;
-                }
-                .service-order-container .materials-container {
-                    border: 1px solid #000;
-                    border-radius: 8px;
+                    border-radius: 2mm;
                     overflow: hidden;
-                    margin: 8px 0;
+                    margin: 3mm 0;
                     width: 100%;
                 }
-                .service-order-container table {
+                table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 10px;
+                    font-size: 8pt;
                 }
-                .service-order-container table, 
-                .service-order-container th, 
-                .service-order-container td {
+                th, td {
                     border: 1px solid #000;
-                }
-                .service-order-container th {
-                    padding: 4px;
+                    padding: 1mm;
                     text-align: center;
+                    height: 5mm;
+                }
+                th {
                     font-weight: bold;
-                    font-size: 10px;
                 }
-                .service-order-container td {
-                    padding: 3px;
-                    height: 20px;
-                    font-size: 10px;
-                }
-                .service-order-container .footer-container {
-                    display: flex;
-                    flex-direction: column;
-                    margin-top: 10px;
-                    gap: 8px;
-                    width: 100%;
-                }
-                .service-order-container .signatures-container {
+                
+                /* Pie de página con firmas */
+                .footer-container {
                     display: flex;
                     justify-content: space-between;
+                    margin-top: 5mm;
                     width: 100%;
-                    gap: 5px;
                 }
-                .service-order-container .signature-box {
+                .signatures-container {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 72%;
+                    gap: 2mm;
+                }
+                .signature-box {
                     text-align: center;
                     flex: 1;
-                    padding: 6px;
+                    padding: 2mm;
                     border: 1px solid #000;
-                    border-radius: 8px;
+                    border-radius: 2mm;
                     display: flex;
                     flex-direction: column;
-                    justify-content: space-between;
-                    min-width: 30%;
+                    min-height: 25mm;
                 }
-                .service-order-container .signature-title {
+                .signature-title {
                     font-weight: bold;
-                    margin-bottom: 3px;
-                    font-size: 11px;
+                    margin-bottom: 1mm;
+                    font-size: 9pt;
                 }
-                .service-order-container .signature-line {
+                .signature-line {
                     border-bottom: 1px solid #000;
                     flex-grow: 1;
-                    margin: 5px 0;
-                    min-height: 25px;
+                    margin: 2mm 0;
                 }
-                .service-order-container .signature-name {
-                    margin-top: auto;
-                    font-size: 9px;
-                    line-height: 1.2;
+                .signature-name {
+                    font-size: 8pt;
+                    line-height: 1.1;
                 }
-                .service-order-container .note-box {
+                .note-box {
                     font-weight: bold;
-                    font-size: 9px;
+                    font-size: 7pt;
                     text-align: center;
-                    padding: 6px;
+                    padding: 2mm;
                     border: 1px solid #000;
-                    border-radius: 8px;
+                    border-radius: 2mm;
                     background-color: #f9f9f9;
-                    width: 100%;
-                    margin-top: 5px;
-                }
-                .service-order-container .serial-number-container {
-                    margin: 8px 0;
-                    width: 100%;
-                }
-                .service-order-container .serial-number-field {
+                    width: 25%;
                     display: flex;
                     align-items: center;
-                    font-size: 12px;
-                    font-weight: bold;
-                    flex-wrap: wrap;
-                }
-                .service-order-container .serial-number-field span {
-                    margin-right: 5px;
-                    font-size: 12px;
-                }
-                .service-order-container .serial-input {
-                    display: inline-block;
-                    width: 150px;
-                    border-bottom: 1px solid #000;
-                    min-height: 18px;
-                    padding: 2px 4px;
-                    font-size: 12px;
+                    justify-content: center;
                 }
                 
                 /* Estilos de impresión específicos */
                 @media print {
                     body {
                         margin: 0 !important;
-                        padding: 5mm !important;
+                        padding: 0 !important;
                         width: 100% !important;
-                        font-size: 11px !important;
                     }
                     .service-order-container {
-                        width: 100% !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
+                        width: 180mm !important;
+                        max-width: 180mm !important;
+                        padding: 5mm !important;
+                        margin: 0 auto !important;
                         box-shadow: none !important;
                         border: none !important;
-                        max-width: 100% !important;
                     }
-                    .text-area, .date-field, .folio-input, 
-                    .serial-input, .underline {
-                        border: 1px solid #000 !important;
-                        background-color: transparent !important;
-                        color: #000 !important;
-                    }
-                    .service-order-container .logo img {
-                        max-height: 60px !important;
+                    /* Ocultar botones de acción */
+                    .modal-actions, .close {
+                        display: none !important;
                     }
                 }
                 
-                /* Media query para ajustes en impresión horizontal */
-                @media print and (orientation: landscape) {
+                /* Ajuste para móviles en navegador */
+                @media screen and (max-width: 200mm) {
                     body {
-                        padding: 5mm !important;
+                        padding: 2mm;
                     }
                     .service-order-container {
-                        transform: scale(0.95);
-                        transform-origin: top left;
+                        width: 100%;
+                        max-width: 100%;
+                        transform: scale(0.9);
+                        transform-origin: top center;
                     }
                 }
             </style>
@@ -814,9 +794,8 @@ function printServiceOrder() {
         <body>
             ${serviceOrderContent.innerHTML}
             <script>
-                // Auto-imprimir y cerrar después de un breve retraso
+                // Auto-imprimir y cerrar
                 window.onload = function() {
-                    // Pequeño retraso para asegurar que todo esté cargado
                     setTimeout(function() {
                         window.print();
                         setTimeout(function() {
