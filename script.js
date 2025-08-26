@@ -479,8 +479,7 @@ function showServiceOrder(type, data) {
 }
 
 
-    
-// Función para imprimir la orden de servicio (VERSIÓN OPTIMIZADA PARA PDF)
+// Función para imprimir la orden de servicio (VERSIÓN SIN PIE DE PÁGINA)
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
@@ -756,12 +755,14 @@ function printServiceOrder() {
                     justify-content: center;
                 }
                 
-                /* Estilos de impresión específicos */
+                /* Estilos de impresión específicos - ELIMINAR PIE DE PÁGINA */
                 @media print {
                     body {
                         margin: 0 !important;
                         padding: 0 !important;
                         width: 100% !important;
+                        /* Eliminar márgenes de Safari */
+                        margin-top: 0 !important;
                     }
                     .service-order-container {
                         width: 180mm !important;
@@ -773,6 +774,38 @@ function printServiceOrder() {
                     }
                     /* Ocultar botones de acción */
                     .modal-actions, .close {
+                        display: none !important;
+                    }
+                    /* Eliminar pies de página de Safari */
+                    @page {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        size: auto;
+                    }
+                    /* Solución específica para iOS Safari */
+                    body::after {
+                        display: none !important;
+                    }
+                    /* Prevenir saltos de página innecesarios */
+                    .service-order-container {
+                        page-break-before: avoid;
+                        page-break-after: avoid;
+                        page-break-inside: avoid;
+                    }
+                }
+                
+                /* Soluciones específicas para navegadores móviles */
+                /* Safari iOS */
+                @media print and (color) {
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                }
+                /* Ocultar cualquier elemento de URL/fecha en impresión */
+                @media print {
+                    /* Eliminar cualquier footer automático */
+                    :footer, :header {
                         display: none !important;
                     }
                 }
@@ -794,8 +827,37 @@ function printServiceOrder() {
         <body>
             ${serviceOrderContent.innerHTML}
             <script>
+                // Solución adicional para iOS - inyectar estilo para eliminar footer
+                var style = document.createElement('style');
+                style.innerHTML = '@page { margin: 0; } @media print { body { margin: 0; } }';
+                document.head.appendChild(style);
+                
+                // Detectar iOS y aplicar soluciones específicas
+                function isIOS() {
+                    return [
+                        'iPad Simulator',
+                        'iPhone Simulator',
+                        'iPod Simulator',
+                        'iPad',
+                        'iPhone',
+                        'iPod'
+                    ].includes(navigator.platform) || 
+                    (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+                }
+                
+                if (isIOS()) {
+                    // Inyectar estilos específicos para iOS
+                    var iosStyle = document.createElement('style');
+                    iosStyle.innerHTML = '@page { margin: 0; size: auto; } body { margin: 0 !important; padding: 0 !important; }';
+                    document.head.appendChild(iosStyle);
+                }
+                
                 // Auto-imprimir y cerrar
                 window.onload = function() {
+                    // Forzar la eliminación de márgenes para iOS
+                    document.body.style.margin = '0';
+                    document.body.style.padding = '0';
+                    
                     setTimeout(function() {
                         window.print();
                         setTimeout(function() {
