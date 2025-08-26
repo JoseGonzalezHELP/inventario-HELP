@@ -1163,3 +1163,61 @@ select {
     }
 }
 
+/* Agregar al archivo style.css */
+
+/* Estilos para el contenedor de imágenes */
+.service-order-container .images-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.service-order-container .left-logo {
+    text-align: left;
+    flex: 1;
+}
+
+.service-order-container .right-logo {
+    text-align: right;
+    flex: 1;
+}
+
+/* Estilos para el número de serie */
+.serial-number-container {
+    margin: 10px 0;
+}
+
+.serial-number-field {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.serial-number-field span {
+    margin-right: 8px;
+}
+
+.serial-input {
+    display: inline-block;
+    width: 200px;
+    border-bottom: 1px solid #000;
+    min-height: 20px;
+    padding: 2px 5px;
+}
+
+/* Estilos para impresión - asegurar que las imágenes se muestren correctamente */
+@media print {
+    .service-order-container .left-logo,
+    .service-order-container .right-logo {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .service-order-container .left-logo img,
+    .service-order-container .right-logo img {
+        max-height: 80px;
+        width: auto;
+    }
+}
