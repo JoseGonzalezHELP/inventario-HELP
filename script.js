@@ -286,6 +286,7 @@ function formatDate(dateString) {
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
 // ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO (VERSIÓN CORREGIDA) =====
+// ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO CON FORMATO IDÉNTICO =====
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
@@ -349,120 +350,128 @@ function generateServiceOrder(type, data) {
     }
     
     const serviceOrderHTML = `
-        <div class="service-order-container">
-            <div class="images-container">
-                <div class="logo left-logo">
-                    <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
+        <div class="service-order-container" style="width: 100%; font-family: Arial, sans-serif; color: #000;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <div style="text-align: left; flex: 1;">
+                    <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="80" onerror="this.style.display='none'">
                 </div>
-                <div class="logo right-logo">
-                    <img src="./PEDIATRICO.png" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
-                </div>
-            </div>
-            
-            <div class="hospital-name">HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN</div>
-            
-            <div class="header-info">
-                <div class="order-title">ORDEN DE SERVICIO</div>
-                <div class="right-header">
-                    <div class="folio">No. de Folio: <span class="folio-input">${type === 'output' ? data.os : data.voucher}</span></div>
-                    <div class="department">DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA</div>
+                <div style="text-align: right; flex: 1;">
+                    <img src="./PEDIATRICO.png" alt="Hospital Pediátrico" height="70" onerror="this.style.display='none'">
                 </div>
             </div>
             
-            <div class="serial-number-container">
-                <div class="serial-number-field">
-                    <span>No. de serie de equipo:</span>
-                    <div class="serial-input" contenteditable="true"></div>
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 10px; text-transform: uppercase;">
+                HOSPITAL DE ESPECIALIDADES PEDIÁTRICO LEÓN
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div style="font-weight: bold; text-transform: uppercase; font-size: 16px;">
+                    ORDEN DE SERVICIO
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: bold; margin-bottom: 3px; font-size: 14px;">
+                        No. de Folio: <span style="display: inline-block; width: 80px; border-bottom: 1px solid #000; height: 18px; vertical-align: bottom;">${type === 'output' ? data.os : data.voucher}</span>
+                    </div>
+                    <div style="font-weight: bold; text-transform: uppercase; margin-bottom: 8px; font-size: 12px;">
+                        DEPARTAMENTO DE CONSERVACIÓN, MANTENIMIENTO,<br>BIOMÉDICA E INFORMÁTICA
+                    </div>
                 </div>
             </div>
             
-            <div class="expedition-container">
+            <div style="margin: 10px 0;">
+                <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
+                    <span style="margin-right: 8px;">No. de serie de equipo:</span>
+                    <div style="display: inline-block; width: 200px; border-bottom: 1px solid #000; min-height: 20px; padding: 2px 5px;"></div>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <div></div>
-                <div class="expedition-date">
-                    <span>Fecha de Expediente</span>
-                    <div class="date-field"></div>
-                    <div class="oval-rectangle">MP</div>
-                    <div class="oval-rectangle">MC</div>
+                <div style="display: flex; align-items: center; font-size: 14px;">
+                    <span style="font-weight: bold; margin-right: 8px;">Fecha de Expediente</span>
+                    <div style="width: 100px; border-bottom: 1px solid #000; margin-right: 8px; height: 20px;"></div>
+                    <div style="display: inline-block; padding: 2px 12px; border: 1px solid #000; border-radius: 12px; margin: 0 4px; min-width: 50px; text-align: center; font-size: 13px;">MP</div>
+                    <div style="display: inline-block; padding: 2px 12px; border: 1px solid #000; border-radius: 12px; margin: 0 4px; min-width: 50px; text-align: center; font-size: 13px;">MC</div>
                 </div>
             </div>
             
-            <div class="reference-data">
-                <div class="data-row">
-                    <div class="data-field">
-                        <div class="section-title">Datos de referencia:</div>
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="flex: 1; padding: 0 8px;">
+                        <div style="font-weight: bold; font-size: 14px;">Datos de referencia:</div>
                     </div>
                 </div>
-                <div class="data-row">
-                    <div class="data-field">
-                        <div class="underline">Fecha de reporte: ${formattedDate}</div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="flex: 1; padding: 0 8px;">
+                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">Fecha de reporte: ${formattedDate}</div>
                     </div>
-                    <div class="data-field">
-                        <div class="underline">Fecha de terminación: ${todayFormatted}</div>
-                    </div>
-                </div>
-                <div class="data-row">
-                    <div class="data-field" style="flex: 1;">
-                        <div class="underline">${areaText}</div>
+                    <div style="flex: 1; padding: 0 8px;">
+                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">Fecha de terminación: ${todayFormatted}</div>
                     </div>
                 </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="flex: 1; padding: 0 8px;">
+                        <div style="border-bottom: 1px solid #000; padding: 4px 0; min-height: 20px; font-size: 13px;">${areaText}</div>
+                    </div>
+                </div>
             </div>
             
-            <div class="section">
-                <div class="section-title">Descripción y problema presentado en el área:</div>
-                <div class="text-area" contenteditable="true">${description}</div>
+            <div style="margin: 12px 0;">
+                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Descripción y problema presentado en el área:</div>
+                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${description}</div>
             </div>
             
-            <div class="section">
-                <div class="section-title">Reporte de trabajo realizado:</div>
-                <div class="text-area" contenteditable="true">${report}</div>
+            <div style="margin: 12px 0;">
+                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Reporte de trabajo realizado:</div>
+                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${report}</div>
             </div>
             
-            <div class="section">
-                <div class="section-title">Trabajadores: (Nombres):</div>
-                <div class="text-area" contenteditable="true">${workers}</div>
+            <div style="margin: 12px 0;">
+                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Trabajadores: (Nombres):</div>
+                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${workers}</div>
             </div>
             
-            <div class="centered-title">Materiales:</div>
-            <div class="materials-container">
-                <table>
+            <div style="font-weight: bold; text-align: center; margin: 12px 0; font-size: 14px;">Materiales:</div>
+            <div style="border: 1px solid #000; border-radius: 12px; overflow: hidden; margin: 12px 0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <thead>
                         <tr>
-                            <th width="10%">Cant.</th>
-                            <th width="15%">Unidad</th>
-                            <th width="35%">Descripción</th>
-                            <th width="15%">Costo almacén</th>
-                            <th width="15%">Compra directa</th>
-                            <th width="10%">Total</th>
+                            <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Cant.</th>
+                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Unidad</th>
+                            <th width="35%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Descripción</th>
+                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Costo almacén</th>
+                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Compra directa</th>
+                            <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${materialsHTML}
-                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td></tr>
+                        <tr><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td></tr>
                     </tbody>
                 </table>
             </div>
             
-            <div class="footer-container">
-                <div class="signatures-container">
-                    <div class="signature-box">
-                        <div class="signature-title">Autoriza salida de material</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">El jefe de mantenimiento,<br>biomédica e informática</div>
+            <div style="display: flex; justify-content: space-between; align-items: stretch; margin-top: 15px; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; width: 70%; gap: 8px;">
+                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Autoriza salida de material</div>
+                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
+                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">El jefe de mantenimiento,<br>biomédica e informática</div>
                     </div>
-                    <div class="signature-box">
-                        <div class="signature-title">Realizó trabajo</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">${responsibleName}</div>
+                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Realizó trabajo</div>
+                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
+                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">${responsibleName}</div>
                     </div>
-                    <div class="signature-box">
-                        <div class="signature-title">Recibe a satisfacción</div>
-                        <div class="signature-line"></div>
-                        <div class="signature-name">El Jefe del área solicitante</div>
+                    <div style="text-align: center; flex: 1; padding: 8px; border: 1px solid #000; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="font-weight: bold; margin-bottom: 4px; font-size: 13px;">Recibe a satisfacción</div>
+                        <div style="border-bottom: 1px solid #000; flex-grow: 1; margin: 8px 0; min-height: 30px;"></div>
+                        <div style="margin-top: auto; font-size: 11px; line-height: 1.2;">El Jefe del área solicitante</div>
                     </div>
                 </div>
                 
-                <div class="note-box">
+                <div style="font-weight: bold; font-size: 10px; text-align: center; padding: 8px; border: 1px solid #000; border-radius: 12px; background-color: #f9f9f9; width: 28%; display: flex; align-items: center; justify-content: center;">
                     Nota: Si los materiales usados no caben en este lado, anótelos en la parte de atrás.
                 </div>
             </div>
@@ -472,105 +481,39 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
-// ===== FUNCIÓN PARA DESCARGAR LA ORDEN EN PDF =====
+// ===== FUNCIÓN MEJORADA PARA DESCARGAR PDF CON FORMATO CORRECTO =====
 function downloadServiceOrderPDF() {
     // Obtener el contenido HTML de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
-    const orderHTML = serviceOrderContent.innerHTML;
     
-    // Crear un estilo CSS para la impresión en PDF
-    const styles = `
-        <style>
-            @page { margin: 0; }
-            body { 
-                margin: 0.5in; 
-                font-family: Arial, sans-serif;
-                font-size: 12pt;
-            }
-            .service-order-container {
-                width: 100%;
-            }
-            .images-container {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 15px;
-            }
-            .left-logo {
-                text-align: left;
-                float: left;
-            }
-            .right-logo {
-                text-align: right;
-                float: right;
-            }
-            .logo img {
-                max-height: 70px;
-                width: auto;
-            }
-            .hospital-name {
-                text-align: center;
-                font-weight: bold;
-                font-size: 14pt;
-                margin: 15px 0;
-                clear: both;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 10pt;
-            }
-            th, td {
-                border: 1px solid #000;
-                padding: 5px;
-            }
-            .text-area[contenteditable="true"] {
-                border: none;
-                background-color: transparent;
-            }
-            .signature-line {
-                border-bottom: 1px solid #000;
-                height: 40px;
-                margin: 10px 0;
-            }
-            .modal-actions {
-                display: none;
-            }
-        </style>
-    `;
-    
-    // Crear documento HTML completo para PDF
-    const pdfHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Orden de Servicio</title>
-            <meta charset="UTF-8">
-            ${styles}
-        </head>
-        <body>
-            ${orderHTML}
-        </body>
-        </html>
-    `;
-    
-    // Crear ventana para imprimir
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(pdfHTML);
-    printWindow.document.close();
-    
-    // Esperar a que se cargue el contenido y luego imprimir
-    printWindow.onload = function() {
-        // Esperar un momento para que las imágenes se carguen
-        setTimeout(() => {
-            printWindow.print();
-            // Cerrar la ventana después de imprimir
-            setTimeout(() => {
-                printWindow.close();
-            }, 100);
-        }, 500);
-    };
+    // Usar html2canvas para capturar el contenido como imagen
+    html2canvas(serviceOrderContent, {
+        scale: 2, // Mayor calidad
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        // Crear PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+        // Obtener dimensiones
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = 0;
+        
+        // Agregar imagen al PDF
+        pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+        
+        // Descargar el PDF
+        const fileName = `Orden_de_Servicio_${new Date().toISOString().slice(0, 10)}.pdf`;
+        pdf.save(fileName);
+    });
 }
-
 
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
