@@ -557,7 +557,7 @@ function printServiceOrder() {
             <meta charset="UTF-8">
             <style>
                 @page { 
-                    margin: 5mm !important; 
+                    margin: 10mm 5mm 5mm 5mm !important; /* Margen superior más grande */
                     size: portrait;
                 }
                 body { 
@@ -573,27 +573,40 @@ function printServiceOrder() {
                     padding: 0 !important;
                     margin: 0 !important;
                 }
+                /* AJUSTES ESPECÍFICOS PARA LAS IMÁGENES */
                 .images-container {
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-start;
-                    margin-bottom: 10px;
+                    margin-bottom: 15px !important;
+                    margin-top: 10px !important; /* Espacio superior para las imágenes */
+                    page-break-inside: avoid;
                 }
                 .left-logo, .right-logo {
                     flex: 1;
+                    margin-bottom: 5px !important;
                 }
-                .left-logo { text-align: left; }
-                .right-logo { text-align: right; }
+                .left-logo { 
+                    text-align: left;
+                    padding-top: 5px !important;
+                }
+                .right-logo { 
+                    text-align: right;
+                    padding-top: 5px !important;
+                }
                 .logo img {
-                    max-height: 80px;
+                    max-height: 70px !important; /* Reducir ligeramente el tamaño */
                     width: auto;
+                    object-fit: contain;
                 }
                 .hospital-name {
                     text-align: center;
                     font-weight: bold;
                     font-size: 16px;
-                    margin-bottom: 10px;
+                    margin-bottom: 15px !important;
+                    margin-top: 5px !important;
                     text-transform: uppercase;
+                    page-break-after: avoid;
                 }
                 .header-info {
                     display: flex;
