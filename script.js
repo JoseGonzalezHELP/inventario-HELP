@@ -523,7 +523,7 @@ function makeFieldsEditable() {
     editableFields.forEach(field => {
         field.setAttribute('contenteditable', 'true');
         field.style.backgroundColor = '#ffffe0';
-        field.style.border = '2px dashed #ffa500';
+        field.style.border = '2px solid #ffa500';
         field.style.padding = '8px';
         field.style.borderRadius = '4px';
         field.style.minHeight = '40px';
