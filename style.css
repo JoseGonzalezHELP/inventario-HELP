@@ -1221,3 +1221,68 @@ select {
         width: auto;
     }
 }
+
+/* Estilos para text-areas editables en la orden de servicio */
+.text-area[contenteditable="true"] {
+    background-color: #ffffe0;
+    border: 2px dashed #fca500;
+    min-height: 60px;
+    outline: none;
+    padding: 10px;
+    transition: border-color 0.3s ease;
+}
+
+.text-area[contenteditable="true"]:focus {
+    background-color: #ffffcc;
+    border: 2px solid #fca500;
+}
+
+/* Campos de entrada editables */
+.date-field[contenteditable="true"],
+.folio-input[contenteditable="true"],
+.serial-input[contenteditable="true"],
+.underline[contenteditable="true"] {
+    border-bottom: 2px dashed #fca500 !important;
+    min-height: 20px;
+    padding: 2px 5px;
+    outline: none;
+    background-color: #ffffe0;
+}
+
+.date-field[contenteditable="true"]:focus,
+.folio-input[contenteditable="true"]:focus,
+.serial-input[contenteditable="true"]:focus,
+.underline[contenteditable="true"]:focus {
+    border-bottom: 2px solid #fca500 !important;
+    background-color: #ffffcc;
+}
+
+/* Asegurar que los text-areas sean editables */
+.text-area,
+.date-field,
+.folio-input,
+.serial-input,
+.underline {
+    -webkit-user-modify: read-write-plaintext-only;
+    -moz-user-modify: read-write-plaintext-only;
+    user-modify: read-write-plaintext-only;
+}
+
+/* Estilos para impresión - mantener bordes negros */
+@media print {
+    .text-area[contenteditable="true"],
+    .date-field[contenteditable="true"],
+    .folio-input[contenteditable="true"],
+    .serial-input[contenteditable="true"],
+    .underline[contenteditable="true"] {
+        border: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+        background-color: transparent !important;
+        color: #000 !important;
+    }
+    
+    /* Ocultar elementos no necesarios en impresión */
+    .close, .modal-actions {
+        display: none !important;
+    }
+}
