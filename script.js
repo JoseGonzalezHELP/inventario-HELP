@@ -533,7 +533,7 @@ function showServiceOrder(type, data) {
 // ===== FUNCIÓN CORREGIDA PARA IMPRIMIR ORDEN DE SERVICIO =====
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
-    const serviceOrderContent = dcument.getElementById('serviceOrderContent');
+    const serviceOrderContent = document.getElementById('serviceOrderContent');
     
     // Crear una ventana de impresión
     const printWindow = window.open('', '_blank');
@@ -546,16 +546,22 @@ function printServiceOrder() {
             <title>Orden de Servicio</title>
             <meta charset="UTF-8">
             <style>
+                @page { 
+                    margin: 5mm !important; 
+                    size: portrait;
+                }
                 body { 
-                    margin: 0; 
-                    padding: 15px; 
+                    margin: 0 !important; 
+                    padding: 0 !important; 
                     font-family: Arial, sans-serif;
-                    color: #000;
+                    font-size: 12px;
                     width: 100%;
                 }
                 .service-order-container {
-                    width: 100%;
-                    background: white;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
                 }
                 .images-container {
                     display: flex;
@@ -683,6 +689,7 @@ function printServiceOrder() {
                     margin-bottom: 4px;
                     font-size: 13px;
                     word-wrap: break-word;
+                    page-break-inside: avoid;
                 }
                 .centered-title {
                     font-weight: bold;
@@ -764,6 +771,24 @@ function printServiceOrder() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                }
+                /* ESTILOS PARA CAMPOS EDITABLES EN IMPRESIÓN */
+                .editable-field, 
+                .text-area[contenteditable="true"] {
+                    background-color: transparent !important;
+                    border: 1px solid #000 !important;
+                    padding: 4px !important;
+                    min-height: auto !important;
+                    margin: 2px 0 !important;
+                    box-sizing: border-box !important;
+                    width: 100% !important;
+                    overflow: visible !important;
+                    page-break-inside: avoid;
+                }
+                /* Asegurar que todo el contenido se ajuste */
+                * {
+                    box-sizing: border-box;
+                    max-width: 100%;
                 }
                 @media print {
                     body { 
