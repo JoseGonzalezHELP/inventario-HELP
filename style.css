@@ -1119,24 +1119,36 @@ select {
 }
 
 @media print {
-    body * {
+    /* Ocultar todo EXCEPTO la orden de servicio */
+    body > *:not(#serviceOrderModal) {
         visibility: hidden;
     }
+    
+    #serviceOrderModal {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        background: white !important;
+        z-index: 9999 !important;
+    }
+    
     #serviceOrderContent, #serviceOrderContent * {
         visibility: visible;
     }
+    
     #serviceOrderContent {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
         padding: 10mm 5mm 5mm 5mm !important;
         margin: 0;
         box-sizing: border-box;
+        width: 100% !important;
     }
     
-    /* SOLO ocultar acciones del modal de orden de servicio durante impresión */
-    .modal-actions {
+    /* Ocultar solo el botón de cerrar de la orden de servicio durante impresión */
+    #serviceOrderModal .close,
+    #serviceOrderModal .modal-actions {
         display: none !important;
     }
     
@@ -1197,7 +1209,7 @@ select {
         background-color: transparent;
     }
 }
-    
+
     .modal-actions {
         display: none;
     }
