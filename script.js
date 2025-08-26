@@ -356,7 +356,7 @@ function generateServiceOrder(type, data) {
                     <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="80" onerror="this.style.display='none'">
                 </div>
                 <div style="text-align: right; flex: 1;">
-                    <img src="./PEDIATRICO.png" alt="Hospital Pediátrico" height="70" onerror="this.style.display='none'">
+                    <img src="./PEDIATRICO.jpg" alt="Hospital Pediátrico" height="70" onerror="this.style.display='none'">
                 </div>
             </div>
             
