@@ -1134,7 +1134,9 @@ select {
         margin: 0;
         box-sizing: border-box;
     }
-    .modal-actions, .close {
+    
+    /* SOLO ocultar acciones del modal de orden de servicio durante impresión */
+    .modal-actions {
         display: none !important;
     }
     
