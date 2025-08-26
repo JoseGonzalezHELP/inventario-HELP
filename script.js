@@ -286,7 +286,7 @@ function formatDate(dateString) {
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
 // ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO (VERSIÓN CORREGIDA) =====
-// ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO CON FORMATO IDÉNTICO =====
+
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
@@ -495,6 +495,19 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
+// Función para hacer campos editables
+function makeFieldsEditable() {
+    // Hacer editables los campos específicos
+    const editableFields = document.querySelectorAll('.editable-field');
+    editableFields.forEach(field => {
+        field.setAttribute('contenteditable', 'true');
+        field.style.backgroundColor = '#ffffe0';
+        field.style.border = '2px solid #ffa500';
+        field.style.padding = '8px';
+        field.style.borderRadius = '4px';
+        field.style.minHeight = '40px';
+    });
+}
 
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
@@ -516,19 +529,6 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para hacer campos editables
-function makeFieldsEditable() {
-    // Hacer editables los campos específicos
-    const editableFields = document.querySelectorAll('.editable-field');
-    editableFields.forEach(field => {
-        field.setAttribute('contenteditable', 'true');
-        field.style.backgroundColor = '#ffffe0';
-        field.style.border = '2px solid #ffa500';
-        field.style.padding = '8px';
-        field.style.borderRadius = '4px';
-        field.style.minHeight = '40px';
-    });
-}
 
 // ===== FUNCIÓN CORREGIDA PARA IMPRIMIR ORDEN DE SERVICIO =====
 function printServiceOrder() {
