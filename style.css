@@ -1119,28 +1119,30 @@ select {
 }
 
 @media print {
-    .service-order-container {
-        box-shadow: none;
-        border: none;
+    body * {
+        visibility: hidden;
+    }
+    #serviceOrderContent, #serviceOrderContent * {
+        visibility: visible;
+    }
+    #serviceOrderContent {
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
-        padding: 0;
+        padding: 10mm 5mm 5mm 5mm !important;
         margin: 0;
+        box-sizing: border-box;
     }
-    
-    .service-order-container .logo {
-        border: none;
-        background-color: transparent;
-    }
-    
-    .modal-actions {
-        display: none;
+    .modal-actions, .close {
+        display: none !important;
     }
     
     /* ESTILOS ESPECÍFICOS PARA IMPRESIÓN - CAMPOS EDITABLES */
     .editable-field, 
     .text-area[contenteditable="true"] {
         background-color: transparent !important;
-        border: 1px solid #000 !important; /* Borde más delgado y negro para impresión */
+        border: 1px solid #000 !important;
         padding: 6px !important;
         min-height: auto !important;
         margin: 2px 0 !important;
@@ -1154,10 +1156,43 @@ select {
         break-inside: avoid;
     }
     
+    /* AJUSTES PARA IMÁGENES */
+    .service-order-container .images-container {
+        margin-top: 15px !important;
+        margin-bottom: 20px !important;
+        page-break-inside: avoid;
+    }
+    
+    .service-order-container .logo img {
+        max-height: 70px !important;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    .service-order-container .hospital-name {
+        margin-top: 10px !important;
+        margin-bottom: 15px !important;
+        page-break-after: avoid;
+    }
+    
     /* Asegurar que los campos no se corten */
     .service-order-container * {
         box-sizing: border-box;
         max-width: 100%;
+    }
+    
+    /* Asegurar que todo el contenido sea visible */
+    .service-order-container {
+        box-shadow: none;
+        border: none;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .service-order-container .logo {
+        border: none;
+        background-color: transparent;
     }
 }
     
