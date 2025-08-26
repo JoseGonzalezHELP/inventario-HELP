@@ -511,19 +511,29 @@ function makeFieldsEditable() {
 
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
+    
+    // Preservar el botón de cerrar existente
+    const closeButton = document.querySelector('#serviceOrderModal .close');
+    const modalActions = document.querySelector('#serviceOrderModal .modal-actions');
+    
+    // Actualizar solo el contenido, no toda la estructura
     document.getElementById('serviceOrderContent').innerHTML = orderHTML;
     
     // Hacer campos editables
     makeFieldsEditable();
     
-    // Actualizar los botones de acción
-    const modalActions = document.querySelector('#serviceOrderModal .modal-actions');
+    // Actualizar los botones de acción (preservando el botón de cerrar)
     if (modalActions) {
         modalActions.innerHTML = `
             <button class="btn btn-primary" onclick="printServiceOrder()">
                 <i class="fas fa-print"></i> Imprimir Orden
             </button>
         `;
+    }
+    
+    // Asegurarse de que el botón de cerrar esté visible
+    if (closeButton) {
+        closeButton.style.display = 'block';
     }
     
     document.getElementById('serviceOrderModal').style.display = 'block';
