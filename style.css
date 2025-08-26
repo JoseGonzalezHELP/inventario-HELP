@@ -1221,3 +1221,95 @@ select {
         width: auto;
     }
 }
+
+/* Estilos para el contenedor de imágenes */
+.service-order-container .images-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.service-order-container .left-logo {
+    text-align: left;
+    margin-right: auto;
+    padding-left: 0;
+}
+
+.service-order-container .right-logo {
+    text-align: right;
+    margin-left: auto;
+    padding-right: 0;
+}
+
+/* Ajustar tamaño de imágenes para impresión */
+.service-order-container .logo img {
+    max-height: 80px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Estilos para los botones de acción en el modal */
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.modal-actions .btn {
+    min-width: 120px;
+}
+
+/* Estilos para el número de serie */
+.serial-number-container {
+    margin: 10px 0;
+}
+
+.serial-number-field {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.serial-number-field span {
+    margin-right: 8px;
+}
+
+.serial-input {
+    display: inline-block;
+    width: 200px;
+    border-bottom: 1px solid #000;
+    min-height: 20px;
+    padding: 2px 5px;
+}
+
+/* Estilos para impresión - asegurar que las imágenes se muestren correctamente */
+@media print {
+    .service-order-container .left-logo,
+    .service-order-container .right-logo {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    .service-order-container .left-logo {
+        float: left;
+        margin-left: 0;
+    }
+    
+    .service-order-container .right-logo {
+        float: right;
+        margin-right: 0;
+    }
+    
+    .service-order-container .logo img {
+        max-height: 70px;
+    }
+    
+    .modal-actions {
+        display: none !important;
+    }
+}
