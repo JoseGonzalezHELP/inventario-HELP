@@ -1137,6 +1137,20 @@ select {
         display: none;
     }
 
+.editable-field {
+    background-color: #ffffe0;
+    border: 2px solid #ffa500 !important; /* Contorno continuo naranja */
+    padding: 8px;
+    border-radius: 4px;
+    min-height: 40px;
+    outline: none;
+}
+
+.editable-field:focus {
+    background-color: #ffffcc;
+    border: 2px solid #ff8c00 !important; /* Contorno más oscuro al enfocar */
+}
+    
 
     /* Estilos para text-areas editables en la orden de servicio */
 .text-area[contenteditable="true"] {
