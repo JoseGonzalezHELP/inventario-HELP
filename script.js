@@ -505,7 +505,7 @@ function makeFieldsEditable() {
         field.style.border = '2px solid #ffa500';
         field.style.padding = '8px';
         field.style.borderRadius = '4px';
-        field.style.minHeight = '40px';
+        field.style.minHeight = '30px';
     });
 }
 
@@ -533,7 +533,7 @@ function showServiceOrder(type, data) {
 // ===== FUNCIÓN CORREGIDA PARA IMPRIMIR ORDEN DE SERVICIO =====
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
-    const serviceOrderContent = document.getElementById('serviceOrderContent');
+    const serviceOrderContent = dcument.getElementById('serviceOrderContent');
     
     // Crear una ventana de impresión
     const printWindow = window.open('', '_blank');
