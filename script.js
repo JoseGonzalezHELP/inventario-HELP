@@ -379,11 +379,11 @@ function generateServiceOrder(type, data) {
             </div>
             
             <div style="margin: 10px 0;">
-                <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
-                    <span style="margin-right: 8px;">No. de serie de equipo:</span>
-                    <div style="display: inline-block; width: 200px; border-bottom: 1px solid #000; min-height: 20px; padding: 2px 5px;"></div>
-                </div>
-            </div>
+                  <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
+                      <span style="margin-right: 8px;">No. de serie de equipo:</span>
+                      <div class="editable-field" style="display: inline-block; width: 200px; border-bottom: 1px solid #000; min-height: 20px; padding: 2px 5px;"></div>
+                  </div>
+              </div>
             
             <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                 <div></div>
@@ -416,41 +416,55 @@ function generateServiceOrder(type, data) {
                 </div>
             </div>
             
-            <div style="margin: 12px 0;">
-                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Descripción y problema presentado en el área:</div>
-                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${description}</div>
-            </div>
+          <div style="margin: 12px 0;">
+              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Descripción y problema presentado en el área:</div>
+              <div class="editable-field text-area">${description}</div>
+          </div>
+          
+          <div style="margin: 12px 0;">
+              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Reporte de trabajo realizado:</div>
+              <div class="editable-field text-area">${report}</div>
+          </div>
+          
+          <div style="margin: 12px 0;">
+              <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Trabajadores: (Nombres):</div>
+              <div class="editable-field text-area">${workers}</div>
+          </div>
             
-            <div style="margin: 12px 0;">
-                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Reporte de trabajo realizado:</div>
-                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${report}</div>
-            </div>
-            
-            <div style="margin: 12px 0;">
-                <div style="font-weight: bold; margin-bottom: 4px; font-size: 14px;">Trabajadores: (Nombres):</div>
-                <div style="width: 100%; min-height: 50px; border: 1px solid #000; border-radius: 12px; padding: 8px; margin-bottom: 4px; font-size: 13px;">${workers}</div>
-            </div>
-            
-            <div style="font-weight: bold; text-align: center; margin: 12px 0; font-size: 14px;">Materiales:</div>
-            <div style="border: 1px solid #000; border-radius: 12px; overflow: hidden; margin: 12px 0;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <thead>
-                        <tr>
-                            <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Cant.</th>
-                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Unidad</th>
-                            <th width="35%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Descripción</th>
-                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Costo almacén</th>
-                            <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Compra directa</th>
-                            <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${materialsHTML}
-                        <tr><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td></tr>
-                        <tr><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td><td style="border: 1px solid #000; padding: 5px; height: 25px;"></td></tr>
-                    </tbody>
-                </table>
-            </div>
+         <div style="font-weight: bold; text-align: center; margin: 12px 0; font-size: 14px;">Materiales:</div>
+        <div style="border: 1px solid #000; border-radius: 12px; overflow: hidden; margin: 12px 0;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Cant.</th>
+                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Unidad</th>
+                        <th width="35%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Descripción</th>
+                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Costo almacén</th>
+                        <th width="15%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Compra directa</th>
+                        <th width="10%" style="border: 1px solid #000; padding: 6px; text-align: center; font-weight: bold; word-wrap: break-word;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${materialsHTML}
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                        <td style="border: 1px solid #000; padding: 5px; height: 25px; word-wrap: break-word;"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
             
             <div style="display: flex; justify-content: space-between; align-items: stretch; margin-top: 15px; gap: 8px;">
                 <div style="display: flex; justify-content: space-between; width: 70%; gap: 8px;">
@@ -481,16 +495,17 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
-// ===== FUNCIÓN MEJORADA PARA DESCARGAR PDF CON FORMATO CORRECTO =====
+// ===== FUNCIÓN MEJORADA PARA DESCARGAR PDF CAPTURANDO CAMPOS EDITADOS =====
 function downloadServiceOrderPDF() {
-    // Obtener el contenido HTML de la orden de servicio
+    // Obtener el contenido HTML de la orden de servicio (ya editado por el usuario)
     const serviceOrderContent = document.getElementById('serviceOrderContent');
     
     // Usar html2canvas para capturar el contenido como imagen
     html2canvas(serviceOrderContent, {
         scale: 2, // Mayor calidad
         useCORS: true,
-        logging: false
+        logging: false,
+        backgroundColor: '#ffffff'
     }).then(canvas => {
         // Crear PDF
         const { jsPDF } = window.jspdf;
@@ -512,12 +527,18 @@ function downloadServiceOrderPDF() {
         // Descargar el PDF
         const fileName = `Orden_de_Servicio_${new Date().toISOString().slice(0, 10)}.pdf`;
         pdf.save(fileName);
+    }).catch(error => {
+        console.error('Error al generar PDF:', error);
+        alert('Error al generar el PDF. Por favor, intente nuevamente.');
     });
 }
 
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
     document.getElementById('serviceOrderContent').innerHTML = orderHTML;
+    
+    // Hacer campos editables
+    makeFieldsEditable();
     
     // Actualizar los botones de acción
     const modalActions = document.querySelector('#serviceOrderModal .modal-actions');
@@ -535,24 +556,285 @@ function showServiceOrder(type, data) {
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
-// Función para imprimir la orden de servicio (CORREGIDA)
+// Función para hacer campos editables
+function makeFieldsEditable() {
+    // Hacer editables los campos específicos
+    const editableFields = document.querySelectorAll('.editable-field');
+    editableFields.forEach(field => {
+        field.setAttribute('contenteditable', 'true');
+        field.style.backgroundColor = '#ffffe0';
+        field.style.border = '2px dashed #ffa500';
+        field.style.padding = '8px';
+        field.style.borderRadius = '4px';
+        field.style.minHeight = '40px';
+    });
+}
+
+// ===== FUNCIÓN CORREGIDA PARA IMPRIMIR ORDEN DE SERVICIO =====
 function printServiceOrder() {
-    // Obtener el contenido editable actualizado
+    // Obtener el contenido de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
     
-    // Crear una copia para imprimir
-    const printContent = serviceOrderContent.innerHTML;
-    const originalContent = document.body.innerHTML;
+    // Crear una ventana de impresión
+    const printWindow = window.open('', '_blank');
     
-    // Reemplazar el contenido editable con texto normal para impresión
-    const printableContent = printContent.replace(/contenteditable="true"/g, '');
+    // Construir el contenido HTML para imprimir
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Orden de Servicio</title>
+            <meta charset="UTF-8">
+            <style>
+                body { 
+                    margin: 0; 
+                    padding: 15px; 
+                    font-family: Arial, sans-serif;
+                    color: #000;
+                    width: 100%;
+                }
+                .service-order-container {
+                    width: 100%;
+                    background: white;
+                }
+                .images-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 10px;
+                }
+                .left-logo, .right-logo {
+                    flex: 1;
+                }
+                .left-logo { text-align: left; }
+                .right-logo { text-align: right; }
+                .logo img {
+                    max-height: 80px;
+                    width: auto;
+                }
+                .hospital-name {
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 16px;
+                    margin-bottom: 10px;
+                    text-transform: uppercase;
+                }
+                .header-info {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                .order-title {
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    font-size: 16px;
+                }
+                .folio {
+                    font-weight: bold;
+                    margin-bottom: 3px;
+                    font-size: 14px;
+                }
+                .folio-input {
+                    display: inline-block;
+                    width: 80px;
+                    border-bottom: 1px solid #000;
+                    height: 18px;
+                    vertical-align: bottom;
+                }
+                .department {
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                    font-size: 12px;
+                }
+                .serial-number-container {
+                    margin: 10px 0;
+                }
+                .serial-number-field {
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+                .serial-input {
+                    display: inline-block;
+                    width: 200px;
+                    border-bottom: 1px solid #000;
+                    min-height: 20px;
+                    padding: 2px 5px;
+                }
+                .expedition-container {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+                .expedition-date {
+                    display: flex;
+                    align-items: center;
+                    font-size: 14px;
+                }
+                .date-field {
+                    width: 100px;
+                    border-bottom: 1px solid #000;
+                    margin-right: 8px;
+                    height: 20px;
+                }
+                .oval-rectangle {
+                    display: inline-block;
+                    padding: 2px 12px;
+                    border: 1px solid #000;
+                    border-radius: 12px;
+                    margin: 0 4px;
+                    min-width: 50px;
+                    text-align: center;
+                    font-size: 13px;
+                }
+                .reference-data {
+                    margin-bottom: 15px;
+                }
+                .data-row {
+                    display: flex;
+                    margin-bottom: 8px;
+                }
+                .data-field {
+                    flex: 1;
+                    padding: 0 8px;
+                }
+                .underline {
+                    border-bottom: 1px solid #000;
+                    padding: 4px 0;
+                    min-height: 20px;
+                    font-size: 13px;
+                }
+                .section {
+                    margin: 12px 0;
+                }
+                .section-title {
+                    font-weight: bold;
+                    margin-bottom: 4px;
+                    font-size: 14px;
+                }
+                .text-area {
+                    width: 100%;
+                    min-height: 50px;
+                    border: 1px solid #000;
+                    border-radius: 12px;
+                    padding: 8px;
+                    margin-bottom: 4px;
+                    font-size: 13px;
+                    word-wrap: break-word;
+                }
+                .centered-title {
+                    font-weight: bold;
+                    text-align: center;
+                    margin: 12px 0;
+                    font-size: 14px;
+                }
+                .materials-container {
+                    border: 1px solid #000;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    margin: 12px 0;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 12px;
+                }
+                th, td {
+                    border: 1px solid #000;
+                    padding: 5px;
+                    height: auto;
+                    min-height: 25px;
+                    vertical-align: top;
+                }
+                th {
+                    padding: 6px;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                .footer-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: stretch;
+                    margin-top: 15px;
+                    gap: 8px;
+                }
+                .signatures-container {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 70%;
+                    gap: 8px;
+                }
+                .signature-box {
+                    text-align: center;
+                    flex: 1;
+                    padding: 8px;
+                    border: 1px solid #000;
+                    border-radius: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
+                .signature-title {
+                    font-weight: bold;
+                    margin-bottom: 4px;
+                    font-size: 13px;
+                }
+                .signature-line {
+                    border-bottom: 1px solid #000;
+                    flex-grow: 1;
+                    margin: 8px 0;
+                    min-height: 30px;
+                }
+                .signature-name {
+                    margin-top: auto;
+                    font-size: 11px;
+                    line-height: 1.2;
+                }
+                .note-box {
+                    font-weight: bold;
+                    font-size: 10px;
+                    text-align: center;
+                    padding: 8px;
+                    border: 1px solid #000;
+                    border-radius: 12px;
+                    background-color: #f9f9f9;
+                    width: 28%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                @media print {
+                    body { 
+                        margin: 0; 
+                        padding: 0;
+                    }
+                    .service-order-container {
+                        width: 100%;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            ${serviceOrderContent.innerHTML}
+        </body>
+        </html>
+    `;
     
-    document.body.innerHTML = printableContent;
-    window.print();
-    document.body.innerHTML = originalContent;
+    printWindow.document.write(printContent);
+    printWindow.document.close();
     
-    // No es necesario recargar la página completa
-    // location.reload();
+    // Esperar a que se cargue el contenido y luego imprimir
+    printWindow.onload = function() {
+        setTimeout(() => {
+            printWindow.print();
+            // No cerrar inmediatamente para dar tiempo a la impresión
+            setTimeout(() => {
+                printWindow.close();
+            }, 500);
+        }, 500);
+    };
 }
 
 // Función para mostrar/ocultar campo de área manual
