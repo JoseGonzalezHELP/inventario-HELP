@@ -1118,7 +1118,6 @@ select {
     justify-content: center;
 }
 
-/* Estilos para impresión */
 @media print {
     .service-order-container {
         box-shadow: none;
@@ -1132,6 +1131,35 @@ select {
         border: none;
         background-color: transparent;
     }
+    
+    .modal-actions {
+        display: none;
+    }
+    
+    /* ESTILOS ESPECÍFICOS PARA IMPRESIÓN - CAMPOS EDITABLES */
+    .editable-field, 
+    .text-area[contenteditable="true"] {
+        background-color: transparent !important;
+        border: 1px solid #000 !important; /* Borde más delgado y negro para impresión */
+        padding: 6px !important;
+        min-height: auto !important;
+        margin: 2px 0 !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        overflow: visible !important;
+    }
+    
+    .text-area {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+    
+    /* Asegurar que los campos no se corten */
+    .service-order-container * {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}
     
     .modal-actions {
         display: none;
