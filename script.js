@@ -285,11 +285,19 @@ function formatDate(dateString) {
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
 
-// Función para generar la orden de servicio (VERSIÓN COMPLETA CORREGIDA)
+// ===== FUNCIÓN PARA GENERAR LA ORDEN DE SERVICIO (VERSIÓN CORREGIDA) =====
 function generateServiceOrder(type, data) {
     // Usar la fecha del registro si está disponible, de lo contrario usar la fecha actual
     const recordDate = data.date ? new Date(data.date) : new Date();
     const formattedDate = recordDate.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+    
+    // Obtener fecha actual para "fecha de terminación"
+    const today = new Date();
+    const todayFormatted = today.toLocaleDateString('es-ES', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
@@ -324,27 +332,30 @@ function generateServiceOrder(type, data) {
     let report = '';
     let workers = '';
     let areaText = '';
+    let responsibleName = '';
     
     if (type === 'output') {
         description = `Solicitud de ${data.movementType === 'loan' ? 'préstamo' : 'salida'} de insumo biomédico`;
         report = `Entrega de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.engineer || 'Personal de biomédica';
+        responsibleName = data.engineer || 'Personal de biomédica';
         areaText = `Departamento o área: ${data.area || 'Área solicitante'}`;
     } else if (type === 'entry') {
         description = `Recepción de insumos biomédicos en el almacén`;
         report = `Recepción de ${data.quantity} unidad(es) de insumo biomédico ${data.itemName}`;
         workers = data.responsible || 'Personal de almacén';
+        responsibleName = data.responsible || 'Personal de almacén';
         areaText = 'Departamento o área: Almacén Biomédico';
     }
     
     const serviceOrderHTML = `
         <div class="service-order-container">
             <div class="images-container">
-                <div class="logo">
+                <div class="logo left-logo">
                     <img src="https://raw.githubusercontent.com/JoseGonzalezHELP/inventario-HELP/main/SecretariaDeSalud.png" alt="Secretaría de Salud" height="110" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 1 - Secretaría de Salud]'">
                 </div>
-                <div class="logo">
-                    <img src="./PEDIATRICO.jpeg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
+                <div class="logo right-logo">
+                    <img src="./PEDIATRICO.jpg" alt="Hospital Pediátrico" height="80" onerror="this.style.display='none'; this.parentNode.innerHTML='[Imagen 2 - Hospital]'">
                 </div>
             </div>
             
@@ -358,11 +369,18 @@ function generateServiceOrder(type, data) {
                 </div>
             </div>
             
+            <div class="serial-number-container">
+                <div class="serial-number-field">
+                    <span>No. de serie de equipo:</span>
+                    <div class="serial-input" contenteditable="true"></div>
+                </div>
+            </div>
+            
             <div class="expedition-container">
                 <div></div>
                 <div class="expedition-date">
                     <span>Fecha de Expediente</span>
-                    <div class="date-field">${formattedDate}</div>
+                    <div class="date-field"></div>
                     <div class="oval-rectangle">MP</div>
                     <div class="oval-rectangle">MC</div>
                 </div>
@@ -379,7 +397,7 @@ function generateServiceOrder(type, data) {
                         <div class="underline">Fecha de reporte: ${formattedDate}</div>
                     </div>
                     <div class="data-field">
-                        <div class="underline">Fecha de terminación:</div>
+                        <div class="underline">Fecha de terminación: ${todayFormatted}</div>
                     </div>
                 </div>
                 <div class="data-row">
@@ -435,7 +453,7 @@ function generateServiceOrder(type, data) {
                     <div class="signature-box">
                         <div class="signature-title">Realizó trabajo</div>
                         <div class="signature-line"></div>
-                        <div class="signature-name">El trabajador</div>
+                        <div class="signature-name">${responsibleName}</div>
                     </div>
                     <div class="signature-box">
                         <div class="signature-title">Recibe a satisfacción</div>
