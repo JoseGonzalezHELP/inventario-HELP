@@ -472,10 +472,123 @@ function generateServiceOrder(type, data) {
     return serviceOrderHTML;
 }
 
-// Función para mostrar la orden de servicio
+// ===== FUNCIÓN PARA DESCARGAR LA ORDEN EN PDF =====
+function downloadServiceOrderPDF() {
+    // Obtener el contenido HTML de la orden de servicio
+    const serviceOrderContent = document.getElementById('serviceOrderContent');
+    const orderHTML = serviceOrderContent.innerHTML;
+    
+    // Crear un estilo CSS para la impresión en PDF
+    const styles = `
+        <style>
+            @page { margin: 0; }
+            body { 
+                margin: 0.5in; 
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+            }
+            .service-order-container {
+                width: 100%;
+            }
+            .images-container {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+            }
+            .left-logo {
+                text-align: left;
+                float: left;
+            }
+            .right-logo {
+                text-align: right;
+                float: right;
+            }
+            .logo img {
+                max-height: 70px;
+                width: auto;
+            }
+            .hospital-name {
+                text-align: center;
+                font-weight: bold;
+                font-size: 14pt;
+                margin: 15px 0;
+                clear: both;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 10pt;
+            }
+            th, td {
+                border: 1px solid #000;
+                padding: 5px;
+            }
+            .text-area[contenteditable="true"] {
+                border: none;
+                background-color: transparent;
+            }
+            .signature-line {
+                border-bottom: 1px solid #000;
+                height: 40px;
+                margin: 10px 0;
+            }
+            .modal-actions {
+                display: none;
+            }
+        </style>
+    `;
+    
+    // Crear documento HTML completo para PDF
+    const pdfHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Orden de Servicio</title>
+            <meta charset="UTF-8">
+            ${styles}
+        </head>
+        <body>
+            ${orderHTML}
+        </body>
+        </html>
+    `;
+    
+    // Crear ventana para imprimir
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(pdfHTML);
+    printWindow.document.close();
+    
+    // Esperar a que se cargue el contenido y luego imprimir
+    printWindow.onload = function() {
+        // Esperar un momento para que las imágenes se carguen
+        setTimeout(() => {
+            printWindow.print();
+            // Cerrar la ventana después de imprimir
+            setTimeout(() => {
+                printWindow.close();
+            }, 100);
+        }, 500);
+    };
+}
+
+
 function showServiceOrder(type, data) {
     const orderHTML = generateServiceOrder(type, data);
     document.getElementById('serviceOrderContent').innerHTML = orderHTML;
+    
+    // Actualizar los botones de acción
+    const modalActions = document.querySelector('#serviceOrderModal .modal-actions');
+    if (modalActions) {
+        modalActions.innerHTML = `
+            <button class="btn btn-primary" onclick="printServiceOrder()">
+                <i class="fas fa-print"></i> Imprimir Orden
+            </button>
+            <button class="btn btn-success" onclick="downloadServiceOrderPDF()">
+                <i class="fas fa-download"></i> Descargar PDF
+            </button>
+        `;
+    }
+    
     document.getElementById('serviceOrderModal').style.display = 'block';
 }
 
