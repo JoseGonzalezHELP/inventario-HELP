@@ -1286,3 +1286,45 @@ select {
         display: none !important;
     }
 }
+
+/* Estilos para fechas de caducidad */
+.expiration-date-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.expiration-date-input,
+.expiration-quantity-input {
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+}
+
+.expiration-date-input:focus,
+.expiration-quantity-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+#remainingQuantity {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #e5e7eb;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+}
+
+/* Estilo para campo de factura editable */
+#entryInvoice:not([readonly]) {
+    background-color: #ffffe0;
+    border-color: #f59e0b;
+}
+
+#entryInvoice:not([readonly]):focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
