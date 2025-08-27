@@ -479,12 +479,12 @@ function showServiceOrder(type, data) {
 }
 
 
-// Función para imprimir la orden de servicio (SIN PIES DE PÁGINA PARA iOS Y ANDROID)
+// Función para imprimir la orden de servicio (VERSIÓN OPTIMIZADA PARA PDF)
 function printServiceOrder() {
     // Obtener el contenido de la orden de servicio
     const serviceOrderContent = document.getElementById('serviceOrderContent');
     
-    // Crear HTML optimizado para impresión
+    // Crear HTML optimizado para impresión PDF
     const printHTML = `
         <!DOCTYPE html>
         <html>
@@ -493,31 +493,29 @@ function printServiceOrder() {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                /* Reset completo para impresión */
+                /* Reset y configuración general */
                 * {
                     box-sizing: border-box;
                     margin: 0;
                     padding: 0;
                     font-family: Arial, sans-serif;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
                 }
                 body {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    width: 100% !important;
+                    margin: 0;
+                    padding: 5mm;
+                    width: 100%;
                     font-size: 10pt;
                     line-height: 1.2;
                     color: #000;
                     background: #fff;
                 }
                 
-                /* Contenedor principal */
+                /* Contenedor principal - medidas exactas para A4 */
                 .service-order-container {
-                    width: 100%;
-                    max-width: 100%;
+                    width: 180mm;
+                    max-width: 180mm;
                     margin: 0 auto;
-                    padding: 10px;
+                    padding: 5mm;
                     background: white;
                 }
                 
@@ -526,7 +524,7 @@ function printServiceOrder() {
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-start;
-                    margin-bottom: 10px;
+                    margin-bottom: 3mm;
                     width: 100%;
                 }
                 .left-logo, .right-logo {
@@ -535,17 +533,16 @@ function printServiceOrder() {
                     max-width: 45%;
                 }
                 .logo img {
-                    max-height: 70px;
+                    max-height: 25mm;
                     width: auto;
-                    max-width: 100%;
                 }
                 
                 /* Nombre del hospital */
                 .hospital-name {
                     text-align: center;
-                    font-size: 16px;
+                    font-size: 12pt;
                     font-weight: bold;
-                    margin: 10px 0;
+                    margin: 2mm 0 4mm 0;
                     text-transform: uppercase;
                     width: 100%;
                 }
@@ -553,172 +550,155 @@ function printServiceOrder() {
                 /* Sección de folio y departamento */
                 .header-info {
                     display: flex;
-                    flex-direction: column;
-                    margin-bottom: 15px;
+                    justify-content: space-between;
+                    margin-bottom: 4mm;
                     width: 100%;
                 }
                 .order-title {
                     font-weight: bold;
                     text-transform: uppercase;
-                    font-size: 16px;
-                    text-align: center;
-                    margin-bottom: 10px;
+                    font-size: 12pt;
                 }
                 .right-header {
-                    text-align: center;
-                    width: 100%;
+                    text-align: right;
                 }
                 .folio {
                     font-weight: bold;
-                    font-size: 14px;
-                    margin-bottom: 5px;
+                    font-size: 10pt;
+                    margin-bottom: 1mm;
                 }
                 .folio-input {
                     display: inline-block;
-                    width: 80px;
+                    width: 25mm;
                     border-bottom: 1px solid #000;
-                    height: 20px;
+                    height: 5mm;
                 }
                 .department {
                     font-weight: bold;
                     text-transform: uppercase;
-                    font-size: 12px;
-                    line-height: 1.2;
+                    font-size: 8pt;
+                    line-height: 1.1;
                 }
                 
                 /* Número de serie */
                 .serial-number-container {
-                    margin: 10px 0;
+                    margin: 3mm 0;
                     width: 100%;
                 }
                 .serial-number-field {
                     display: flex;
                     align-items: center;
-                    font-size: 14px;
+                    font-size: 10pt;
                     font-weight: bold;
                 }
                 .serial-number-field span {
-                    margin-right: 10px;
+                    margin-right: 3mm;
                 }
                 .serial-input {
                     display: inline-block;
-                    width: 150px;
+                    width: 50mm;
                     border-bottom: 1px solid #000;
-                    min-height: 20px;
-                    padding: 2px 5px;
+                    height: 5mm;
                 }
                 
                 /* Fecha de expediente */
                 .expedition-container {
                     display: flex;
                     justify-content: flex-end;
-                    margin-bottom: 15px;
+                    margin-bottom: 4mm;
                     width: 100%;
                 }
                 .expedition-date {
                     display: flex;
                     align-items: center;
-                    font-size: 14px;
-                    flex-wrap: wrap;
+                    font-size: 10pt;
                 }
                 .expedition-date span {
                     font-weight: bold;
-                    margin-right: 10px;
+                    margin-right: 3mm;
                 }
                 .date-field {
-                    width: 100px;
+                    width: 25mm;
                     border-bottom: 1px solid #000;
-                    margin-right: 10px;
-                    height: 20px;
+                    margin-right: 3mm;
+                    height: 5mm;
                 }
                 .oval-rectangle {
                     display: inline-block;
-                    padding: 2px 12px;
+                    padding: 1mm 3mm;
                     border: 1px solid #000;
-                    border-radius: 12px;
-                    margin: 0 4px;
-                    min-width: 50px;
+                    border-radius: 6mm;
+                    margin: 0 1mm;
+                    min-width: 12mm;
                     text-align: center;
-                    font-size: 13px;
+                    font-size: 9pt;
                 }
                 
                 /* Datos de referencia */
                 .reference-data {
-                    margin-bottom: 15px;
+                    margin-bottom: 4mm;
                     width: 100%;
                 }
                 .data-row {
                     display: flex;
-                    margin-bottom: 10px;
-                    flex-wrap: wrap;
+                    margin-bottom: 2mm;
                     width: 100%;
                 }
                 .data-field {
                     flex: 1;
-                    padding: 0 8px;
-                    min-width: 45%;
-                    margin-bottom: 10px;
-                }
-                .data-field:first-child {
-                    padding-left: 0;
-                }
-                .data-field:last-child {
-                    padding-right: 0;
                 }
                 .underline {
                     border-bottom: 1px solid #000;
-                    padding: 4px 0;
-                    min-height: 20px;
-                    font-size: 13px;
-                    width: 100%;
+                    padding: 1mm 0;
+                    min-height: 5mm;
+                    font-size: 10pt;
                 }
                 
                 /* Secciones de texto */
                 .section {
-                    margin: 12px 0;
+                    margin: 3mm 0;
                     width: 100%;
                 }
                 .section-title {
                     font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 14px;
+                    margin-bottom: 1mm;
+                    font-size: 10pt;
                 }
                 .text-area {
                     width: 100%;
-                    min-height: 50px;
+                    min-height: 15mm;
                     border: 1px solid #000;
-                    border-radius: 12px;
-                    padding: 8px;
-                    margin-bottom: 4px;
-                    font-size: 13px;
+                    border-radius: 2mm;
+                    padding: 2mm;
+                    font-size: 10pt;
                 }
                 
                 /* Título centrado */
                 .centered-title {
                     font-weight: bold;
                     text-align: center;
-                    margin: 12px 0;
-                    font-size: 14px;
+                    margin: 3mm 0;
+                    font-size: 10pt;
                 }
                 
                 /* Tabla de materiales */
                 .materials-container {
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 2mm;
                     overflow: hidden;
-                    margin: 12px 0;
+                    margin: 3mm 0;
                     width: 100%;
                 }
                 table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
+                    font-size: 8pt;
                 }
                 th, td {
                     border: 1px solid #000;
-                    padding: 5px;
+                    padding: 1mm;
                     text-align: center;
-                    height: 25px;
+                    height: 5mm;
                 }
                 th {
                     font-weight: bold;
@@ -727,110 +707,85 @@ function printServiceOrder() {
                 /* Pie de página con firmas */
                 .footer-container {
                     display: flex;
-                    flex-direction: column;
-                    margin-top: 15px;
-                    gap: 8px;
+                    justify-content: space-between;
+                    margin-top: 5mm;
                     width: 100%;
                 }
                 .signatures-container {
                     display: flex;
                     justify-content: space-between;
-                    width: 100%;
-                    gap: 8px;
+                    width: 72%;
+                    gap: 2mm;
                 }
                 .signature-box {
                     text-align: center;
                     flex: 1;
-                    padding: 8px;
+                    padding: 2mm;
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 2mm;
                     display: flex;
                     flex-direction: column;
-                    min-height: 80px;
+                    min-height: 25mm;
                 }
                 .signature-title {
                     font-weight: bold;
-                    margin-bottom: 4px;
-                    font-size: 13px;
+                    margin-bottom: 1mm;
+                    font-size: 9pt;
                 }
                 .signature-line {
                     border-bottom: 1px solid #000;
                     flex-grow: 1;
-                    margin: 8px 0;
-                    min-height: 30px;
+                    margin: 2mm 0;
                 }
                 .signature-name {
-                    margin-top: auto;
-                    font-size: 11px;
-                    line-height: 1.2;
+                    font-size: 8pt;
+                    line-height: 1.1;
                 }
                 .note-box {
                     font-weight: bold;
-                    font-size: 10px;
+                    font-size: 7pt;
                     text-align: center;
-                    padding: 8px;
+                    padding: 2mm;
                     border: 1px solid #000;
-                    border-radius: 12px;
+                    border-radius: 2mm;
                     background-color: #f9f9f9;
-                    width: 100%;
-                    margin-top: 10px;
+                    width: 25%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 
-                /* ===== ESTILOS CRÍTICOS PARA ELIMINAR PIES DE PÁGINA ===== */
+                /* Estilos de impresión específicos */
                 @media print {
-                    /* Eliminar márgenes por defecto del navegador */
-                    @page {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        size: auto;
-                    }
-                    
-                    /* Reset completo del body */
                     body {
                         margin: 0 !important;
-                        padding: 5mm !important;
-                        width: 100% !important;
-                        height: auto !important;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                    }
-                    
-                    /* Ocultar elementos de UI del navegador */
-                    .service-order-container {
-                        width: 100% !important;
-                        max-width: 100% !important;
-                        margin: 0 auto !important;
                         padding: 0 !important;
+                        width: 100% !important;
+                    }
+                    .service-order-container {
+                        width: 180mm !important;
+                        max-width: 180mm !important;
+                        padding: 5mm !important;
+                        margin: 0 auto !important;
                         box-shadow: none !important;
                         border: none !important;
                     }
-                    
-                    /* Prevenir que los navegadores añadan sus headers/footers */
-                    html, body {
-                        height: 100% !important;
-                        overflow: visible !important;
-                    }
-                    
-                    /* Solución específica para Safari */
-                    body::after {
-                        content: "" !important;
-                        display: none !important;
-                    }
-                    
-                    /* Ocultar cualquier elemento añadido por el navegador */
-                    ::-webkit-scrollbar {
+                    /* Ocultar botones de acción */
+                    .modal-actions, .close {
                         display: none !important;
                     }
                 }
                 
-                /* Media query para ajustes en móviles */
-                @media screen and (max-width: 768px) {
+                /* Ajuste para móviles en navegador */
+                @media screen and (max-width: 200mm) {
                     body {
-                        padding: 5px;
+                        padding: 2mm;
                     }
                     .service-order-container {
                         width: 100%;
                         max-width: 100%;
+                        transform: scale(0.9);
+                        transform-origin: top center;
                     }
                 }
             </style>
@@ -838,41 +793,14 @@ function printServiceOrder() {
         <body>
             ${serviceOrderContent.innerHTML}
             <script>
-                // Solución universal para eliminar pies de página
-                function removePrintFooters() {
-                    // Inyectar estilos críticos
-                    var criticalStyles = document.createElement('style');
-                    criticalStyles.innerHTML = '
-                        @page { margin: 0 !important; padding: 0 !important; size: auto; } 
-                        body { margin: 0 !important; padding: 5mm !important; width: 100% !important; } 
-                        .service-order-container { width: 100% !important; margin: 0 auto !important; padding: 0 !important; }
-                    ';
-                    document.head.appendChild(criticalStyles);
-                    
-                    // Forzar reset de márgenes
-                    document.body.style.margin = '0';
-                    document.body.style.padding = '0';
-                    document.documentElement.style.margin = '0';
-                    document.documentElement.style.padding = '0';
-                }
-                
-                // Ejecutar inmediatamente
-                removePrintFooters();
-                
                 // Auto-imprimir y cerrar
                 window.onload = function() {
-                    // Reforzar estilos antes de imprimir
-                    removePrintFooters();
-                    
-                    // Pequeña pausa para asegurar que los estilos se apliquen
                     setTimeout(function() {
                         window.print();
-                        
-                        // Cerrar después de imprimir
                         setTimeout(function() {
                             window.close();
-                        }, 500);
-                    }, 100);
+                        }, 100);
+                    }, 50);
                 };
             <\/script>
         </body>
