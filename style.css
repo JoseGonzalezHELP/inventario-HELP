@@ -1328,3 +1328,67 @@ select {
     border-color: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
 }
+/* Estilos para fechas de caducidad */
+.expiration-date-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.expiration-date-input,
+.expiration-quantity-input {
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+}
+
+.expiration-date-input:focus,
+.expiration-quantity-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+.expiration-date-input:readonly,
+.expiration-quantity-input:readonly {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: var(--gray);
+}
+
+#remainingQuantity {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background-color: #e5e7eb;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+}
+
+/* Estilo para campos deshabilitados en modo edición */
+#entryModal input[readonly]:not(#entryInvoice),
+#entryModal select[disabled],
+#entryModal textarea[readonly] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: var(--gray);
+}
+
+#entryModal input[readonly]:not(#entryInvoice):focus,
+#entryModal select[disabled]:focus,
+#entryModal textarea[readonly]:focus {
+    border-color: #e2e8f0;
+    box-shadow: none;
+}
+
+/* Estilo para campo de factura editable */
+#entryInvoice:not([readonly]) {
+    background-color: #ffffff;
+    border-color: var(--primary);
+}
+
+#entryInvoice:not([readonly]):focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
