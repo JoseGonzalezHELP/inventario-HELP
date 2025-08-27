@@ -1616,6 +1616,20 @@ function openAddEntryModal() {
     
     document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('customResponsible').style.display = 'none';
+    
+    // Resetear fechas de caducidad
+    document.getElementById('expirationDatesContainer').innerHTML = '';
+    document.getElementById('expirationSection').style.display = 'none';
+    const remainingQuantity = document.getElementById('remainingQuantity');
+    if (remainingQuantity) remainingQuantity.remove();
+    
+    // Hacer el campo de factura editable inicialmente
+    document.getElementById('entryInvoice').removeAttribute('readonly');
+    document.getElementById('entryInvoice').style.backgroundColor = '#ffffe0';
+    document.getElementById('entryInvoice').style.borderColor = '#f59e0b';
+    
+    editingEntryId = null;
+    
     document.getElementById('entryModal').style.display = 'block';
 }
 
@@ -1652,8 +1666,16 @@ function saveEntry() {
     const quantity = parseInt(document.getElementById('entryQuantity').value);
     const comments = document.getElementById('entryComments').value;
     const date = document.getElementById('entryDate').value;
-    
-    // Manejo del responsable (selección o manual)
+
+    // Validar fechas de caducidad si existen
+    const hasExpirationDates = document.getElementById('expirationSection').style.display !== 'none';
+    if (hasExpirationDates && !validateExpirationDates()) {
+        return;
+    }
+    // Obtener fechas de caducidad
+    const expirationData = hasExpirationDates ? getExpirationDates() : [];
+  
+  // Manejo del responsable (selección o manual)
     let responsible = document.getElementById('entryResponsible').value;
     if (responsible === 'OTRO') {
         responsible = document.getElementById('customResponsible').value.trim();
@@ -1669,16 +1691,17 @@ function saveEntry() {
         return;
     }
     
-    // VERIFICAR FOLIO DUPLICADO
-    const folioExists = entries.some(entry => entry.voucher === voucher) || 
-                       outputs.some(output => output.os === voucher);
-    
-    if (folioExists) {
-        alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
-        return;
+    // VERIFICAR FOLIO DUPLICADO (solo para nuevas entradas, no para edición)
+    if (!editingEntryId) {
+        const folioExists = entries.some(entry => entry.voucher === voucher) || 
+                           outputs.some(output => output.os === voucher);
+        
+        if (folioExists) {
+            alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
+            return;
+        }
     }
     
-    // Resto del código existente...
     // Buscar el insumo en el inventario
     const itemIndex = inventory.findIndex(i => i.id === itemId);
     if (itemIndex === -1) {
@@ -1687,7 +1710,7 @@ function saveEntry() {
     }
     
     // Crear objeto de entrada
-    const entryId = Date.now().toString();
+    const entryId = editingEntryId || Date.now().toString();
     const entry = {
         id: entryId,
         itemId: itemId,
@@ -1697,7 +1720,8 @@ function saveEntry() {
         responsible: responsible,
         comments: comments || null,
         date: document.getElementById('entryDate').value + 'T00:00:00',
-        isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
+        isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO',
+        expirationData: expirationData // Agregar datos de caducidad
     };
     
     // Guardar en Firebase
@@ -1717,28 +1741,252 @@ function saveEntry() {
                     });
                     
                     closeModal('entryModal');
-                    showToast('✅ Entrada registrada correctamente');
+                    showToast(editingEntryId ? '✅ Entrada actualizada correctamente' : '✅ Entrada registrada correctamente');
                 })
                 .catch(error => alert('Error al actualizar stock: ' + error));
         })
         .catch(error => alert('Error al guardar entrada: ' + error));
 }
 
-// Ver detalles de entrada - CORREGIDA
+// Función para editar número de factura
+function editInvoiceNumber() {
+    const invoiceInput = document.getElementById('entryInvoice');
+    const isReadOnly = invoiceInput.hasAttribute('readonly');
+    
+    if (isReadOnly) {
+        invoiceInput.removeAttribute('readonly');
+        invoiceInput.style.backgroundColor = '#ffffe0';
+        invoiceInput.style.borderColor = '#f59e0b';
+        showToast('🔓 Modo edición activado para N° Factura');
+    } else {
+        invoiceInput.setAttribute('readonly', 'true');
+        invoiceInput.style.backgroundColor = '';
+        invoiceInput.style.borderColor = '';
+        showToast('🔒 Modo edición desactivado');
+    }
+}
+
+// Función para agregar fecha de caducidad
+function addExpirationDate() {
+    const container = document.getElementById('expirationDatesContainer');
+    const dateId = `expDate_${Date.now()}`;
+    
+    const dateRow = document.createElement('div');
+    dateRow.className = 'expiration-date-row';
+    dateRow.style.display = 'flex';
+    dateRow.style.gap = '0.5rem';
+    dateRow.style.marginBottom = '0.5rem';
+    dateRow.style.alignItems = 'center';
+    
+    dateRow.innerHTML = `
+        <input type="date" class="expiration-date-input" style="flex: 2;">
+        <input type="number" class="expiration-quantity-input" min="1" placeholder="Cantidad" style="flex: 1;">
+        <button type="button" class="btn btn-danger" onclick="removeExpirationDate(this)" style="width: auto;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(dateRow);
+    
+    // Actualizar cantidades máximas
+    updateExpirationQuantities();
+}
+
+// Función para eliminar fecha de caducidad
+function removeExpirationDate(button) {
+    const row = button.parentElement;
+    row.remove();
+    updateExpirationQuantities();
+}
+
+// Función para actualizar cantidades máximas
+function updateExpirationQuantities() {
+    const totalQuantity = parseInt(document.getElementById('entryQuantity').value) || 0;
+    const quantityInputs = document.querySelectorAll('.expiration-quantity-input');
+    const remainingQuantity = document.getElementById('remainingQuantity');
+    
+    let assignedQuantity = 0;
+    quantityInputs.forEach(input => {
+        assignedQuantity += parseInt(input.value) || 0;
+    });
+    
+    const availableQuantity = totalQuantity - assignedQuantity;
+    
+    quantityInputs.forEach(input => {
+        const currentValue = parseInt(input.value) || 0;
+        input.max = currentValue + availableQuantity;
+    });
+    
+    // Mostrar cantidad restante
+    if (!remainingQuantity) {
+        const container = document.getElementById('expirationDatesContainer');
+        const infoDiv = document.createElement('div');
+        infoDiv.id = 'remainingQuantity';
+        infoDiv.style.margin = '0.5rem 0';
+        infoDiv.style.padding = '0.5rem';
+        infoDiv.style.backgroundColor = '#e5e7eb';
+        infoDiv.style.borderRadius = 'var(--border-radius-sm)';
+        infoDiv.style.fontSize = '0.9rem';
+        container.parentNode.insertBefore(infoDiv, container.nextSibling);
+    }
+    
+    document.getElementById('remainingQuantity').textContent = 
+        `Cantidad asignada: ${assignedQuantity} / ${totalQuantity} | Restante: ${availableQuantity}`;
+    
+    if (availableQuantity < 0) {
+        document.getElementById('remainingQuantity').style.color = '#ef4444';
+        document.getElementById('remainingQuantity').style.fontWeight = 'bold';
+    } else {
+        document.getElementById('remainingQuantity').style.color = '';
+        document.getElementById('remainingQuantity').style.fontWeight = '';
+    }
+}
+
+// Función para validar fechas de caducidad
+function validateExpirationDates() {
+    const totalQuantity = parseInt(document.getElementById('entryQuantity').value) || 0;
+    const quantityInputs = document.querySelectorAll('.expiration-quantity-input');
+    
+    let assignedQuantity = 0;
+    quantityInputs.forEach(input => {
+        assignedQuantity += parseInt(input.value) || 0;
+    });
+    
+    if (assignedQuantity !== totalQuantity) {
+        alert(`❌ La suma de las cantidades (${assignedQuantity}) debe ser igual a la cantidad total (${totalQuantity})`);
+        return false;
+    }
+    
+    // Validar fechas únicas
+    const dateInputs = document.querySelectorAll('.expiration-date-input');
+    const dates = [];
+    
+    dateInputs.forEach(input => {
+        if (input.value) {
+            dates.push(input.value);
+        }
+    });
+    
+    const uniqueDates = [...new Set(dates)];
+    if (dates.length !== uniqueDates.length) {
+        alert('❌ No puede haber fechas de caducidad duplicadas');
+        return false;
+    }
+    
+    return true;
+}
+
+// Función para obtener las fechas de caducidad
+function getExpirationDates() {
+    const dateInputs = document.querySelectorAll('.expiration-date-input');
+    const quantityInputs = document.querySelectorAll('.expiration-quantity-input');
+    const expirationData = [];
+    
+    dateInputs.forEach((input, index) => {
+        if (input.value && quantityInputs[index].value) {
+            expirationData.push({
+                date: input.value,
+                quantity: parseInt(quantityInputs[index].value)
+            });
+        }
+    });
+    
+    return expirationData;
+}
+
+// Función para cargar fechas de caducidad existentes
+function loadExpirationDates(expirationData) {
+    const container = document.getElementById('expirationDatesContainer');
+    container.innerHTML = '';
+    
+    if (expirationData && expirationData.length > 0) {
+        expirationData.forEach(item => {
+            const dateId = `expDate_${Date.now()}`;
+            const dateRow = document.createElement('div');
+            dateRow.className = 'expiration-date-row';
+            dateRow.style.display = 'flex';
+            dateRow.style.gap = '0.5rem';
+            dateRow.style.marginBottom = '0.5rem';
+            dateRow.style.alignItems = 'center';
+            
+            dateRow.innerHTML = `
+                <input type="date" class="expiration-date-input" value="${item.date}" style="flex: 2;">
+                <input type="number" class="expiration-quantity-input" value="${item.quantity}" min="1" placeholder="Cantidad" style="flex: 1;">
+                <button type="button" class="btn btn-danger" onclick="removeExpirationDate(this)" style="width: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(dateRow);
+        });
+        
+        document.getElementById('expirationSection').style.display = 'block';
+        updateExpirationQuantities();
+    }
+}
+
+
+// Función para editar entrada existente
+function editEntry(id) {
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    
+    editingEntryId = id;
+    
+    document.getElementById('entryModalTitle').textContent = 'Editar Entrada';
+    document.getElementById('entryForm').reset();
+    
+    // Llenar campos del formulario
+    document.getElementById('entryVoucher').value = entry.voucher;
+    document.getElementById('entryInvoice').value = entry.invoice || '';
+    document.getElementById('entryQuantity').value = entry.quantity;
+    document.getElementById('entryComments').value = entry.comments || '';
+    document.getElementById('entryDate').value = entry.date.split('T')[0];
+    
+    // Seleccionar el item
+    document.getElementById('entryItem').value = entry.itemId;
+    
+    // Seleccionar responsable
+    if (entry.isCustomResponsible) {
+        document.getElementById('entryResponsible').value = 'OTRO';
+        document.getElementById('customResponsible').value = entry.responsible;
+        document.getElementById('customResponsible').style.display = 'block';
+    } else {
+        document.getElementById('entryResponsible').value = entry.responsible;
+        document.getElementById('customResponsible').style.display = 'none';
+    }
+    
+    // Cargar fechas de caducidad si existen
+    if (entry.expirationData && entry.expirationData.length > 0) {
+        loadExpirationDates(entry.expirationData);
+    } else {
+        document.getElementById('expirationDatesContainer').innerHTML = '';
+        document.getElementById('expirationSection').style.display = 'none';
+    }
+    
+    // Hacer el campo de factura editable
+    document.getElementById('entryInvoice').removeAttribute('readonly');
+    document.getElementById('entryInvoice').style.backgroundColor = '#ffffe0';
+    document.getElementById('entryInvoice').style.borderColor = '#f59e0b';
+    
+    document.getElementById('entryModal').style.display = 'block';
+}
+
 function viewEntryDetails(id) {
     const entry = entries.find(e => e.id === id);
     if (!entry) return;
 
     const item = inventory.find(i => i.id === entry.itemId) || { name: "Desconocido" };
     
-    // Mostrar la orden de servicio
+    // Mostrar la orden de servicio con botón de editar
     showServiceOrder('entry', {
         voucher: entry.voucher || 'N/A',
         quantity: entry.quantity,
         responsible: entry.responsible || 'N/A',
         itemId: entry.itemId,
         itemName: item.name,
-        date: entry.date || new Date().toISOString()
+        date: entry.date || new Date().toISOString(),
+        entryId: id // Pasar el ID para editar
     });
 }
 
@@ -1751,7 +1999,7 @@ function loadEntries() {
     
     entries.forEach(entry => {
         let item = inventory.find(i => i.id === entry.itemId) || { name: "Insumo no encontrado" };
-        
+
         // Formatear fecha correctamente (dd/mm/aaaa)
         let entryDate = 'N/A';
         if (entry.date) {
@@ -1775,6 +2023,9 @@ function loadEntries() {
             <td class="action-buttons">
                 <button class="btn btn-primary" onclick="viewEntryDetails('${entry.id}')">
                     <i class="fas fa-eye"></i> Ver
+                </button>
+                <button class="btn btn-warning" onclick="editEntry('${entry.id}')">
+                    <i class="fas fa-edit"></i> Editar
                 </button>
                 <button class="btn btn-danger" onclick="verifyPasswordBeforeDelete('deleteEntry', '${entry.id}')">
                     <i class="fas fa-trash"></i> Eliminar
@@ -2834,6 +3085,43 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.style.zIndex = '10000';
     statusDiv.style.fontSize = '12px';
     document.body.appendChild(statusDiv);
+
+  // Event listener para cambios en la cantidad
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar evento para cambios en la cantidad
+    document.addEventListener('input', function(e) {
+        if (e.target.id === 'entryQuantity') {
+            updateExpirationQuantities();
+            
+            // Mostrar/ocultar sección de caducidad basado en si el item tiene fecha de caducidad
+            const itemId = document.getElementById('entryItem').value;
+            if (itemId) {
+                const item = inventory.find(i => i.id === itemId);
+                if (item && item.expiration) {
+                    document.getElementById('expirationSection').style.display = 'block';
+                }
+            }
+        }
+    });
+    
+    // Evento para cambios en la selección de item
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'entryItem') {
+            const itemId = e.target.value;
+            if (itemId) {
+                const item = inventory.find(i => i.id === itemId);
+                if (item && item.expiration) {
+                    document.getElementById('expirationSection').style.display = 'block';
+                } else {
+                    document.getElementById('expirationSection').style.display = 'none';
+                    document.getElementById('expirationDatesContainer').innerHTML = '';
+                    const remainingQuantity = document.getElementById('remainingQuantity');
+                    if (remainingQuantity) remainingQuantity.remove();
+                }
+            }
+        }
+    });
+});
     
     // Inicializar la aplicación
     initializeApp();
