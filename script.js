@@ -273,6 +273,11 @@ function showToast(message) {
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     
+    // Si ya está en formato dd/mm/aaaa, devolverlo directamente
+    if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        return dateString;
+    }
+    
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return 'N/A';
     
@@ -281,6 +286,45 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     
     return `${day}/${month}/${year}`;
+}
+
+// Función para convertir fecha dd/mm/aaaa a objeto Date
+function parseDate(dateString) {
+    if (!dateString) return null;
+    
+    // Si ya es un objeto Date, devolverlo
+    if (dateString instanceof Date) return dateString;
+    
+    // Si está en formato dd/mm/aaaa, convertirlo
+    if (typeof dateString === 'string' && dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const parts = dateString.split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+    
+    // Si está en formato ISO (de base de datos)
+    if (typeof dateString === 'string' && dateString.includes('T')) {
+        return new Date(dateString);
+    }
+    
+    // Para otros formatos, intentar crear Date
+    return new Date(dateString);
+}
+
+// Función para convertir fecha dd/mm/aaaa a formato ISO para Firebase
+function convertToISO(dateString) {
+    if (!dateString) return null;
+    
+    // Si ya está en formato ISO, devolverlo
+    if (dateString.includes('T')) return dateString;
+    
+    // Convertir dd/mm/aaaa a ISO
+    if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        const parts = dateString.split('/');
+        const date = new Date(parts[2], parts[1] - 1, parts[0]);
+        return date.toISOString();
+    }
+    
+    return null;
 }
 
 // ===== FUNCIONES PARA ORDEN DE SERVICIO ===== //
@@ -1634,7 +1678,12 @@ function openAddEntryModal() {
     // Generar folio automático
     document.getElementById('entryVoucher').value = generateNextFolio();
     
-    document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+    // Establecer fecha actual en formato dd/mm/aaaa
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    document.getElementById('entryDate').value = `${day}/${month}/${year}`;
     document.getElementById('customResponsible').style.display = 'none';
     
     // Resetear fechas de caducidad - MEJORADO
@@ -1690,8 +1739,14 @@ function saveEntry() {
     const invoice = document.getElementById('entryInvoice').value;
     const quantity = parseInt(document.getElementById('entryQuantity').value);
     const comments = document.getElementById('entryComments').value;
-    const date = document.getElementById('entryDate').value;
+    const dateInput = document.getElementById('entryDate').value;
+    const dateISO = convertToISO(dateInput);
     
+    if (!dateISO) {
+        alert('Formato de fecha inválido. Use el formato dd/mm/aaaa');
+        return;
+    }
+  
     // Verificar si el item tiene fecha de caducidad
     const item = inventory.find(i => i.id === itemId);
     const hasExpiration = item && item.expiration;
@@ -1751,9 +1806,9 @@ function saveEntry() {
         quantity: quantity,
         responsible: responsible,
         comments: comments || null,
-        date: document.getElementById('entryDate').value + 'T00:00:00',
+        date: dateISO, // Usar fecha en formato ISO
         isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO',
-        expirationData: expirationData // Agregar datos de caducidad
+        expirationData: expirationData
     };
     
     // Guardar en Firebase
@@ -2030,7 +2085,8 @@ function editEntry(id) {
     document.getElementById('entryInvoice').value = entry.invoice || '';
     document.getElementById('entryQuantity').value = entry.quantity;
     document.getElementById('entryComments').value = entry.comments || '';
-    document.getElementById('entryDate').value = entry.date.split('T')[0];
+    // Convertir fecha ISO a dd/mm/aaaa para mostrar
+    document.getElementById('entryDate').value = formatDate(entry.date);
     
     // Seleccionar el item
     document.getElementById('entryItem').value = entry.itemId;
@@ -2108,17 +2164,7 @@ function loadEntries() {
         let item = inventory.find(i => i.id === entry.itemId) || { name: "Insumo no encontrado" };
 
         // Formatear fecha correctamente (dd/mm/aaaa)
-        let entryDate = 'N/A';
-        if (entry.date) {
-            const dateObj = new Date(entry.date);
-            if (!isNaN(dateObj.getTime())) {
-                entryDate = dateObj.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-            }
-        }
+        let entryDate = formatDate(entry.date);
 
         let row = document.createElement('tr');
         row.innerHTML = `
@@ -2150,7 +2196,13 @@ function openAddOutputModal() {
     // Generar folio automático para OS
     document.getElementById('outputOS').value = generateNextFolio();
     
-    document.getElementById('outputDate').value = new Date().toISOString().split('T')[0];
+    // Establecer fecha actual en formato dd/mm/aaaa
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    document.getElementById('outputDate').value = `${day}/${month}/${year}`;
+    
     document.getElementById('customEngineer').style.display = 'none';
     document.getElementById('customArea').style.display = 'none';
     document.getElementById('outputModal').style.display = 'block';
@@ -2203,7 +2255,14 @@ function saveOutput() {
     const os = document.getElementById('outputOS').value;
     let engineer = document.getElementById('outputEngineer').value;
     const quantity = parseInt(document.getElementById('outputQuantity').value);
-    const date = document.getElementById('outputDate').value;
+    // Convertir fecha dd/mm/aaaa a ISO para Firebase
+    const dateInput = document.getElementById('outputDate').value;
+    const dateISO = convertToISO(dateInput);
+    
+    if (!dateISO) {
+        alert('Formato de fecha inválido. Use el formato dd/mm/aaaa');
+        return;
+    }
     const movementType = document.getElementById('movementType').value;
     
     // Nuevos campos
@@ -2260,7 +2319,7 @@ function saveOutput() {
         os: os,
         engineer: engineer,
         quantity: quantity,
-        date: document.getElementById('outputDate').value + 'T00:00:00',
+        date: dateISO, // Usar fecha en formato ISO
         movementType: movementType,
         status: movementType === 'loan' ? 'pending' : 'completed',
         isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO',
@@ -2268,7 +2327,7 @@ function saveOutput() {
         isCustomArea: document.getElementById('outputArea').value === 'OTRO',
         comments: comments || null
     };
-
+  
     outputsRef.child(outputId).set(output)
         .then(() => {
             const newStock = item.stock - quantity;
@@ -2357,17 +2416,7 @@ function loadOutputs() {
         let item = inventory.find(i => i.id === output.itemId) || { name: "Insumo no encontrado" };
 
         // Formatear fecha correctamente (dd/mm/aaaa)
-        let outputDate = 'N/A';
-        if (output.date) {
-            const dateObj = new Date(output.date);
-            if (!isNaN(dateObj.getTime())) {
-                outputDate = dateObj.toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-            }
-        }
+        let outputDate = formatDate(output.date);
 
         let row = document.createElement('tr');
         row.className = output.movementType === 'loan' ? 'loan-row' : '';
@@ -3246,6 +3295,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
   
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Validar formato de fecha en inputs
+    document.addEventListener('blur', function(e) {
+        if (e.target.id === 'entryDate' || e.target.id === 'outputDate') {
+            const value = e.target.value;
+            if (value && !value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                alert('Por favor use el formato dd/mm/aaaa para la fecha');
+                e.target.focus();
+            }
+        }
+    });
 });
     
     // Inicializar la aplicación
