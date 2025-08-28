@@ -1607,8 +1607,32 @@ function loadItemOptions() {
     });
 }
 
+function restoreEntryFormFields() {
+    const entryForm = document.getElementById('entryForm');
+    const inputs = entryForm.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.removeAttribute('readonly');
+        input.removeAttribute('disabled');
+        input.style.backgroundColor = '';
+        input.style.borderColor = '';
+    });
+    
+    // Especialmente importante para el campo de factura
+    document.getElementById('entryInvoice').removeAttribute('readonly');
+    document.getElementById('entryInvoice').style.backgroundColor = '';
+    document.getElementById('entryInvoice').style.borderColor = '';
+    
+    // Ocultar botón de edición de factura
+    document.getElementById('editInvoiceButton').style.display = 'none';
+}
+
 function openAddEntryModal() {
     document.getElementById('entryModalTitle').textContent = 'Registrar Nueva Entrada';
+
+    // LLAMAR A LA NUEVA FUNCIÓN AL INICIO
+    restoreEntryFormFields();
+  
     document.getElementById('entryForm').reset();
     
     // Generar folio automático
@@ -1625,15 +1649,28 @@ function openAddEntryModal() {
     // Ocultar botón de editar factura para nuevas entradas
     document.getElementById('editInvoiceButton').style.display = 'none';
     
+    // Asegurarse de que todos los campos estén habilitados para nuevas entradas
+    const entryForm = document.getElementById('entryForm');
+    const inputs = entryForm.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.removeAttribute('readonly');
+        input.removeAttribute('disabled');
+        input.style.backgroundColor = '';
+        input.style.borderColor = '';
+    });
+    
     // Hacer el campo de factura editable para nuevas entradas
     document.getElementById('entryInvoice').removeAttribute('readonly');
     document.getElementById('entryInvoice').style.backgroundColor = '';
     document.getElementById('entryInvoice').style.borderColor = '';
     
+    // Reiniciar variable de edición
     editingEntryId = null;
     
     document.getElementById('entryModal').style.display = 'block';
 }
+
 // Buscar en entradas
 function searchEntries() {
     let input = document.getElementById('entriesSearch');
@@ -1994,6 +2031,9 @@ function editEntry(id) {
     
     document.getElementById('entryModalTitle').textContent = 'Editar N° Factura de Entrada';
     document.getElementById('entryForm').reset();
+    
+    // Primero, restaurar todos los campos
+    restoreEntryFormFields();
     
     // Llenar campos del formulario pero hacerlos readonly excepto factura
     document.getElementById('entryVoucher').value = entry.voucher;
@@ -2816,6 +2856,12 @@ function closeModal(modalId) {
     if (modalId === 'scanQRModal') {
         stopQRScanner();
     }
+    
+    // Si se cierra el modal de entrada, restaurar los campos
+    if (modalId === 'entryModal') {
+        restoreEntryFormFields();
+    }
+    
     document.getElementById(modalId).style.display = 'none';
 }
 
