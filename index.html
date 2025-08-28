@@ -389,7 +389,8 @@
             
             <div class="form-group">
                 <label for="entryDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
-                <input type="date" id="entryDate" required>
+                <input type="text" id="entryDate" placeholder="dd/mm/aaaa" required onkeyup="formatDateInput(this)">
+
             </div>
             
             <div class="form-actions">
