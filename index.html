@@ -362,24 +362,34 @@
                            placeholder="Nombre completo del responsable" class="form-input">
                 </div>
             </div>
+
+            <!-- Sección de Control de Caducidades -->
+            <div class="expiration-section" id="expirationSection">
+                <div class="expiration-header">
+                    <label><i class="fas fa-calendar-times"></i> Control de Caducidades:</label>
+                </div>
+                
+                <div id="expirationDatesContainer" class="expiration-dates-container">
+                    <!-- Las fechas de caducidad se agregarán aquí dinámicamente -->
+                </div>
+                
+                <button type="button" class="btn btn-info add-expiration-btn" onclick="addExpirationDate()" style="margin-top: 0.5rem;">
+                    <i class="fas fa-plus"></i> Agregar Fecha de Caducidad
+                </button>
+                
+                <div id="remainingQuantity" class="remaining-quantity">
+                    Especifique la cantidad total primero
+                </div>
+            </div>
             
             <div class="form-group">
                 <label for="entryComments"><i class="fas fa-comment"></i> Comentarios:</label>
                 <textarea id="entryComments" rows="3"></textarea>
             </div>
-
-          <div class="form-group" id="expirationSection" style="display: none;">
-            <label><i class="fas fa-calendar-times"></i> Fechas de Caducidad:</label>
-            <div id="expirationDatesContainer"></div>
-            <button type="button" class="btn btn-info" onclick="addExpirationDate()" style="margin-top: 0.5rem;">
-                <i class="fas fa-plus"></i> Agregar Fecha de Caducidad
-            </button>
-            <div id="remainingQuantity" style="margin-top: 0.5rem; padding: 0.5rem; background-color: #e5e7eb; border-radius: var(--border-radius-sm); font-size: 0.9rem;"></div>
-          </div>
             
             <div class="form-group">
                 <label for="entryDate"><i class="fas fa-calendar-day"></i> Fecha:</label>
-                <input type="date" id="entryDate" required pattern="\d{2}/\d{2}/\d{4}">
+                <input type="date" id="entryDate" required>
             </div>
             
             <div class="form-actions">
