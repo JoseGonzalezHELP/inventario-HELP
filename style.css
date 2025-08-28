@@ -1421,3 +1421,76 @@ select {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
+
+/* Estilos para el sistema de caducidades múltiples */
+.expiration-section {
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: #f9fafb;
+}
+
+.expiration-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.expiration-dates-container {
+    margin: 1rem 0;
+}
+
+.expiration-date-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.expiration-date-input,
+.expiration-quantity-input {
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition);
+}
+
+.expiration-date-input:focus,
+.expiration-quantity-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+.expiration-date-input {
+    flex: 2;
+}
+
+.expiration-quantity-input {
+    flex: 1;
+}
+
+#remainingQuantity {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: #e5e7eb;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.quantity-warning {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.quantity-success {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.add-expiration-btn {
+    margin-top: 0.5rem;
+}
