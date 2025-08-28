@@ -1392,3 +1392,32 @@ select {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
+
+/* Estilo para campos deshabilitados */
+#entryModal input[readonly]:not(#entryInvoice),
+#entryModal select[disabled],
+#entryModal textarea[readonly] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: var(--gray);
+    cursor: not-allowed;
+}
+
+#entryModal input[readonly]:not(#entryInvoice):focus,
+#entryModal select[disabled]:focus,
+#entryModal textarea[readonly]:focus {
+    border-color: #e2e8f0;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Estilo para campo de factura editable */
+#entryInvoice:not([readonly]) {
+    background-color: #ffffff;
+    border-color: var(--primary);
+}
+
+#entryInvoice:not([readonly]):focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
