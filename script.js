@@ -55,6 +55,10 @@ let qrScanner = null;
 let itemTypes = [];
 let itemBrands = [];  
 let areas = [];
+// Variables para múltiples insumos
+let selectedEntryItems = [];
+let selectedOutputItems = [];
+let editingOutputId = null;
 
 // Función para verificar contraseña antes de eliminar
 function verifyPasswordBeforeDelete(action, id) {
@@ -1631,6 +1635,10 @@ function openAddEntryModal() {
     document.getElementById('entryModalTitle').textContent = 'Registrar Nueva Entrada';
     document.getElementById('entryForm').reset();
     
+    // Limpiar lista de insumos
+    selectedEntryItems = [];
+    updateEntryItemsDisplay();
+    
     // Generar folio automático
     document.getElementById('entryVoucher').value = generateNextFolio();
     
@@ -2147,8 +2155,26 @@ function openAddOutputModal() {
     document.getElementById('outputModalTitle').textContent = 'Registrar Salida';
     document.getElementById('outputForm').reset();
     
+    // Resetear lista de insumos
+    selectedOutputItems = [];
+    updateOutputItemsDisplay();
+    
     // Generar folio automático para OS
     document.getElementById('outputOS').value = generateNextFolio();
+    document.getElementById('outputOS').setAttribute('readonly', 'true');
+    
+    // Agregar botón para hacer editable
+    const osField = document.getElementById('outputOS').parentElement;
+    if (!osField.querySelector('.edit-os-btn')) {
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'btn btn-info edit-os-btn';
+        editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar Folio';
+        editBtn.onclick = makeOutputOSEditable;
+        editBtn.style.marginTop = '0.5rem';
+        editBtn.style.width = '100%';
+        osField.appendChild(editBtn);
+    }
     
     document.getElementById('outputDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('customEngineer').style.display = 'none';
@@ -2199,16 +2225,20 @@ function searchOutputs() {
 
 // Guardar salida
 function saveOutput() {
-    const itemId = document.getElementById('outputItem').value;
     const os = document.getElementById('outputOS').value;
     let engineer = document.getElementById('outputEngineer').value;
-    const quantity = parseInt(document.getElementById('outputQuantity').value);
     const date = document.getElementById('outputDate').value;
     const movementType = document.getElementById('movementType').value;
     
     // Nuevos campos
     let area = document.getElementById('outputArea').value;
     const comments = document.getElementById('outputComments').value;
+
+    // Validaciones básicas
+    if (!os || !engineer || !area || selectedOutputItems.length === 0 || !date) {
+        alert('Complete los campos requeridos');
+        return;
+    }
 
     // Validar área manual
     if (area === 'OTRO') {
@@ -2228,68 +2258,109 @@ function saveOutput() {
         }
     }
 
-    if (!itemId || !os || !engineer || !area || isNaN(quantity) || quantity <= 0 || !date) {
-        alert('Complete los campos requeridos');
-        return;
+    // VERIFICAR FOLIO DUPLICADO (solo para nuevas salidas)
+    if (!editingOutputId) {
+        const folioExists = entries.some(entry => entry.voucher === os) || 
+                           outputs.some(output => output.os === os);
+        
+        if (folioExists) {
+            alert('❌ Error: Este número de folio ya existe en el sistema.');
+            return;
+        }
     }
 
-    // VERIFICAR FOLIO DUPLICADO
-    const folioExists = entries.some(entry => entry.voucher === os) || 
-                       outputs.some(output => output.os === os);
-    
-    if (folioExists) {
-        alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
-        return;
+    // Validar stock para cada insumo
+    for (const item of selectedOutputItems) {
+        const inventoryItem = inventory.find(i => i.id === item.id);
+        if (!inventoryItem) {
+            alert(`Insumo ${item.name} no encontrado en el inventario`);
+            return;
+        }
+        
+        if (inventoryItem.stock < item.quantity) {
+            alert(`Stock insuficiente para ${item.name}. Disponible: ${inventoryItem.stock}, Solicitado: ${item.quantity}`);
+            return;
+        }
     }
 
-    const item = inventory.find(i => i.id === itemId);
-    if (!item) {
-        alert('Insumo no encontrado');
-        return;
-    }
-
-    if (item.stock < quantity) {
-        alert('Stock insuficiente');
-        return;
-    }
-
-    const outputId = Date.now().toString();
-    const output = {
-        id: outputId,
-        itemId: itemId,
-        os: os,
-        engineer: engineer,
-        quantity: quantity,
-        date: document.getElementById('outputDate').value + 'T00:00:00',
-        movementType: movementType,
-        status: movementType === 'loan' ? 'pending' : 'completed',
-        isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO',
-        area: area,
-        isCustomArea: document.getElementById('outputArea').value === 'OTRO',
-        comments: comments || null
-    };
-
-    outputsRef.child(outputId).set(output)
-        .then(() => {
-            const newStock = item.stock - quantity;
-            inventoryRef.child(itemId).update({ stock: newStock })
-                .then(() => {
-                    // Mostrar orden de servicio
-                    showServiceOrder('output', {
-                        os: os,
-                        quantity: quantity,
-                        engineer: engineer,
-                        area: area,
-                        movementType: movementType,
-                        itemId: itemId,
-                        itemName: item.name
-                    });
-                    
-                    closeModal('outputModal');
-                    showToast('✅ Salida registrada correctamente');
+    // Si estamos editando, primero restaurar el stock del registro original
+    if (editingOutputId) {
+        const originalOutput = outputs.find(o => o.id === editingOutputId);
+        if (originalOutput) {
+            const originalItem = inventory.find(i => i.id === originalOutput.itemId);
+            if (originalItem) {
+                // Restaurar stock
+                inventoryRef.child(originalOutput.itemId).update({ 
+                    stock: originalItem.stock + originalOutput.quantity 
                 });
+            }
+        }
+    }
+
+    // Guardar cada insumo como salida separada (pero con el mismo folio OS)
+    const promises = [];
+    
+    selectedOutputItems.forEach(item => {
+        const outputId = editingOutputId ? editingOutputId : Date.now().toString() + '-' + item.id;
+        const output = {
+            id: outputId,
+            itemId: item.id,
+            os: os,
+            engineer: engineer,
+            quantity: item.quantity,
+            date: date + 'T00:00:00',
+            movementType: movementType,
+            status: movementType === 'loan' ? 'pending' : 'completed',
+            isCustomEngineer: document.getElementById('outputEngineer').value === 'OTRO',
+            area: area,
+            isCustomArea: document.getElementById('outputArea').value === 'OTRO',
+            comments: comments || null,
+            parentOutputId: editingOutputId || outputId // Para agrupar salidas relacionadas
+        };
+
+        // Guardar en Firebase
+        promises.push(
+            outputsRef.child(outputId).set(output)
+                .then(() => {
+                    // Actualizar stock
+                    const inventoryItem = inventory.find(i => i.id === item.id);
+                    if (inventoryItem) {
+                        const newStock = inventoryItem.stock - item.quantity;
+                        return inventoryRef.child(item.id).update({ stock: newStock });
+                    }
+                })
+        );
+    });
+
+    // Ejecutar todas las operaciones
+    Promise.all(promises)
+        .then(() => {
+            // Mostrar orden de servicio solo si es una nueva salida
+            if (!editingOutputId) {
+                const firstItem = selectedOutputItems[0];
+                const item = inventory.find(i => i.id === firstItem.id);
+                
+                showServiceOrder('output', {
+                    os: os,
+                    quantity: firstItem.quantity,
+                    engineer: engineer,
+                    area: area,
+                    movementType: movementType,
+                    itemId: firstItem.id,
+                    itemName: item ? item.name : 'Desconocido'
+                });
+            }
+            
+            closeModal('outputModal');
+            showToast(editingOutputId ? '✅ Salida actualizada correctamente' : '✅ Salida registrada correctamente');
+            
+            // Limpiar para la próxima vez
+            editingOutputId = null;
+            selectedOutputItems = [];
         })
-        .catch(error => alert('Error: ' + error.message));
+        .catch(error => {
+            alert('Error al guardar: ' + error.message);
+        });
 }
 
 // Ver detalles de salida - NUEVA VERSIÓN CON FORMATO DE ORDEN DE SERVICIO
@@ -2382,6 +2453,9 @@ function loadOutputs() {
                 <button class="btn btn-primary" onclick="viewOutputDetails('${output.id}')">
                     <i class="fas fa-eye"></i> Ver
                 </button>
+                <button class="btn btn-warning" onclick="editOutput('${output.id}')">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
                 ${output.movementType === 'loan' && output.status === 'pending' ? 
                  `<button class="btn btn-success" onclick="restoreLoan('${output.id}')">
                     <i class="fas fa-undo"></i> Restaurar
@@ -2390,7 +2464,7 @@ function loadOutputs() {
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             </td>
-          `;
+        `;
         tableBody.appendChild(row);
     });
 }
@@ -2847,9 +2921,17 @@ function closeModal(modalId) {
         stopQRScanner();
     }
     
-    // Si se cierra el modal de entrada, restaurar los campos
+    // Si se cierra el modal de entrada/salida, limpiar las listas
     if (modalId === 'entryModal') {
         restoreEntryFormFields();
+        selectedEntryItems = [];
+        updateEntryItemsDisplay();
+    }
+    
+    if (modalId === 'outputModal') {
+        selectedOutputItems = [];
+        updateOutputItemsDisplay();
+        editingOutputId = null;
     }
     
     document.getElementById(modalId).style.display = 'none';
@@ -3013,6 +3095,300 @@ function loadSelectedBrands(brandsString) {
     });
     
     updateSelectedBrandsField();
+}
+
+// ===== FUNCIONES PARA MÚLTIPLES INSUMOS EN ENTRADAS =====
+
+function addEntryItem() {
+    const itemSelect = document.getElementById('entryItem');
+    const itemId = itemSelect.value;
+    
+    if (!itemId) {
+        alert('Seleccione un insumo');
+        return;
+    }
+    
+    const existingItem = selectedEntryItems.find(item => item.id === itemId);
+    if (existingItem) {
+        alert('Este insumo ya ha sido agregado');
+        return;
+    }
+    
+    const item = inventory.find(i => i.id === itemId);
+    if (!item) {
+        alert('Insumo no encontrado');
+        return;
+    }
+    
+    selectedEntryItems.push({
+        id: itemId,
+        name: item.name,
+        quantity: 1,
+        stock: item.stock,
+        availableStock: item.stock
+    });
+    
+    updateEntryItemsDisplay();
+    itemSelect.value = '';
+}
+
+function removeEntryItem(itemId) {
+    selectedEntryItems = selectedEntryItems.filter(item => item.id !== itemId);
+    updateEntryItemsDisplay();
+}
+
+function updateEntryItemQuantity(itemId, quantity) {
+    const item = selectedEntryItems.find(i => i.id === itemId);
+    if (item) {
+        item.quantity = Math.max(1, quantity);
+        updateEntryItemsDisplay();
+    }
+}
+
+function updateEntryItemsDisplay() {
+    const container = document.getElementById('entryItemsContainer');
+    const totalDiv = document.getElementById('entryTotalQuantity');
+    const totalSpan = document.getElementById('totalEntryItems');
+    
+    if (selectedEntryItems.length === 0) {
+        container.style.display = 'none';
+        totalDiv.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    totalDiv.style.display = 'block';
+    
+    let html = '';
+    let totalItems = 0;
+    
+    selectedEntryItems.forEach(item => {
+        totalItems += item.quantity;
+        
+        html += `
+            <div class="selected-item" id="entry-item-${item.id}">
+                <div class="item-info">
+                    <div class="item-name">${item.name} (${item.id})</div>
+                    <div class="item-details">
+                        <span>Existencias: ${item.stock}</span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <div class="quantity-control">
+                        <button type="button" onclick="updateEntryItemQuantity('${item.id}', ${item.quantity - 1})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" value="${item.quantity}" min="1" 
+                               onchange="updateEntryItemQuantity('${item.id}', this.value)">
+                        <button type="button" onclick="updateEntryItemQuantity('${item.id}', ${item.quantity + 1})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <button class="remove-item" onclick="removeEntryItem('${item.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    totalSpan.textContent = totalItems;
+}
+
+// ===== FUNCIONES PARA MÚLTIPLES INSUMOS EN SALIDAS =====
+
+function addOutputItem() {
+    const itemSelect = document.getElementById('outputItem');
+    const itemId = itemSelect.value;
+    
+    if (!itemId) {
+        alert('Seleccione un insumo');
+        return;
+    }
+    
+    const existingItem = selectedOutputItems.find(item => item.id === itemId);
+    if (existingItem) {
+        alert('Este insumo ya ha sido agregado');
+        return;
+    }
+    
+    const item = inventory.find(i => i.id === itemId);
+    if (!item) {
+        alert('Insumo no encontrado');
+        return;
+    }
+    
+    // Verificar stock disponible
+    if (item.stock <= 0) {
+        alert('Stock insuficiente para este insumo');
+        return;
+    }
+    
+    selectedOutputItems.push({
+        id: itemId,
+        name: item.name,
+        quantity: 1,
+        stock: item.stock,
+        maxQuantity: item.stock
+    });
+    
+    updateOutputItemsDisplay();
+    itemSelect.value = '';
+    updateAvailableStock();
+}
+
+function removeOutputItem(itemId) {
+    selectedOutputItems = selectedOutputItems.filter(item => item.id !== itemId);
+    updateOutputItemsDisplay();
+    updateAvailableStock();
+}
+
+function updateOutputItemQuantity(itemId, quantity) {
+    const item = selectedOutputItems.find(i => i.id === itemId);
+    if (item) {
+        quantity = Math.max(1, Math.min(quantity, item.maxQuantity));
+        item.quantity = quantity;
+        updateOutputItemsDisplay();
+    }
+}
+
+function updateOutputItemsDisplay() {
+    const container = document.getElementById('outputItemsContainer');
+    const totalDiv = document.getElementById('outputTotalQuantity');
+    const totalSpan = document.getElementById('totalOutputItems');
+    
+    if (selectedOutputItems.length === 0) {
+        container.style.display = 'none';
+        totalDiv.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    totalDiv.style.display = 'block';
+    
+    let html = '';
+    let totalItems = 0;
+    
+    selectedOutputItems.forEach(item => {
+        totalItems += item.quantity;
+        
+        html += `
+            <div class="selected-item" id="output-item-${item.id}">
+                <div class="item-info">
+                    <div class="item-name">${item.name} (${item.id})</div>
+                    <div class="item-details">
+                        <span>Disponible: ${item.stock}</span>
+                    </div>
+                </div>
+                <div class="item-actions">
+                    <div class="quantity-control">
+                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity - 1})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" value="${item.quantity}" min="1" max="${item.maxQuantity}"
+                               onchange="updateOutputItemQuantity('${item.id}', this.value)">
+                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity + 1})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <button class="remove-item" onclick="removeOutputItem('${item.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    totalSpan.textContent = totalItems;
+}
+
+// ===== FUNCIÓN PARA HACER EL FOLIO DE SALIDAS EDITABLE =====
+
+function makeOutputOSEditable() {
+    const osInput = document.getElementById('outputOS');
+    const isReadOnly = osInput.hasAttribute('readonly');
+    
+    if (isReadOnly) {
+        osInput.removeAttribute('readonly');
+        osInput.style.backgroundColor = '#ffffe0';
+        osInput.style.borderColor = '#f59e0b';
+        showToast('🔓 Folio editable. Puede ingresar un número personalizado.');
+    } else {
+        osInput.setAttribute('readonly', 'true');
+        osInput.style.backgroundColor = '';
+        osInput.style.borderColor = '';
+        showToast('🔒 Folio en modo automático');
+    }
+}
+
+// ===== FUNCIÓN PARA EDITAR SALIDAS COMPLETAS =====
+
+function editOutput(id) {
+    const output = outputs.find(o => o.id === id);
+    if (!output) return;
+    
+    // Solicitar contraseña
+    const password = prompt("🔒 Ingrese la contraseña para editar esta salida:");
+    
+    if (password !== DELETE_PASSWORD) {
+        if (password !== null) {
+            alert("❌ Contraseña incorrecta. No se puede editar.");
+        }
+        return;
+    }
+    
+    editingOutputId = id;
+    
+    // Obtener el item original
+    const item = inventory.find(i => i.id === output.itemId);
+    
+    document.getElementById('outputModalTitle').textContent = 'Editar Salida';
+    document.getElementById('outputForm').reset();
+    
+    // Cargar datos existentes
+    document.getElementById('outputOS').value = output.os;
+    document.getElementById('outputOS').removeAttribute('readonly');
+    document.getElementById('outputDate').value = output.date.split('T')[0];
+    document.getElementById('movementType').value = output.movementType;
+    
+    // Cargar ingeniero
+    if (output.isCustomEngineer) {
+        document.getElementById('outputEngineer').value = 'OTRO';
+        document.getElementById('customEngineer').value = output.engineer;
+        document.getElementById('customEngineer').style.display = 'block';
+    } else {
+        document.getElementById('outputEngineer').value = output.engineer;
+        document.getElementById('customEngineer').style.display = 'none';
+    }
+    
+    // Cargar área
+    if (output.isCustomArea) {
+        document.getElementById('outputArea').value = 'OTRO';
+        document.getElementById('customArea').value = output.area;
+        document.getElementById('customArea').style.display = 'block';
+    } else {
+        document.getElementById('outputArea').value = output.area;
+        document.getElementById('customArea').style.display = 'none';
+    }
+    
+    document.getElementById('outputComments').value = output.comments || '';
+    
+    // Cargar insumo(s) - convertir el insumo único a múltiples
+    selectedOutputItems = [{
+        id: output.itemId,
+        name: item ? item.name : 'Desconocido',
+        quantity: output.quantity,
+        stock: item ? item.stock + output.quantity : 0, // Sumar la cantidad devuelta
+        maxQuantity: item ? item.stock + output.quantity : 0
+    }];
+    
+    updateOutputItemsDisplay();
+    updateAvailableStock();
+    
+    // Mostrar el modal
+    document.getElementById('outputModal').style.display = 'block';
 }
 
 // Función para resetear el formulario de insumos
