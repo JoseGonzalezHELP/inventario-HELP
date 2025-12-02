@@ -322,10 +322,23 @@
         <form id="entryForm">
             <div class="form-group">
                 <label for="entryItem"><i class="fas fa-box-open"></i> Insumo:</label>
-                <select id="entryItem" required>
-                    <option value="">Seleccione un insumo</option>
-                    <!-- Opciones se llenarán dinámicamente -->
-                </select>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select id="entryItem" style="flex: 1;" onchange="addEntryItem()">
+                        <option value="">Seleccione un insumo</option>
+                    </select>
+                    <button type="button" class="btn btn-info" onclick="addEntryItem()" style="width: auto;">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenedor para insumos seleccionados -->
+            <div class="selected-items-container" id="entryItemsContainer" style="display: none;">
+                <!-- Los insumos seleccionados aparecerán aquí -->
+            </div>
+            
+            <div class="total-quantity" id="entryTotalQuantity" style="display: none;">
+                Total de insumos: <span id="totalEntryItems">0</span>
             </div>
             
             <div class="form-row">
@@ -407,18 +420,32 @@
             <h2 id="outputModalTitle"><i class="fas fa-sign-out-alt"></i> Registrar Salida</h2>
             
            <form id="outputForm">
-                <!-- Primera fila: Insumo y Stock -->
+                <!-- Primera fila: Selección de insumos -->
                 <div class="form-row">
                     <div class="form-group" style="flex: 2;">
                         <label for="outputItem"><i class="fas fa-box-open"></i> Insumo:</label>
-                        <select id="outputItem" required onchange="updateAvailableStock()">
-                            <option value="">Seleccione un insumo</option>
-                        </select>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <select id="outputItem" style="flex: 1;" onchange="updateAvailableStock()">
+                                <option value="">Seleccione un insumo</option>
+                            </select>
+                            <button type="button" class="btn btn-info" onclick="addOutputItem()" style="width: auto;">
+                                <i class="fas fa-plus"></i> Agregar
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="availableStock"><i class="fas fa-boxes"></i> Existencias:</label>
                         <input type="text" id="availableStock" readonly>
                     </div>
+                </div>
+                
+                <!-- Contenedor para insumos seleccionados -->
+                <div class="selected-items-container" id="outputItemsContainer" style="display: none;">
+                    <!-- Los insumos seleccionados aparecerán aquí -->
+                </div>
+                
+                <div class="total-quantity" id="outputTotalQuantity" style="display: none;">
+                    Total de insumos: <span id="totalOutputItems">0</span>
                 </div>
             
                  <!-- Segunda fila: Folio OS y Tipo -->
