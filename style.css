@@ -1494,3 +1494,105 @@ select {
 .add-expiration-btn {
     margin-top: 0.5rem;
 }
+
+/* Estilos para múltiples insumos en entrada/salida */
+.selected-items-container {
+    margin: 1rem 0;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 1rem;
+    background-color: #f9fafb;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.selected-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: white;
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius-sm);
+    animation: fadeIn 0.3s ease;
+}
+
+.selected-item:last-child {
+    margin-bottom: 0;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.item-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--gray);
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.quantity-control input {
+    width: 60px;
+    text-align: center;
+    padding: 0.25rem;
+}
+
+.remove-item {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.remove-item:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.add-another-btn {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.total-quantity {
+    background-color: #e5e7eb;
+    padding: 0.75rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+/* Estilos para el formulario de edición de salidas */
+.edit-mode .readonly-field {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: var(--gray);
+    cursor: not-allowed;
+}
+
+.edit-mode .editable-field {
+    background-color: #ffffff;
+    border-color: var(--primary);
+}
