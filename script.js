@@ -3604,9 +3604,7 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.style.fontSize = '12px';
     document.body.appendChild(statusDiv);
 
- // Event listener para cambios en la cantidad
-document.addEventListener('DOMContentLoaded', function() {
-    // Agregar evento para cambios en la cantidad
+    // Event listener para cambios en la cantidad
     document.addEventListener('input', function(e) {
         if (e.target.id === 'entryQuantity') {
             updateExpirationQuantities();
@@ -3638,10 +3636,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-    });
-
-    // Event listener para cambios en la selección de item
-    document.addEventListener('change', function(e) {
+        
         if (e.target.id === 'entryItem') {
             checkItemExpiration();
         }
