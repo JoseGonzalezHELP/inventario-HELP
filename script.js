@@ -3604,7 +3604,7 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.style.fontSize = '12px';
     document.body.appendChild(statusDiv);
 
-  // Event listener para cambios en la cantidad
+ // Event listener para cambios en la cantidad
 document.addEventListener('DOMContentLoaded', function() {
     // Agregar evento para cambios en la cantidad
     document.addEventListener('input', function(e) {
@@ -3651,8 +3651,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
   
-});
-    
     // Inicializar la aplicación
     initializeApp();
 });
