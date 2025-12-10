@@ -1698,21 +1698,15 @@ function searchEntries() {
     }
 }
 
-// Guardar entrada - VERSIÓN CORREGIDA
+// Guardar entrada - VERSIÓN QUE ACEPTA UNO O MÚLTIPLES INSUMOS
 function saveEntry() {
-    // Validar que haya al menos un insumo
-    if (selectedEntryItems.length === 0) {
-        alert('Debe agregar al menos un insumo');
-        return;
-    }
-    
     // Obtener valores del formulario
     const voucher = document.getElementById('entryVoucher').value;
     const invoice = document.getElementById('entryInvoice').value;
     const comments = document.getElementById('entryComments').value;
     const date = document.getElementById('entryDate').value;
     
-    // Manejo del responsable (selección o manual)
+    // Manejo del responsable
     let responsible = document.getElementById('entryResponsible').value;
     if (responsible === 'OTRO') {
         responsible = document.getElementById('customResponsible').value.trim();
@@ -1728,31 +1722,67 @@ function saveEntry() {
         return;
     }
     
-    // VERIFICAR FOLIO DUPLICADO (solo para nuevas entradas)
-    if (!editingEntryId) {
-        const folioExists = entries.some(entry => entry.voucher === voucher) || 
-                           outputs.some(output => output.os === voucher);
+    // Verificar si hay insumos en la lista O si hay un insumo seleccionado individualmente
+    const itemSelect = document.getElementById('entryItem');
+    const quantityInput = document.getElementById('entryQuantity');
+    
+    let itemsToSave = [];
+    
+    if (selectedEntryItems.length > 0) {
+        // CASO 1: Hay múltiples insumos en la lista
+        itemsToSave = [...selectedEntryItems];
+    } else if (itemSelect.value) {
+        // CASO 2: Hay un insumo seleccionado pero NO en la lista (solo uno)
+        const itemId = itemSelect.value;
+        const item = inventory.find(i => i.id === itemId);
+        const quantity = parseInt(quantityInput.value) || 1;
         
+        if (!item) {
+            alert('Insumo no encontrado');
+            return;
+        }
+        
+        if (quantity < 1) {
+            alert('La cantidad debe ser al menos 1');
+            return;
+        }
+        
+        itemsToSave.push({
+            id: itemId,
+            name: item.name,
+            quantity: quantity,
+            stock: item.stock
+        });
+    } else {
+        // CASO 3: No hay nada
+        alert('Debe seleccionar al menos un insumo');
+        return;
+    }
+    
+    // Verificar folio duplicado solo para nuevas entradas
+    if (!editingEntryId) {
+        const folioExists = entries.some(entry => entry.voucher === voucher);
         if (folioExists) {
-            alert('❌ Error: Este número de folio ya existe en el sistema. No se puede registrar duplicados.');
+            alert('❌ Este número de folio ya existe en el sistema');
             return;
         }
     }
     
-    // Guardar cada insumo como entrada separada (pero con el mismo folio de vale)
+    // Guardar cada insumo
     const promises = [];
     
-    selectedEntryItems.forEach(item => {
-        const entryId = editingEntryId ? editingEntryId : Date.now().toString() + '-' + item.id;
+    itemsToSave.forEach(item => {
+        // Crear ID único para cada entrada
+        const entryId = editingEntryId ? editingEntryId : Date.now().toString() + '-' + Math.random().toString(36).substr(2, 9);
         
         const entry = {
             id: entryId,
             itemId: item.id,
             voucher: voucher,
-            invoice: invoice || null,
+            invoice: invoice || '',
             quantity: item.quantity,
             responsible: responsible,
-            comments: comments || null,
+            comments: comments || '',
             date: date + 'T00:00:00',
             isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
         };
@@ -1769,6 +1799,7 @@ function saveEntry() {
                             return inventoryRef.child(item.id).update({ stock: newStock });
                         }
                     }
+                    return Promise.resolve();
                 })
         );
     });
@@ -1776,30 +1807,33 @@ function saveEntry() {
     // Ejecutar todas las operaciones
     Promise.all(promises)
         .then(() => {
-            // Mostrar orden de servicio solo si es una nueva entrada
-            if (!editingEntryId && selectedEntryItems.length > 0) {
-                const firstItem = selectedEntryItems[0];
-                const item = inventory.find(i => i.id === firstItem.id);
-                
-                showServiceOrder('entry', {
-                    voucher: voucher,
-                    quantity: firstItem.quantity,
-                    responsible: responsible,
-                    itemId: firstItem.id,
-                    itemName: item ? item.name : 'Desconocido'
-                });
-            }
-            
-            closeModal('entryModal');
             showToast(editingEntryId ? '✅ Entrada actualizada correctamente' : '✅ Entrada registrada correctamente');
             
-            // Limpiar para la próxima vez
+            // Mostrar orden de servicio para nuevas entradas
+            if (!editingEntryId && itemsToSave.length > 0) {
+                const firstItem = itemsToSave[0];
+                const item = inventory.find(i => i.id === firstItem.id);
+                
+                if (item) {
+                    showServiceOrder('entry', {
+                        voucher: voucher,
+                        quantity: firstItem.quantity,
+                        responsible: responsible,
+                        itemId: firstItem.id,
+                        itemName: item.name
+                    });
+                }
+            }
+            
+            // Cerrar modal y limpiar
+            closeModal('entryModal');
             editingEntryId = null;
             selectedEntryItems = [];
             updateEntryItemsDisplay();
         })
         .catch(error => {
-            alert('Error al guardar entrada: ' + error.message);
+            console.error('Error al guardar entrada:', error);
+            alert('❌ Error al guardar entrada: ' + error.message);
         });
 }
 
@@ -2229,7 +2263,7 @@ function searchOutputs() {
     }
 }
 
-// Guardar salida
+// Guardar salida - VERSIÓN QUE ACEPTA UNO O MÚLTIPLES INSUMOS
 function saveOutput() {
     const os = document.getElementById('outputOS').value;
     let engineer = document.getElementById('outputEngineer').value;
@@ -2241,7 +2275,7 @@ function saveOutput() {
     const comments = document.getElementById('outputComments').value;
 
     // Validaciones básicas
-    if (!os || !engineer || !area || selectedOutputItems.length === 0 || !date) {
+    if (!os || !engineer || !area || !date) {
         alert('Complete los campos requeridos');
         return;
     }
@@ -2264,6 +2298,50 @@ function saveOutput() {
         }
     }
 
+    // Verificar si hay insumos en la lista O si hay un insumo seleccionado individualmente
+    const itemSelect = document.getElementById('outputItem');
+    const quantityInput = document.getElementById('outputQuantity');
+    
+    let itemsToSave = [];
+    
+    if (selectedOutputItems.length > 0) {
+        // CASO 1: Hay múltiples insumos en la lista
+        itemsToSave = [...selectedOutputItems];
+    } else if (itemSelect.value) {
+        // CASO 2: Hay un insumo seleccionado pero NO en la lista (solo uno)
+        const itemId = itemSelect.value;
+        const item = inventory.find(i => i.id === itemId);
+        const quantity = parseInt(quantityInput.value) || 1;
+        
+        if (!item) {
+            alert('Insumo no encontrado');
+            return;
+        }
+        
+        if (quantity < 1) {
+            alert('La cantidad debe ser al menos 1');
+            return;
+        }
+        
+        // Verificar stock disponible
+        if (item.stock < quantity) {
+            alert(`Stock insuficiente para ${item.name}. Disponible: ${item.stock}, Solicitado: ${quantity}`);
+            return;
+        }
+        
+        itemsToSave.push({
+            id: itemId,
+            name: item.name,
+            quantity: quantity,
+            stock: item.stock,
+            maxQuantity: item.stock
+        });
+    } else {
+        // CASO 3: No hay nada
+        alert('Debe seleccionar al menos un insumo');
+        return;
+    }
+    
     // VERIFICAR FOLIO DUPLICADO (solo para nuevas salidas)
     if (!editingOutputId) {
         const folioExists = entries.some(entry => entry.voucher === os) || 
@@ -2271,20 +2349,6 @@ function saveOutput() {
         
         if (folioExists) {
             alert('❌ Error: Este número de folio ya existe en el sistema.');
-            return;
-        }
-    }
-
-    // Validar stock para cada insumo
-    for (const item of selectedOutputItems) {
-        const inventoryItem = inventory.find(i => i.id === item.id);
-        if (!inventoryItem) {
-            alert(`Insumo ${item.name} no encontrado en el inventario`);
-            return;
-        }
-        
-        if (inventoryItem.stock < item.quantity) {
-            alert(`Stock insuficiente para ${item.name}. Disponible: ${inventoryItem.stock}, Solicitado: ${item.quantity}`);
             return;
         }
     }
@@ -2303,10 +2367,10 @@ function saveOutput() {
         }
     }
 
-    // Guardar cada insumo como salida separada (pero con el mismo folio OS)
+    // Guardar cada insumo
     const promises = [];
     
-    selectedOutputItems.forEach(item => {
+    itemsToSave.forEach(item => {
         const outputId = editingOutputId ? editingOutputId : Date.now().toString() + '-' + item.id;
         const output = {
             id: outputId,
@@ -2321,7 +2385,7 @@ function saveOutput() {
             area: area,
             isCustomArea: document.getElementById('outputArea').value === 'OTRO',
             comments: comments || null,
-            parentOutputId: editingOutputId || outputId // Para agrupar salidas relacionadas
+            parentOutputId: editingOutputId || outputId
         };
 
         // Guardar en Firebase
@@ -2342,8 +2406,8 @@ function saveOutput() {
     Promise.all(promises)
         .then(() => {
             // Mostrar orden de servicio solo si es una nueva salida
-            if (!editingOutputId) {
-                const firstItem = selectedOutputItems[0];
+            if (!editingOutputId && itemsToSave.length > 0) {
+                const firstItem = itemsToSave[0];
                 const item = inventory.find(i => i.id === firstItem.id);
                 
                 showServiceOrder('output', {
@@ -2363,6 +2427,7 @@ function saveOutput() {
             // Limpiar para la próxima vez
             editingOutputId = null;
             selectedOutputItems = [];
+            updateOutputItemsDisplay();
         })
         .catch(error => {
             alert('Error al guardar: ' + error.message);
