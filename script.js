@@ -3274,7 +3274,6 @@ function updateOutputItemQuantity(itemId, quantity) {
 }
 
 function updateOutputItemsDisplay() {
-function updateOutputItemsDisplay() {
     const container = document.getElementById('outputItemsContainer');
     const totalDiv = document.getElementById('outputTotalQuantity');
     const totalSpan = document.getElementById('totalOutputItems');
