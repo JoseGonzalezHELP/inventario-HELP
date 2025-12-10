@@ -1642,27 +1642,35 @@ function openAddEntryModal() {
     // Generar folio automático
     document.getElementById('entryVoucher').value = generateNextFolio();
     
-    document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+    // Establecer fecha actual
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    document.getElementById('entryDate').value = formattedDate;
+    
+    // Resetear responsable
     document.getElementById('customResponsible').style.display = 'none';
+    document.getElementById('customResponsible').required = false;
     
-    // Resetear fechas de caducidad - MEJORADO
+    // Resetear sección de caducidades
     document.getElementById('expirationDatesContainer').innerHTML = '';
-    document.getElementById('expirationSection').style.display = 'block'; // Mostrar siempre la sección
-    document.getElementById('remainingQuantity').textContent = 'Cantidad asignada: 0 / 0 | Restante: 0';
+    document.getElementById('expirationSection').style.display = 'none';
     
-    // Ocultar botón de editar factura para nuevas entradas
-    document.getElementById('editInvoiceButton').style.display = 'none';
+    // Mostrar campo de cantidad inicialmente
+    document.getElementById('entryQuantity').style.display = 'block';
+    document.getElementById('entryQuantity').parentElement.style.display = 'block';
+    document.getElementById('entryQuantity').value = '';
+    document.getElementById('entryQuantity').disabled = false;
     
-    // Hacer el campo de factura editable para nuevas entradas
+    // Configurar campo de factura
     document.getElementById('entryInvoice').removeAttribute('readonly');
     document.getElementById('entryInvoice').style.backgroundColor = '';
     document.getElementById('entryInvoice').style.borderColor = '';
+    document.getElementById('editInvoiceButton').style.display = 'none';
     
-    // Asegurar que todos los campos estén habilitados
-    restoreEntryFormFields();
-    
+    // Resetear estado de edición
     editingEntryId = null;
     
+    // Mostrar modal
     document.getElementById('entryModal').style.display = 'block';
 }
 
@@ -1690,30 +1698,19 @@ function searchEntries() {
     }
 }
 
-// Guardar entrada
+// Guardar entrada - VERSIÓN CORREGIDA
 function saveEntry() {
-    // Obtener valores del formulario
-    const itemId = document.getElementById('entryItem').value;
-    const voucher = document.getElementById('entryVoucher').value;
-    const invoice = document.getElementById('entryInvoice').value;
-    const quantity = parseInt(document.getElementById('entryQuantity').value);
-    const comments = document.getElementById('entryComments').value;
-    const date = document.getElementById('entryDate').value;
-    
-    // Verificar si el item tiene fecha de caducidad
-    const item = inventory.find(i => i.id === itemId);
-    const hasExpiration = item && item.expiration;
-    
-    // Validar fechas de caducidad si el item las requiere
-    if (hasExpiration) {
-        const expirationInputs = document.querySelectorAll('.expiration-date-input');
-        if (expirationInputs.length > 0 && !validateExpirationDates()) {
-            return; // Detener si la validación falla
-        }
+    // Validar que haya al menos un insumo
+    if (selectedEntryItems.length === 0) {
+        alert('Debe agregar al menos un insumo');
+        return;
     }
     
-    // Obtener fechas de caducidad si existen
-    const expirationData = hasExpiration ? getExpirationDates() : [];
+    // Obtener valores del formulario
+    const voucher = document.getElementById('entryVoucher').value;
+    const invoice = document.getElementById('entryInvoice').value;
+    const comments = document.getElementById('entryComments').value;
+    const date = document.getElementById('entryDate').value;
     
     // Manejo del responsable (selección o manual)
     let responsible = document.getElementById('entryResponsible').value;
@@ -1725,13 +1722,13 @@ function saveEntry() {
         }
     }
     
-    // Validaciones
-    if (!itemId || !voucher || isNaN(quantity) || quantity <= 0 || !date || !responsible) {
+    // Validaciones básicas
+    if (!voucher || !date || !responsible) {
         alert('Complete los campos requeridos (*)');
         return;
     }
     
-    // VERIFICAR FOLIO DUPLICADO (solo para nuevas entradas, no para edición)
+    // VERIFICAR FOLIO DUPLICADO (solo para nuevas entradas)
     if (!editingEntryId) {
         const folioExists = entries.some(entry => entry.voucher === voucher) || 
                            outputs.some(output => output.os === voucher);
@@ -1742,59 +1739,68 @@ function saveEntry() {
         }
     }
     
-    // Buscar el insumo en el inventario
-    const itemIndex = inventory.findIndex(i => i.id === itemId);
-    if (itemIndex === -1) {
-        alert('Insumo no encontrado');
-        return;
-    }
+    // Guardar cada insumo como entrada separada (pero con el mismo folio de vale)
+    const promises = [];
     
-    // Crear objeto de entrada
-    const entryId = editingEntryId || Date.now().toString();
-    const entry = {
-        id: entryId,
-        itemId: itemId,
-        voucher: voucher,
-        invoice: invoice || null,
-        quantity: quantity,
-        responsible: responsible,
-        comments: comments || null,
-        date: document.getElementById('entryDate').value + 'T00:00:00',
-        isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO',
-        expirationData: expirationData // Agregar datos de caducidad
-    };
-    
-    // Guardar en Firebase
-    entriesRef.child(entryId).set(entry)
-        .then(() => {
-            // Actualizar stock solo para nuevas entradas
-            if (!editingEntryId) {
-                const newStock = inventory[itemIndex].stock + quantity;
-                inventoryRef.child(itemId).update({ stock: newStock })
-                    .then(() => {
-                        showSuccess();
-                    })
-                    .catch(error => alert('Error al actualizar stock: ' + error));
-            } else {
-                showSuccess();
-            }
-        })
-        .catch(error => alert('Error al guardar entrada: ' + error));
-    
-    function showSuccess() {
-        // Mostrar orden de servicio
-        showServiceOrder('entry', {
-            voucher: voucher,
-            quantity: quantity,
-            responsible: responsible,
-            itemId: itemId,
-            itemName: inventory[itemIndex].name,
-            entryId: editingEntryId || entryId
-        });
+    selectedEntryItems.forEach(item => {
+        const entryId = editingEntryId ? editingEntryId : Date.now().toString() + '-' + item.id;
         
-        closeModal('entryModal');
-        showToast(editingEntryId ? '✅ Factura actualizada correctamente' : '✅ Entrada registrada correctamente');
-    }
+        const entry = {
+            id: entryId,
+            itemId: item.id,
+            voucher: voucher,
+            invoice: invoice || null,
+            quantity: item.quantity,
+            responsible: responsible,
+            comments: comments || null,
+            date: date + 'T00:00:00',
+            isCustomResponsible: document.getElementById('entryResponsible').value === 'OTRO'
+        };
+        
+        // Guardar en Firebase
+        promises.push(
+            entriesRef.child(entryId).set(entry)
+                .then(() => {
+                    // Actualizar stock solo para nuevas entradas
+                    if (!editingEntryId) {
+                        const inventoryItem = inventory.find(i => i.id === item.id);
+                        if (inventoryItem) {
+                            const newStock = inventoryItem.stock + item.quantity;
+                            return inventoryRef.child(item.id).update({ stock: newStock });
+                        }
+                    }
+                })
+        );
+    });
+
+    // Ejecutar todas las operaciones
+    Promise.all(promises)
+        .then(() => {
+            // Mostrar orden de servicio solo si es una nueva entrada
+            if (!editingEntryId && selectedEntryItems.length > 0) {
+                const firstItem = selectedEntryItems[0];
+                const item = inventory.find(i => i.id === firstItem.id);
+                
+                showServiceOrder('entry', {
+                    voucher: voucher,
+                    quantity: firstItem.quantity,
+                    responsible: responsible,
+                    itemId: firstItem.id,
+                    itemName: item ? item.name : 'Desconocido'
+                });
+            }
+            
+            closeModal('entryModal');
+            showToast(editingEntryId ? '✅ Entrada actualizada correctamente' : '✅ Entrada registrada correctamente');
+            
+            // Limpiar para la próxima vez
+            editingEntryId = null;
+            selectedEntryItems = [];
+            updateEntryItemsDisplay();
+        })
+        .catch(error => {
+            alert('Error al guardar entrada: ' + error.message);
+        });
 }
 
 // Función para editar número de factura
@@ -3130,6 +3136,10 @@ function addEntryItem() {
     
     updateEntryItemsDisplay();
     itemSelect.value = '';
+    
+    // Mostrar la sección de insumos seleccionados
+    document.getElementById('entryItemsContainer').style.display = 'block';
+    document.getElementById('entryTotalQuantity').style.display = 'block';
 }
 
 function removeEntryItem(itemId) {
@@ -3138,9 +3148,11 @@ function removeEntryItem(itemId) {
 }
 
 function updateEntryItemQuantity(itemId, quantity) {
+    if (quantity < 1) return;
+    
     const item = selectedEntryItems.find(i => i.id === itemId);
     if (item) {
-        item.quantity = Math.max(1, quantity);
+        item.quantity = quantity;
         updateEntryItemsDisplay();
     }
 }
@@ -3153,6 +3165,10 @@ function updateEntryItemsDisplay() {
     if (selectedEntryItems.length === 0) {
         container.style.display = 'none';
         totalDiv.style.display = 'none';
+        
+        // Mostrar campo de cantidad individual si no hay insumos
+        document.getElementById('entryQuantity').style.display = 'block';
+        document.getElementById('entryQuantity').parentElement.style.display = 'block';
         return;
     }
     
@@ -3170,12 +3186,12 @@ function updateEntryItemsDisplay() {
                 <div class="item-info">
                     <div class="item-name">${item.name} (${item.id})</div>
                     <div class="item-details">
-                        <span>Existencias: ${item.stock}</span>
+                        <span>Existencias actuales: ${item.stock}</span>
                     </div>
                 </div>
                 <div class="item-actions">
                     <div class="quantity-control">
-                        <button type="button" onclick="updateEntryItemQuantity('${item.id}', ${item.quantity - 1})">
+                        <button type="button" onclick="updateEntryItemQuantity('${item.id}', ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
                             <i class="fas fa-minus"></i>
                         </button>
                         <input type="number" value="${item.quantity}" min="1" 
@@ -3184,7 +3200,7 @@ function updateEntryItemsDisplay() {
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <button class="remove-item" onclick="removeEntryItem('${item.id}')">
+                    <button class="btn btn-danger" onclick="removeEntryItem('${item.id}')" style="padding: 0.5rem; width: auto;">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -3194,6 +3210,10 @@ function updateEntryItemsDisplay() {
     
     container.innerHTML = html;
     totalSpan.textContent = totalItems;
+    
+    // OCULTAR el campo de cantidad individual cuando hay insumos seleccionados
+    document.getElementById('entryQuantity').style.display = 'none';
+    document.getElementById('entryQuantity').parentElement.style.display = 'none';
 }
 
 // ===== FUNCIONES PARA MÚLTIPLES INSUMOS EN SALIDAS =====
@@ -3254,6 +3274,7 @@ function updateOutputItemQuantity(itemId, quantity) {
 }
 
 function updateOutputItemsDisplay() {
+function updateOutputItemsDisplay() {
     const container = document.getElementById('outputItemsContainer');
     const totalDiv = document.getElementById('outputTotalQuantity');
     const totalSpan = document.getElementById('totalOutputItems');
@@ -3261,6 +3282,10 @@ function updateOutputItemsDisplay() {
     if (selectedOutputItems.length === 0) {
         container.style.display = 'none';
         totalDiv.style.display = 'none';
+        
+        // Mostrar campo de cantidad individual si no hay insumos
+        document.getElementById('outputQuantity').style.display = 'block';
+        document.getElementById('outputQuantity').parentElement.style.display = 'block';
         return;
     }
     
@@ -3283,16 +3308,16 @@ function updateOutputItemsDisplay() {
                 </div>
                 <div class="item-actions">
                     <div class="quantity-control">
-                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity - 1})">
+                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
                             <i class="fas fa-minus"></i>
                         </button>
                         <input type="number" value="${item.quantity}" min="1" max="${item.maxQuantity}"
                                onchange="updateOutputItemQuantity('${item.id}', this.value)">
-                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity + 1})">
+                        <button type="button" onclick="updateOutputItemQuantity('${item.id}', ${item.quantity + 1})" ${item.quantity >= item.maxQuantity ? 'disabled' : ''}>
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
-                    <button class="remove-item" onclick="removeOutputItem('${item.id}')">
+                    <button class="btn btn-danger" onclick="removeOutputItem('${item.id}')" style="padding: 0.5rem; width: auto;">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -3302,6 +3327,10 @@ function updateOutputItemsDisplay() {
     
     container.innerHTML = html;
     totalSpan.textContent = totalItems;
+    
+    // OCULTAR el campo de cantidad individual cuando hay insumos seleccionados
+    document.getElementById('outputQuantity').style.display = 'none';
+    document.getElementById('outputQuantity').parentElement.style.display = 'none';
 }
 
 // ===== FUNCIÓN PARA HACER EL FOLIO DE SALIDAS EDITABLE =====
